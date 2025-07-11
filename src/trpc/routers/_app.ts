@@ -15,6 +15,9 @@ export const appRouter = createTRPCRouter({
           email: input.text,
         },
       });
+      return {
+        ok: 'success',
+      };
     }),
   devDoido: baseProcedure
     .input(
