@@ -12,6 +12,6 @@ export const helloWorld = inngest.createFunction(
     });
     const { output } = await summarizer.run(`Summarize the following text: ${event.data.value}`);
     console.log(output);
-    return { message: `success!` };
+    return { output };
   },
 );
