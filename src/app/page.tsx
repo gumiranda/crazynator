@@ -1,10 +1,6 @@
-'use client';
+import { caller } from '@/trpc/server';
 
-import { useTRPC } from '@/trpc/client';
-import { useQuery } from '@tanstack/react-query';
-
-export default function Home() {
-  const trpc = useTRPC();
-  const { data } = useQuery(trpc.devDoido.queryOptions({ text: 'falaaa dev doido' }));
+export default async function Home() {
+  const data = await caller.devDoido({ text: 'falaaa dev doido SERVER' });
   return <div>{JSON.stringify(data)}</div>;
 }
