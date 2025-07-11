@@ -3,10 +3,13 @@ bun install -D prisma tsx
 bun add @prisma/client
 bunx prisma init
 
+//rodar sempre que mudar schema
+bunx prisma migrate dev
 
-
-
-
+bunx prisma generate
+bunx prisma db seed
+bunx prisma studio
+bunx prisma migrate reset
 
 
 
