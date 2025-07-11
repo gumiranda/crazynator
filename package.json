@@ -10,9 +10,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@prisma/client": "^6.11.1",
