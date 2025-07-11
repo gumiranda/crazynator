@@ -13,9 +13,9 @@ bunx prisma migrate reset
 
 bun add @trpc/server @trpc/client @trpc/tanstack-react-query @tanstack/react-query@latest zod client-only server-only superjson
 
+bun add inngest
 
-
-
+npx inngest-cli@latest dev
 
 
 
