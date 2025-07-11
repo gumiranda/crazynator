@@ -1,1 +1,2 @@
 DATABASE_URL='postgresql://neondb_owner:senha@url-do-bagulho.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+NEXT_PUBLIC_APP_URL='http://localhost:3000'
