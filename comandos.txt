@@ -1,7 +1,7 @@
 bunx shadcn@latest add --all
 bun install -D prisma tsx
-
-
+bun add @prisma/client
+bunx prisma init
 
 
 
