@@ -17,7 +17,7 @@ bun add inngest
 
 npx inngest-cli@latest dev
 
-
+bun add @inngest/agent-kit inngest
 
 
 
