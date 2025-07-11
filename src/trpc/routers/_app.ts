@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter } from '../init';
 export const appRouter = createTRPCRouter({
-  hello: baseProcedure
+  devDoido: baseProcedure
     .input(
       z.object({
         text: z.string(),
