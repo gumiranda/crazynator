@@ -44,7 +44,7 @@ e2b template publish -t 9qvou4ro4jowzpan4obm
 bun add @e2b/code-interpreter
 
 
-
+bunx prisma migrate dev
 
 
 
