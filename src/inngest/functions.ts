@@ -12,12 +12,15 @@ export const helloWorld = inngest.createFunction(
       return sandbox.sandboxId;
     });
 
-    const summarizer = createAgent({
-      name: 'summarizer',
-      system: 'You are an expert summarizer.  You summarize in 2 words',
+    const codeAgent = createAgent({
+      name: 'code-agent',
+      system:
+        'You are an expert code agent.  You write code to solve the problem.  You are using Nextjs and shadcn',
       model: openai({ model: 'gpt-4o' }),
     });
-    const { output } = await summarizer.run(`Summarize the following text: ${event.data.value}`);
+    const { output } = await codeAgent.run(
+      `Write a code to solve the problem: ${event.data.value}`,
+    );
     const sandboxUrl = await step.run('get-sandbox-url', async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000);
