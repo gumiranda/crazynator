@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { PROMPT } from './prompt';
 import { prisma } from '@/lib/db';
 
-export const helloWorld = inngest.createFunction(
-  { id: 'hello-world' },
-  { event: 'test/hello.world' },
+export const codeAgent = inngest.createFunction(
+  { id: 'code-agent' },
+  { event: 'code-agent/run' },
   async ({ event, step }) => {
     const sandboxId = await step.run('sandbox', async () => {
       const sandbox = await Sandbox.create('crazystack');
