@@ -8,7 +8,7 @@ export const helloWorld = inngest.createFunction(
   { event: 'test/hello.world' },
   async ({ event, step }) => {
     const sandboxId = await step.run('sandbox', async () => {
-      const sandbox = await Sandbox.create('crazy-code');
+      const sandbox = await Sandbox.create('crazy-vibe');
       return sandbox.sandboxId;
     });
 

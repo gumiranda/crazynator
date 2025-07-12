@@ -2,3 +2,4 @@ DATABASE_URL='postgresql://neondb_owner:senha@url-do-bagulho.c-2.us-east-2.aws.n
 NEXT_PUBLIC_APP_URL='http://localhost:3000'
 OPENAI_API_KEY='sk-proj-_'
 ANTHROPIC_API_KEY=
+E2B_API_KEY='e2b_'
