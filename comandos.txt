@@ -15,9 +15,20 @@ bun add @trpc/server @trpc/client @trpc/tanstack-react-query @tanstack/react-que
 
 bun add inngest
 
+//rodar toda vez
 npx inngest-cli@latest dev
 
 bun add @inngest/agent-kit inngest
+
+brew install e2b
+
+e2b auth login
+
+e2b sandbox list
+
+
+
+
 
 
 
