@@ -11,8 +11,8 @@ export default function Home() {
   const [value, setValue] = useState('');
   const trpc = useTRPC();
   const invoke = useMutation(
-    trpc.invoke.mutationOptions({
-      onSuccess: () => toast.success('Background job invoked'),
+    trpc.messages.create.mutationOptions({
+      onSuccess: () => toast.success('Message created'),
       onError: (error) => toast.error(error.message),
     }),
   );
