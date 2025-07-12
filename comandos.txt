@@ -28,8 +28,7 @@ e2b sandbox list
 
 cd sandbox-templates/nextjs
 
-e2b template build --name crazy-code 
-##--cmd "./compile-page.sh"
+e2b template build --name crazystack --cmd "/compile_page.sh"
 
 copia o id do negocio la no site https://e2b.dev/dashboard/imartytk/templates
 

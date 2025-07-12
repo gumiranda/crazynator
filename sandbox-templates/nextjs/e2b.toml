@@ -1,16 +1,17 @@
 # This is a config for E2B sandbox template.
-# You can use template ID (9qvou4ro4jowzpan4obm) or template name (crazy-vibe) to create a sandbox:
+# You can use template ID (dhsr26uj8qkby0ejis7b) or template name (crazystack) to create a sandbox:
 
 # Python SDK
 # from e2b import Sandbox, AsyncSandbox
-# sandbox = Sandbox("crazy-vibe") # Sync sandbox
-# sandbox = await AsyncSandbox.create("crazy-vibe") # Async sandbox
+# sandbox = Sandbox("crazystack") # Sync sandbox
+# sandbox = await AsyncSandbox.create("crazystack") # Async sandbox
 
 # JS SDK
 # import { Sandbox } from 'e2b'
-# const sandbox = await Sandbox.create('crazy-vibe')
+# const sandbox = await Sandbox.create('crazystack')
 
 team_id = "1443b94e-e03b-44b2-8d63-b6952854c471"
+start_cmd = "/compile_page.sh"
 dockerfile = "e2b.Dockerfile"
-template_name = "crazy-vibe"
-template_id = "9qvou4ro4jowzpan4obm"
+template_name = "crazystack"
+template_id = "dhsr26uj8qkby0ejis7b"
