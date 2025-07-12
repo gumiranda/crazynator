@@ -26,11 +26,19 @@ e2b auth login
 
 e2b sandbox list
 
+cd sandbox-templates/nextjs
 
+e2b template build --name crazy-code --cmd "./compile-page.sh"
 
+copia o id do negocio la no site https://e2b.dev/dashboard/imartytk/templates
 
+e2b template publish -t iddonegocio
 
+no nosso caso:
 
+e2b template publish -t 9qvou4ro4jowzpan4obm
+
+bun add @e2b/code-interpreter
 
 
 

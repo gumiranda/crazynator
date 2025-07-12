@@ -1,10 +1,16 @@
 import { inngest } from './client';
 import { openai, createAgent } from '@inngest/agent-kit';
+import { Sandbox } from '@e2b/code-interpreter';
 
 export const helloWorld = inngest.createFunction(
   { id: 'hello-world' },
   { event: 'test/hello.world' },
-  async ({ event }) => {
+  async ({ event, step }) => {
+    const sandboxId = await step.run('sandbox', async () => {
+      const sandbox = await Sandbox.create('crazy-code');
+      return sandbox.sandboxId;
+    });
+
     const summarizer = createAgent({
       name: 'summarizer',
       system: 'You are an expert summarizer.  You summarize in 2 words',
