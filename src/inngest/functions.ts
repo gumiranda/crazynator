@@ -1,12 +1,15 @@
 import { inngest } from './client';
-import { openai, createAgent, createTool, createNetwork } from '@inngest/agent-kit';
+import { openai, createAgent, createTool, createNetwork, type Tool } from '@inngest/agent-kit';
 import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
 import { PROMPT } from './prompt';
 import { prisma } from '@/lib/db';
-
-export const codeAgent = inngest.createFunction(
+interface AgentState {
+  summary: string;
+  files: { [path: string]: string };
+}
+export const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
   async ({ event, step }) => {
@@ -15,7 +18,7 @@ export const codeAgent = inngest.createFunction(
       return sandbox.sandboxId;
     });
 
-    const codeAgent = createAgent({
+    const codeAgent = createAgent<AgentState>({
       name: 'code-agent',
       description: 'You are an expert code agent.',
       system: PROMPT,
@@ -63,7 +66,7 @@ export const codeAgent = inngest.createFunction(
               }),
             ),
           }),
-          handler: async ({ files }, { step, network }) => {
+          handler: async ({ files }, { step, network }: Tool.Options<AgentState>) => {
             const newFiles = await step?.run('createOrUpdateFiles', async () => {
               try {
                 const updatedFiles = network.state.data.files || {};
@@ -118,7 +121,7 @@ export const codeAgent = inngest.createFunction(
       },
     });
 
-    const network = createNetwork({
+    const network = createNetwork<AgentState>({
       name: 'coding-agent-network',
       agents: [codeAgent],
       maxIter: 15,
