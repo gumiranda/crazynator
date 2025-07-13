@@ -46,7 +46,7 @@ bun add @e2b/code-interpreter
 
 bunx prisma migrate dev
 
-
+bun add random-word-slugs
 
 
 
