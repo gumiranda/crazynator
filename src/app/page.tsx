@@ -13,8 +13,10 @@ import {
   SelectValue,
   SelectTrigger,
 } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
   const [value, setValue] = useState('');
   const [projectId, setProjectId] = useState('');
   const trpc = useTRPC();
@@ -23,8 +25,7 @@ export default function Home() {
   const invoke = useMutation(
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
-        toast.success(`Project ${data.name} created`);
-        setProjectId(data.id);
+        router.push(`/projects/${data.id}`);
       },
       onError: (error) => toast.error(error.message),
     }),
