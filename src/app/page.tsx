@@ -21,7 +21,7 @@ export default function Home() {
   const [projectId, setProjectId] = useState('');
   const trpc = useTRPC();
   const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
-  const { data: messages } = useQuery(trpc.messages.getMany.queryOptions());
+
   const invoke = useMutation(
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
@@ -49,11 +49,6 @@ export default function Home() {
         <Button disabled={invoke.isPending} onClick={() => invoke.mutate({ value })}>
           {invoke.isPending ? 'Invoking...' : 'Invoke'}
         </Button>
-      </div>
-      <div className="flex flex-col gap-2">
-        {messages?.map((message) => (
-          <div key={message.id}>{message.content}</div>
-        ))}
       </div>
     </div>
   );
