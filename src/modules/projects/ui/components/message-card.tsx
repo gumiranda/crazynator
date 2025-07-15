@@ -19,5 +19,8 @@ export const MessageCard = ({
   onFragmentClick,
   type,
 }: MessageCardProps) => {
-  return <div>MessageCard</div>;
+  if (role === 'ASSISTANT') {
+    return <p>ASSISTANT</p>;
+  }
+  return <div>USER</div>;
 };
