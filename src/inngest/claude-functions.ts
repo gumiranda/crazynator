@@ -149,6 +149,7 @@ export const codeAgent = inngest.createFunction(
               files: result.state.data.files,
             },
           },
+          projectId: event.data.projectId,
         },
       });
     });
