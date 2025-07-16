@@ -45,7 +45,7 @@ const FragmentCard = ({ fragment, isActiveFragment, onFragmentClick }: FragmentC
 
 interface AssistantMessageProps {
   content: string;
-  fragment: Fragment;
+  fragment: Fragment | null;
   createdAt: Date;
   isActiveFragment: boolean;
   onFragmentClick: (fragment: Fragment) => void;
@@ -90,7 +90,7 @@ const AssistantMessage = ({
 interface MessageCardProps {
   content: string;
   role: MessageRole;
-  fragment: Fragment;
+  fragment: Fragment | null;
   createdAt: Date;
   isActiveFragment: boolean;
   onFragmentClick: (fragment: Fragment) => void;

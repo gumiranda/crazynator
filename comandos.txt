@@ -48,7 +48,7 @@ bunx prisma migrate dev
 
 bun add random-word-slugs date-fns
 
-
+bun add react-textarea-autosize
 
 
 
