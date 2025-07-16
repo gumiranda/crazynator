@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowUpIcon, Loader2Icon } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,20 +27,30 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showUsage, setShowUsage] = useState(false);
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       value: '',
     },
   });
-  const createMessage = useMutation(trpc.messages.create.mutationOptions());
+  const createMessage = useMutation(
+    trpc.messages.create.mutationOptions({
+      onSuccess: () => {
+        form.reset();
+        toast.success('Message sent');
+        queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({ projectId }));
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    }),
+  );
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await createMessage.mutateAsync({
       projectId,
       value: values.value,
     });
-    form.reset();
-    toast.success('Message sent');
   };
   const isPending = createMessage.isPending;
   const isButtonDisabled = isPending || !form.formState.isValid;
