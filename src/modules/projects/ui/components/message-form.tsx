@@ -26,15 +26,24 @@ const formSchema = z.object({
 export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showUsage, setShowUsage] = useState(false);
+  const trpc = useTRPC();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       value: '',
     },
   });
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const createMessage = useMutation(trpc.messages.create.mutationOptions());
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    await createMessage.mutateAsync({
+      projectId,
+      value: values.value,
+    });
+    form.reset();
+    toast.success('Message sent');
   };
+  const isPending = createMessage.isPending;
+  const isButtonDisabled = isPending || !form.formState.isValid;
   return (
     <Form {...form}>
       <form
@@ -44,7 +53,53 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
           isFocused && 'shadow-xs',
           showUsage && 'rounded-t-none',
         )}
-      ></form>
+      >
+        <FormField
+          control={form.control}
+          name="value"
+          render={({ field }) => (
+            <TextareaAutosize
+              {...field}
+              disabled={isPending}
+              className={cn('pt-4 resize-none border-none w-full outline-none bg-transparent')}
+              minRows={2}
+              maxRows={8}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Type your message here..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                  e.preventDefault();
+                  form.handleSubmit(onSubmit)(e);
+                }
+              }}
+            />
+          )}
+        />
+        <div className="flex gap-x-2 items-end justify-between pt-2">
+          <div className="text-[10px] text-muted-foreground font-mono">
+            <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              <span>&#8984;</span>Enter
+            </kbd>
+            &nbsp;to send
+          </div>
+          <Button
+            type="submit"
+            size="icon"
+            className={cn(
+              'size-8 rounded-full cursor-pointer',
+              isButtonDisabled && 'bg-muted-foreground border',
+            )}
+            disabled={isButtonDisabled}
+          >
+            {isPending ? (
+              <Loader2Icon className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowUpIcon className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+      </form>
     </Form>
   );
 };
