@@ -29,7 +29,12 @@ export default function RootLayout({
     <TRPCReactProvider>
       <html lang="pt-BR" suppressHydrationWarning={true} data-lt-installed="true">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <Toaster />
             {children}
           </ThemeProvider>
