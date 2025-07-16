@@ -9,6 +9,7 @@ import { CrownIcon, EyeIcon } from 'lucide-react';
 import { CodeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import FragmentPreview from '../components/fragment-preview';
 interface Props {
   projectId: string;
 }
@@ -59,9 +60,10 @@ export const ProjectView = ({ projectId }: Props) => {
                 </Button>
               </div>
             </div>
-            {/* <TabsContent value="preview">
+            <TabsContent value="preview">
               {!!activeFragment && <FragmentPreview fragment={activeFragment} />}
             </TabsContent>
+            {/* 
             <TabsContent value="code" className="min-h-0">
               {!!activeFragment && <FileExplore files={activeFragment.files as FileCollection} />}
             </TabsContent> */}
