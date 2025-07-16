@@ -13,7 +13,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
   return (
-    <header className="p-2 flex justify-between items-center border-b">
+    <header className="p-2 flex justify-between items-center border-b bg-background z-10">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

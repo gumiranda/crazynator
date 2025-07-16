@@ -25,8 +25,8 @@ export const ProjectView = ({ projectId }: Props) => {
             />
           </Suspense>
         </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={65} minSize={50}>
+        <ResizableHandle className="hover:bg-primary/10 transition-colors" />
+        <ResizablePanel defaultSize={70} minSize={50} className="flex min-h-0 flex-col">
           <div>Messages</div>
         </ResizablePanel>
       </ResizablePanelGroup>
