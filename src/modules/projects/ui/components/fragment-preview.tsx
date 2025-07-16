@@ -76,6 +76,7 @@ export default function FragmentPreview({ fragment }: FragmentPreviewProps) {
       <iframe
         key={iframeKey}
         className="h-full w-full"
+        loading="lazy"
         sandbox="allow-scripts allow-same-origin allow-forms"
         src={fragment.sandboxUrl}
       />
