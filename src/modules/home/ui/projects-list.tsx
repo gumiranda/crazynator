@@ -10,11 +10,7 @@ import { Button } from '@/components/ui/button';
 export default function ProjectList() {
   const trpc = useTRPC();
 
-  const { data: projects } = useQuery(
-    trpc.projects.getMany.queryOptions(undefined, {
-      enabled: true,
-    }),
-  );
+  const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
 
   return (
     <div className="dark:bg-sidebar flex w-full flex-col gap-y-6 rounded-xl border bg-white p-8 sm:gap-y-4">
