@@ -6,6 +6,7 @@ import {
   createNetwork,
   type Tool,
   Message,
+  createState,
 } from '@inngest/agent-kit';
 import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
@@ -44,7 +45,15 @@ export const codeAgentFunction = inngest.createFunction(
       }
       return formattedMessages;
     });
-
+    const state = createState<AgentState>(
+      {
+        summary: '',
+        files: {},
+      },
+      {
+        messages: previousMessages,
+      },
+    );
     const codeAgent = createAgent<AgentState>({
       name: 'code-agent',
       description: 'You are an expert code agent.',
@@ -152,6 +161,7 @@ export const codeAgentFunction = inngest.createFunction(
       name: 'coding-agent-network',
       agents: [codeAgent],
       maxIter: 15,
+      defaultState: state,
       router: async ({ network }) => {
         const summary = network.state.data.summary;
         if (summary) {
@@ -160,7 +170,9 @@ export const codeAgentFunction = inngest.createFunction(
         return codeAgent;
       },
     });
-    const result = await network.run(event.data.value);
+    const result = await network.run(event.data.value, {
+      state,
+    });
     const isError =
       !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
     const sandboxUrl = await step.run('get-sandbox-url', async () => {
