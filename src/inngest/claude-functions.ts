@@ -9,12 +9,11 @@ import {
   createState,
   anthropic,
 } from '@inngest/agent-kit';
-import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
-import { SANDBOX_TEMPLATE } from '@/constants/sandbox';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
+import { createSandbox } from '@/lib/sandbox';
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
@@ -32,8 +31,8 @@ export const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
   async ({ event, step }) => {
-    const sandboxId = await step.run('sandbox', async () => {
-      const sandbox = await Sandbox.create(SANDBOX_TEMPLATE);
+    const sandboxId = await step.run('get-sandbox-id', async () => {
+      const sandbox = await createSandbox();
       return sandbox.sandboxId;
     });
     const previousMessages = await step.run('previous-messages', async () => {
