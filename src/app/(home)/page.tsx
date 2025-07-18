@@ -1,5 +1,5 @@
-import { ProjectForm } from '@/modules/home/project-form';
-import ProjectsList from '@/modules/home/ui/projects-list';
+import { ProjectForm } from '@/modules/home/ui/components/project-form';
+import ProjectsList from '@/modules/home/ui/components/projects-list';
 import Image from 'next/image';
 
 const Page = () => {
