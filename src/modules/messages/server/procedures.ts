@@ -2,6 +2,7 @@ import { protectedProcedure, createTRPCRouter } from '@/trpc/init';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { inngest } from '@/inngest/client';
+import { TRPCError } from '@trpc/server';
 
 export const messagesRouter = createTRPCRouter({
   getMany: protectedProcedure
@@ -10,7 +11,7 @@ export const messagesRouter = createTRPCRouter({
         projectId: z.string().min(1, { message: 'Project is required' }),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const messages = await prisma.message.findMany({
         orderBy: {
           updatedAt: 'asc',
@@ -20,6 +21,9 @@ export const messagesRouter = createTRPCRouter({
         },
         where: {
           projectId: input.projectId,
+          project: {
+            userId: ctx.auth.userId,
+          },
         },
       });
       return messages;
@@ -31,20 +35,32 @@ export const messagesRouter = createTRPCRouter({
         projectId: z.string().min(1, { message: 'Project is required' }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+      });
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
       const createdMessage = await prisma.message.create({
         data: {
           content: input.value,
           role: 'USER',
           type: 'RESULT',
-          projectId: input.projectId,
+          projectId: project.id,
         },
       });
       await inngest.send({
         name: 'code-agent/run',
         data: {
           value: input.value,
-          projectId: input.projectId,
+          projectId: project.id,
         },
       });
       return createdMessage;
