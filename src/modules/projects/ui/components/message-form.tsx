@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
 import Usage from './usage';
+import { useRouter } from 'next/navigation';
 
 interface MessageFormProps {
   projectId: string;
@@ -26,6 +27,7 @@ const formSchema = z.object({
 
 export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
+  const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,9 +42,13 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
         form.reset();
         toast.success('Message sent');
         queryClient.invalidateQueries(trpc.messages.getMany.queryOptions({ projectId }));
+        queryClient.invalidateQueries(trpc.usages.status.queryOptions());
       },
       onError: (error) => {
         toast.error(error.message);
+        if (error.data?.code === 'TOO_MANY_REQUESTS') {
+          router.push('/pricing');
+        }
       },
     }),
   );
@@ -53,7 +59,7 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       value: values.value,
     });
   };
-  const isPending = createMessage.isPending;
+  const isPending = createMessage.isPending || isLoadingUsage;
   const isButtonDisabled = isPending || !form.formState.isValid;
   const showUsage = !!usage;
 
