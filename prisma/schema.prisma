@@ -6,52 +6,62 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model Project {
-  id String @id @default(uuid())
-  name String
-  userId String
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   messages Message[]
 }
-
 
 enum MessageRole {
   USER
   ASSISTANT
 }
+
 enum MessageType {
   RESULT
   ERROR
 }
-model Message{
-  id String @id @default(uuid())
-  content String
-  role MessageRole
-  type MessageType
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  fragment Fragment?
+
+model Message {
+  id        String      @id @default(uuid())
+  content   String
+  role      MessageRole
+  type      MessageType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  fragment  Fragment?
+
   projectId String
-  project Project @relation(fields: [projectId], references: [id],onDelete:Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Fragment {
-  id String @id @default(uuid())
-  messageId String @unique
-  message Message @relation(fields: [messageId], references: [id],onDelete:Cascade)
+  id        String  @id @default(uuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
   sandboxUrl String
-  title String 
-  files Json
+  title      String
+  files      Json
 }
- 
+
+
+
+model Usage {
+  key    String    @id
+  points Int
+  expire DateTime?
+}
