@@ -5,8 +5,26 @@ import { inngest } from '@/inngest/client';
 import { generateSlug } from 'random-word-slugs';
 import { TRPCError } from '@trpc/server';
 import { consumeCredits } from '@/lib/usage';
+import { projectChannel } from '@/inngest/channels';
+import { getSubscriptionToken } from '@inngest/realtime';
 
 export const projectsRouter = createTRPCRouter({
+  generateSubscriptionToken: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const subscriptionToken = await getSubscriptionToken(inngest, {
+        channel: projectChannel(input.projectId),
+        topics: ['realtime'],
+      });
+
+      console.log('subscriptionToken ->', subscriptionToken);
+
+      return subscriptionToken;
+    }),
   getOne: protectedProcedure
     .input(
       z.object({

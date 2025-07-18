@@ -18,15 +18,24 @@ import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-
+import { InngestSubscriptionState } from '@inngest/realtime/hooks';
+import {
+  InngestConnectionStatus,
+  InngestConnectionStatusLabel,
+  InngestConnectionStatusIndicator,
+} from '@/components/inngest-connection-status';
+import { useInngest } from '@/components/ui/inngest-provider';
 interface Props {
   projectId: string;
 }
 
 export const ProjectHeader = ({ projectId }: Props) => {
+  const { setTheme, theme } = useTheme();
+
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
-  const { theme, setTheme } = useTheme();
+  const { state: realtimeConnectionState } = useInngest();
+
   const handleThemeChange = (value: string) => {
     setTheme(value);
   };
@@ -75,6 +84,21 @@ export const ProjectHeader = ({ projectId }: Props) => {
           </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
+      <div className="px-3 pl-2">
+        <InngestConnectionStatus
+          status={
+            realtimeConnectionState === InngestSubscriptionState.Connecting ||
+            realtimeConnectionState === InngestSubscriptionState.RefreshingToken
+              ? 'connecting'
+              : realtimeConnectionState === InngestSubscriptionState.Active
+                ? 'connected'
+                : 'disconnected'
+          }
+        >
+          <InngestConnectionStatusIndicator />
+          <InngestConnectionStatusLabel />
+        </InngestConnectionStatus>
+      </div>
     </header>
   );
 };

@@ -15,6 +15,7 @@ import type { FileCollection } from '@/types/files';
 import UserControl from '@/components/user-control';
 import { useAuth } from '@clerk/nextjs';
 import { ErrorBoundary } from 'react-error-boundary';
+import { InngestProvider } from '@/components/ui/inngest-provider';
 
 interface Props {
   projectId: string;
@@ -29,20 +30,22 @@ export const ProjectView = ({ projectId }: Props) => {
     <div className="h-screen">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={35} minSize={20} className="flex flex-col min-h-0">
-          <ErrorBoundary fallback={<p>Error</p>}>
-            <Suspense fallback={<p>Loading...</p>}>
-              <ProjectHeader projectId={projectId} />
+          <InngestProvider projectId={projectId}>
+            <Suspense fallback={<div>Loading project...</div>}>
+              <ErrorBoundary fallback={<div>Error loading project...</div>}>
+                <ProjectHeader projectId={projectId} />
+              </ErrorBoundary>
             </Suspense>
-          </ErrorBoundary>
-          <ErrorBoundary fallback={<p>Error</p>}>
-            <Suspense fallback={<p>Loading...</p>}>
-              <MessagesContainer
-                projectId={projectId}
-                activeFragment={activeFragment}
-                setActiveFragment={setActiveFragment}
-              />
+            <Suspense fallback={<div>Loading messages...</div>}>
+              <ErrorBoundary fallback={<div>Error loading messages...</div>}>
+                <MessagesContainer
+                  projectId={projectId}
+                  activeFragment={activeFragment}
+                  setActiveFragment={setActiveFragment}
+                />
+              </ErrorBoundary>
             </Suspense>
-          </ErrorBoundary>
+          </InngestProvider>
         </ResizablePanel>
         <ResizableHandle className="hover:bg-primary/10 transition-colors" />
         <ResizablePanel defaultSize={70} minSize={50} className="flex min-h-0 flex-col">
