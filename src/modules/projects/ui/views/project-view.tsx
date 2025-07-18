@@ -12,6 +12,7 @@ import Link from 'next/link';
 import FragmentPreview from '../components/fragment-preview';
 import FileExplore from '@/components/file-explore';
 import type { FileCollection } from '@/types/files';
+import UserControl from '@/components/user-control';
 
 interface Props {
   projectId: string;
@@ -61,6 +62,7 @@ export const ProjectView = ({ projectId }: Props) => {
                     <span>Upgrade</span>
                   </Link>
                 </Button>
+                <UserControl />
               </div>
             </div>
             <TabsContent value="preview">
