@@ -13,12 +13,15 @@ import FragmentPreview from '../components/fragment-preview';
 import FileExplore from '@/components/file-explore';
 import type { FileCollection } from '@/types/files';
 import UserControl from '@/components/user-control';
+import { useAuth } from '@clerk/nextjs';
 
 interface Props {
   projectId: string;
 }
 
 export const ProjectView = ({ projectId }: Props) => {
+  const { has } = useAuth();
+  const hasProAccess = has?.({ plan: 'pro' });
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
   return (
@@ -56,12 +59,14 @@ export const ProjectView = ({ projectId }: Props) => {
                 </TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
-                <Button variant="tertiary" size="sm" asChild>
-                  <Link href={`/projects/${projectId}`}>
-                    <CrownIcon className="h-4 w-4" />
-                    <span>Upgrade</span>
-                  </Link>
-                </Button>
+                {!hasProAccess && (
+                  <Button variant="tertiary" size="sm" asChild>
+                    <Link href={`/projects/${projectId}`}>
+                      <CrownIcon className="h-4 w-4" />
+                      <span>Upgrade</span>
+                    </Link>
+                  </Button>
+                )}
                 <UserControl />
               </div>
             </div>
