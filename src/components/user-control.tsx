@@ -8,7 +8,7 @@ type UserControlProps = {
   showName?: boolean;
 };
 
-export default function UserControl({ showName = true }: UserControlProps) {
+export default function UserControl({ showName = false }: UserControlProps) {
   const currentTheme = useCurrentTheme();
 
   return (
