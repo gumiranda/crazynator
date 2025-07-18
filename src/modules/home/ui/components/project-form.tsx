@@ -15,6 +15,7 @@ import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import { PROJECT_TEMPLATES } from '@/lib/constants';
+import { useClerk } from '@clerk/nextjs';
 
 const formSchema = z.object({
   value: z
@@ -27,6 +28,7 @@ export const ProjectForm = () => {
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
+  const clerk = useClerk();
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +44,9 @@ export const ProjectForm = () => {
       },
       onError: (error) => {
         toast.error(error.message);
+        if (error.data?.code === 'UNAUTHORIZED') {
+          clerk.openSignIn();
+        }
       },
     }),
   );
