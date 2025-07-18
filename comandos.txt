@@ -55,7 +55,7 @@ bun add @clerk/nextjs
 
 bun add @clerk/themes
 
-bun add rate-limiter-flexible @inngest/realtime
+bun add rate-limiter-flexible @inngest/realtime react-error-boundary
 
 
 
