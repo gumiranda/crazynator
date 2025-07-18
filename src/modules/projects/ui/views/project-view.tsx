@@ -29,12 +29,12 @@ export const ProjectView = ({ projectId }: Props) => {
     <div className="h-screen">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={35} minSize={20} className="flex flex-col min-h-0">
-          <ErrorBoundary fallbackRender={({ error }) => <div>{error.message}</div>}>
+          <ErrorBoundary fallback={<p>Error</p>}>
             <Suspense fallback={<p>Loading...</p>}>
               <ProjectHeader projectId={projectId} />
             </Suspense>
           </ErrorBoundary>
-          <ErrorBoundary fallbackRender={({ error }) => <div>{error.message}</div>}>
+          <ErrorBoundary fallback={<p>Error</p>}>
             <Suspense fallback={<p>Loading...</p>}>
               <MessagesContainer
                 projectId={projectId}

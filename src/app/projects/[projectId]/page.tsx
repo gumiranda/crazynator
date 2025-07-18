@@ -26,7 +26,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   );
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ErrorBoundary fallbackRender={({ error }) => <div>{error.message}</div>}>
+      <ErrorBoundary fallback={<p>Error</p>}>
         <Suspense fallback={<div>Loading...</div>}>
           <ProjectView projectId={projectId} />
         </Suspense>
