@@ -6,9 +6,9 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Suspense } from 'react';
 
 interface ProjectPageProps {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
