@@ -53,6 +53,8 @@ bun add react-textarea-autosize
 
 bun add @clerk/nextjs
 
+ bun add @clerk/themes
+
 
 
 

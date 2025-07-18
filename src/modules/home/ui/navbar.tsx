@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
+import UserControl from '@/components/user-control';
 
 export default function Navbar() {
   return (
@@ -26,7 +27,7 @@ export default function Navbar() {
           </div>
         </SignedOut>
         <SignedIn>
-          <UserButton />
+          <UserControl />
         </SignedIn>
       </div>
     </nav>
