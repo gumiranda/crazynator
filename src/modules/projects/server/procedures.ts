@@ -12,10 +12,11 @@ export const projectsRouter = createTRPCRouter({
         id: z.string().min(1, { message: 'Project is required' }),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const project = await prisma.project.findUnique({
         where: {
           id: input.id,
+          userId: ctx.auth.userId,
         },
       });
       if (!project) {
@@ -26,8 +27,11 @@ export const projectsRouter = createTRPCRouter({
       }
       return project;
     }),
-  getMany: protectedProcedure.query(async () => {
+  getMany: protectedProcedure.query(async ({ ctx }) => {
     const projects = await prisma.project.findMany({
+      where: {
+        userId: ctx.auth.userId,
+      },
       orderBy: {
         updatedAt: 'asc',
       },
@@ -42,10 +46,11 @@ export const projectsRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const createdProject = await prisma.project.create({
         data: {
           name: generateSlug(2, { format: 'kebab' }),
+          userId: ctx.auth.userId,
           messages: {
             create: {
               content: input.value,
