@@ -3,15 +3,16 @@ import { anthropic, createAgent, createTool, createNetwork } from '@inngest/agen
 import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
-import { PROMPT } from './prompt';
 import { prisma } from '@/lib/db';
+import { SANDBOX_TEMPLATE } from '@/constants/sandbox';
+import { PROMPT } from '@/constants/prompt';
 
 export const codeAgent = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
   async ({ event, step }) => {
     const sandboxId = await step.run('sandbox', async () => {
-      const sandbox = await Sandbox.create('crazystack');
+      const sandbox = await Sandbox.create(SANDBOX_TEMPLATE);
       return sandbox.sandboxId;
     });
 

@@ -3,8 +3,9 @@ import { openai, createAgent, createTool, createNetwork, type Tool } from '@inng
 import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
-import { PROMPT } from './prompt';
 import { prisma } from '@/lib/db';
+import { SANDBOX_TEMPLATE } from '@/constants/sandbox';
+import { PROMPT } from '@/constants/prompt';
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
@@ -14,7 +15,7 @@ export const codeAgentFunction = inngest.createFunction(
   { event: 'code-agent/run' },
   async ({ event, step }) => {
     const sandboxId = await step.run('sandbox', async () => {
-      const sandbox = await Sandbox.create('crazystack');
+      const sandbox = await Sandbox.create(SANDBOX_TEMPLATE);
       return sandbox.sandboxId;
     });
 

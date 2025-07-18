@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
-import { PROJECT_TEMPLATES } from '@/lib/constants';
 import { useClerk } from '@clerk/nextjs';
+import { PROJECT_TEMPLATES } from '@/constants/projects';
 
 const formSchema = z.object({
   value: z
