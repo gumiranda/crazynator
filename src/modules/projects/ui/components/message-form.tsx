@@ -5,12 +5,13 @@ import { z } from 'zod';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowUpIcon, Loader2Icon } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
+import Usage from './usage';
 
 interface MessageFormProps {
   projectId: string;
@@ -25,7 +26,6 @@ const formSchema = z.object({
 
 export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [showUsage, setShowUsage] = useState(false);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,6 +46,7 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       },
     }),
   );
+  const { data: usage, isPending: isLoadingUsage } = useQuery(trpc.usages.status.queryOptions());
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await createMessage.mutateAsync({
       projectId,
@@ -54,8 +55,11 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
   };
   const isPending = createMessage.isPending;
   const isButtonDisabled = isPending || !form.formState.isValid;
+  const showUsage = !!usage;
+
   return (
     <Form {...form}>
+      {showUsage && <Usage points={usage.remainingPoints} msBeforeNext={usage.msBeforeNext} />}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
