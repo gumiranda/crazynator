@@ -13,6 +13,8 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
+import { projectChannel } from './channels';
+
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
@@ -29,7 +31,7 @@ const generatedAgentResponse = (output: Message[], defaultValue: string) => {
 export const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
-  async ({ event, step }) => {
+  async ({ event, step, publish }) => {
     const sandboxId = await step.run('get-sandbox-id', async () => {
       const sandbox = await createSandbox();
       return sandbox.sandboxId;
@@ -249,6 +251,8 @@ export const codeAgentFunction = inngest.createFunction(
         },
       });
     });
+    await publish(projectChannel(event.data.projectId).realtime(savedMessage));
+
     return {
       message: savedMessage,
       url: sandboxUrl,
