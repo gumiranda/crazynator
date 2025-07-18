@@ -1,5 +1,12 @@
 import { inngest } from './client';
-import { openai, createAgent, createTool, createNetwork, type Tool } from '@inngest/agent-kit';
+import {
+  openai,
+  createAgent,
+  createTool,
+  createNetwork,
+  type Tool,
+  Message,
+} from '@inngest/agent-kit';
 import { Sandbox } from '@e2b/code-interpreter';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
@@ -17,6 +24,25 @@ export const codeAgentFunction = inngest.createFunction(
     const sandboxId = await step.run('sandbox', async () => {
       const sandbox = await Sandbox.create(SANDBOX_TEMPLATE);
       return sandbox.sandboxId;
+    });
+    const previousMessages = await step.run('previous-messages', async () => {
+      const formattedMessages: Message[] = [];
+      const messages = await prisma.message.findMany({
+        where: {
+          projectId: event.data.projectId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      for (const message of messages) {
+        formattedMessages.push({
+          role: message.role === 'USER' ? 'user' : 'assistant',
+          content: message.content,
+          type: 'text',
+        });
+      }
+      return formattedMessages;
     });
 
     const codeAgent = createAgent<AgentState>({
