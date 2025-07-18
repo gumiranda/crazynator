@@ -1,11 +1,11 @@
 import { inngest } from './client';
 import {
-  openai,
   createAgent,
-  createTool,
   createNetwork,
+  createTool,
+  openai,
   type Tool,
-  Message,
+  type Message,
   createState,
 } from '@inngest/agent-kit';
 import { Sandbox } from '@e2b/code-interpreter';
@@ -13,11 +13,20 @@ import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { SANDBOX_TEMPLATE } from '@/constants/sandbox';
-import { PROMPT } from '@/constants/prompt';
+import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
 }
+const generatedAgentResponse = (output: Message[], defaultValue: string) => {
+  if (output[0].type !== 'text') {
+    return defaultValue;
+  }
+  if (Array.isArray(output[0].content)) {
+    return output[0].content.map((text) => text.text).join('');
+  }
+  return output[0].content;
+};
 export const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
@@ -174,6 +183,29 @@ export const codeAgentFunction = inngest.createFunction(
     const result = await network.run(event.data.value, {
       state,
     });
+    const fragmentTitleGenerator = createAgent({
+      name: 'Fragment Title Generator',
+      description: 'An expert title generator for code fragments',
+      system: FRAGMENT_TITLE_PROMPT,
+      model: openai({
+        model: 'gpt-4o-mini',
+      }),
+    });
+
+    const responseGenerator = createAgent({
+      name: 'Response Generator',
+      description: 'An expert response generator for code fragments',
+      system: RESPONSE_PROMPT,
+      model: openai({
+        model: 'gpt-4o-mini',
+      }),
+    });
+
+    const [fragmentTitleOutput, responseOutput] = await Promise.all([
+      fragmentTitleGenerator.run(result.state.data.summary),
+      responseGenerator.run(result.state.data.summary),
+    ]);
+
     const isError =
       !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
     const sandboxUrl = await step.run('get-sandbox-url', async () => {
@@ -181,7 +213,8 @@ export const codeAgentFunction = inngest.createFunction(
       const host = sandbox.getHost(3000);
       return `https://${host}`;
     });
-    await step.run('save-result', async () => {
+
+    const savedMessage = await step.run('save-result', async () => {
       if (isError) {
         return await prisma.message.create({
           data: {
@@ -190,29 +223,40 @@ export const codeAgentFunction = inngest.createFunction(
             type: 'ERROR',
             projectId: event.data.projectId,
           },
+          include: {
+            fragment: true,
+          },
         });
       }
       return await prisma.message.create({
         data: {
-          content: result.state.data.summary,
+          projectId: event.data.projectId,
+          content: generatedAgentResponse(
+            responseOutput.output,
+            'Something went wrong. Please try again.',
+          ),
           role: 'ASSISTANT',
           type: 'RESULT',
           fragment: {
             create: {
-              title: 'Fragment',
-              sandboxUrl: sandboxUrl,
+              sandboxUrl,
+              title: generatedAgentResponse(fragmentTitleOutput.output, 'Fragment'),
               files: result.state.data.files,
             },
           },
-          projectId: event.data.projectId,
+        },
+        include: {
+          fragment: true,
         },
       });
     });
     return {
+      message: savedMessage,
       url: sandboxUrl,
-      summary: result.state.data.summary,
-      title: 'Fragment',
+      title: savedMessage.fragment?.title || 'Fragment',
       files: result.state.data.files,
+      summary: result.state.data.summary,
+      fragment: savedMessage.fragment,
     };
   },
 );

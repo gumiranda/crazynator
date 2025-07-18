@@ -9,6 +9,7 @@
         "@e2b/code-interpreter": "^1.5.1",
         "@hookform/resolvers": "^5.1.1",
         "@inngest/agent-kit": "^0.9.0",
+        "@inngest/realtime": "^0.3.1",
         "@prisma/client": "^6.11.1",
         "@radix-ui/react-accordion": "^1.2.11",
         "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -263,6 +264,8 @@
     "@inngest/agent-kit": ["@inngest/agent-kit@0.9.0", "", { "dependencies": { "@dmitryrechkin/json-schema-to-zod": "^1.0.0", "@inngest/ai": "0.1.2", "@modelcontextprotocol/sdk": "^1.11.2", "eventsource": "^3.0.2", "express": "^4.21.1", "xxhashjs": "^0.2.2", "zod": "^3.23.8", "zod-to-json-schema": "^3.24.3" }, "peerDependencies": { "inngest": ">=3.39.0" } }, "sha512-/TdogdUvdo4mKa2CLnfQPRTXOW5bgDuvw1SewKS+iszDUzScH90nVCq/GFMEnTFvQnuFNSda080AScF+11ehag=="],
 
     "@inngest/ai": ["@inngest/ai@0.1.2", "", { "dependencies": { "@types/node": "^22.10.5", "typescript": "^5.7.3" } }, "sha512-79Ez/2142GU5Fo44fMxo8rW6PaeVvIFnYqePdEeGTiymTGMMmcsAtrMTfnvq4AnMorFnrtTh6rr6P9xlSdhPJA=="],
+
+    "@inngest/realtime": ["@inngest/realtime@0.3.1", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "debug": "^4.3.4", "inngest": "^3.34.2", "zod": "^3.24.2" }, "peerDependencies": { "react": ">=18.0.0" } }, "sha512-srH3fx8KLbH40PZ6k620YJKq7lguQEv6/UQ8UZWjbVK/2dkNaq4wSMRbQ5lf4cQUrFWioofOTnOWnIILNo7Pig=="],
 
     "@isaacs/fs-minipass": ["@isaacs/fs-minipass@4.0.1", "", { "dependencies": { "minipass": "^7.0.4" } }, "sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w=="],
 
@@ -609,6 +612,8 @@
     "@rushstack/eslint-patch": ["@rushstack/eslint-patch@1.12.0", "", {}, "sha512-5EwMtOqvJMMa3HbmxLlF74e+3/HhwBTMcvt3nqVJgGCozO6hzIPOBlwm8mGVNR9SN2IJpxSnlxczyDjcn7qIyw=="],
 
     "@stablelib/base64": ["@stablelib/base64@1.0.1", "", {}, "sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ=="],
+
+    "@standard-schema/spec": ["@standard-schema/spec@1.0.0", "", {}, "sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA=="],
 
     "@standard-schema/utils": ["@standard-schema/utils@0.3.0", "", {}, "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g=="],
 
