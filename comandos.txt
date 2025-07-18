@@ -51,7 +51,7 @@ bun add random-word-slugs date-fns
 bun add react-textarea-autosize
 
 
-
+bun add @clerk/nextjs
 
 
 
