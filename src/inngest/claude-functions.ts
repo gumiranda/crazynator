@@ -13,7 +13,18 @@ import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
-import { createSandbox } from '@/lib/sandbox';
+import {
+  createSandbox,
+  installPackage,
+  uninstallPackage,
+  getPackageJson,
+  updatePackageJson,
+  readEnvFile,
+  updateEnvFile,
+  deleteEnvVar,
+  listFiles,
+  getDirectoryStructure,
+} from '@/lib/sandbox';
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
@@ -102,8 +113,160 @@ export const codeAgentFunction = inngest.createFunction(
           }),
         }),
         createTool({
+          name: 'installPackage',
+          description: 'Install npm packages in the sandbox. Use this instead of running npm install manually when you need to add dependencies.',
+          handler: async ({ packageName, isDev }, { step }) => {
+            return await step?.run('installPackage', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const result = await installPackage(sandbox, packageName, isDev);
+                return `Successfully installed ${packageName}${isDev ? ' as dev dependency' : ''}. Output: ${result.stdout}`;
+              } catch (e) {
+                return `Failed to install ${packageName}: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({
+            packageName: z.string().describe('The name of the npm package to install'),
+            isDev: z.boolean().optional().describe('Whether to install as dev dependency'),
+          }),
+        }),
+        createTool({
+          name: 'uninstallPackage',
+          description: 'Uninstall npm packages from the sandbox',
+          handler: async ({ packageName }, { step }) => {
+            return await step?.run('uninstallPackage', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const result = await uninstallPackage(sandbox, packageName);
+                return `Successfully uninstalled ${packageName}. Output: ${result.stdout}`;
+              } catch (e) {
+                return `Failed to uninstall ${packageName}: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({
+            packageName: z.string().describe('The name of the npm package to uninstall'),
+          }),
+        }),
+        createTool({
+          name: 'getPackageJson',
+          description: 'Read the current package.json file to see installed dependencies and scripts',
+          handler: async ({}, { step }) => {
+            return await step?.run('getPackageJson', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const packageJson = await getPackageJson(sandbox);
+                return JSON.stringify(packageJson, null, 2);
+              } catch (e) {
+                return `Failed to read package.json: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({}),
+        }),
+        createTool({
+          name: 'updatePackageJson',
+          description: 'Update package.json with custom fields, scripts, or configuration',
+          handler: async ({ updates }, { step }) => {
+            return await step?.run('updatePackageJson', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const updatedPackageJson = await updatePackageJson(sandbox, updates);
+                return `Successfully updated package.json: ${JSON.stringify(updatedPackageJson, null, 2)}`;
+              } catch (e) {
+                return `Failed to update package.json: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({
+            updates: z.record(z.any()).describe('Object with the fields to update in package.json'),
+          }),
+        }),
+        createTool({
+          name: 'manageEnvFile',
+          description: 'Create, read, or update environment variables in .env files',
+          handler: async ({ action, envVars, varName, fileName }, { step }) => {
+            return await step?.run('manageEnvFile', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const envFileName = fileName || '.env';
+                
+                switch (action) {
+                  case 'read':
+                    const content = await readEnvFile(sandbox, envFileName);
+                    return content || `${envFileName} is empty or doesn't exist`;
+                  
+                  case 'update':
+                    if (!envVars) {
+                      return 'Error: envVars is required for update action';
+                    }
+                    const updatedContent = await updateEnvFile(sandbox, envVars, envFileName);
+                    return `Successfully updated ${envFileName}:\n${updatedContent}`;
+                  
+                  case 'delete':
+                    if (!varName) {
+                      return 'Error: varName is required for delete action';
+                    }
+                    const newContent = await deleteEnvVar(sandbox, varName, envFileName);
+                    return `Successfully deleted ${varName} from ${envFileName}:\n${newContent}`;
+                  
+                  default:
+                    return 'Invalid action. Use: read, update, or delete';
+                }
+              } catch (e) {
+                return `Failed to manage env file: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({
+            action: z.enum(['read', 'update', 'delete']).describe('Action to perform: read, update, or delete'),
+            envVars: z.record(z.string()).optional().describe('Environment variables to set (for update action)'),
+            varName: z.string().optional().describe('Variable name to delete (for delete action)'),
+            fileName: z.string().optional().describe('Env file name (defaults to .env)'),
+          }),
+        }),
+        createTool({
+          name: 'exploreFileSystem',
+          description: 'Explore the complete file system structure of the sandbox, list files, and understand the project layout',
+          handler: async ({ action, directory }, { step }) => {
+            return await step?.run('exploreFileSystem', async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const targetDir = directory || '/home/user';
+                
+                switch (action) {
+                  case 'structure':
+                    const structure = await getDirectoryStructure(sandbox, targetDir);
+                    return `Directory structure of ${targetDir}:\n${structure}`;
+                  
+                  case 'listFiles':
+                    const files = await listFiles(sandbox, targetDir);
+                    return `Files in ${targetDir}:\n${files.join('\n')}`;
+                  
+                  case 'both':
+                    const [struct, fileList] = await Promise.all([
+                      getDirectoryStructure(sandbox, targetDir),
+                      listFiles(sandbox, targetDir)
+                    ]);
+                    return `Directory structure:\n${struct}\n\nFile list:\n${fileList.join('\n')}`;
+                  
+                  default:
+                    return 'Invalid action. Use: structure, listFiles, or both';
+                }
+              } catch (e) {
+                return `Failed to explore file system: ${e}`;
+              }
+            });
+          },
+          parameters: z.object({
+            action: z.enum(['structure', 'listFiles', 'both']).describe('What to explore: structure (tree view), listFiles (flat file list), or both'),
+            directory: z.string().optional().describe('Directory to explore (defaults to /home/user)'),
+          }),
+        }),
+        createTool({
           name: 'createOrUpdateFiles',
-          description: 'Create or update files in the sandbox',
+          description: 'Create or update any files in the sandbox, including configuration files, components, utilities, etc.',
           parameters: z.object({
             files: z.array(
               z.object({
