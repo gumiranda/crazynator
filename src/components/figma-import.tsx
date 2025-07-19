@@ -32,9 +32,9 @@ import {
 } from 'lucide-react';
 import type { 
   DesignContext, 
-  FigmaImportResult, 
-  OutputFormat 
+  FigmaImportResult
 } from '@/types/figma';
+import { OutputFormat } from '@/types/figma';
 
 // Form validation schema
 const figmaImportSchema = z.object({
@@ -48,12 +48,12 @@ const figmaImportSchema = z.object({
   accessToken: z.string()
     .min(1, 'Access token is required')
     .min(10, 'Access token seems too short'),
-  includeComponents: z.boolean().default(true),
-  includeStyles: z.boolean().default(true),
-  includeAssets: z.boolean().default(false),
-  extractTokens: z.boolean().default(true),
-  generateCode: z.boolean().default(false),
-  outputFormat: z.array(z.nativeEnum(OutputFormat)).default([OutputFormat.JSON])
+  includeComponents: z.boolean(),
+  includeStyles: z.boolean(),
+  includeAssets: z.boolean(),
+  extractTokens: z.boolean(),
+  generateCode: z.boolean(),
+  outputFormat: z.array(z.nativeEnum(OutputFormat))
 });
 
 type FigmaImportForm = z.infer<typeof figmaImportSchema>;
@@ -496,7 +496,7 @@ function ImportResults({ data, stats }: ImportResultsProps) {
               <div key={category}>
                 <h4 className="font-medium mb-3 capitalize">{category}</h4>
                 <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                  {colors.map((color) => (
+                  {colors.map((color: any) => (
                     <div key={color.hex} className="space-y-1">
                       <div 
                         className="w-full h-12 rounded border"

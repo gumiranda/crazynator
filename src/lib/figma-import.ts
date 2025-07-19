@@ -6,9 +6,9 @@ import type {
   DesignContext,
   ImportError,
   ImportWarning,
-  ImportStats,
-  OutputFormat
+  ImportStats
 } from '@/types/figma';
+import { OutputFormat } from '@/types/figma';
 
 export class FigmaImportService {
   private client: FigmaClient;

@@ -11,10 +11,8 @@ import type {
   DesignTokens,
   PageAnalysis,
   DesignMetadata,
-  ComponentType,
   PropertyType,
   PageType,
-  DesignStatus,
   FigmaColor,
   HSLColor,
   TextStyle,
@@ -24,6 +22,7 @@ import type {
   AccessibilityInfo,
   ResponsiveInfo
 } from '@/types/figma';
+import { ComponentType, DesignStatus } from '@/types/figma';
 
 export class FigmaDesignAnalyzer {
   private figmaFile: FigmaFile;
