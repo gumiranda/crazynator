@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, DownloadIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -25,12 +25,16 @@ import {
   InngestConnectionStatusIndicator,
 } from '@/components/inngest-connection-status';
 import { useInngest } from '@/components/ui/inngest-provider';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 interface Props {
   projectId: string;
 }
 
 export const ProjectHeader = ({ projectId }: Props) => {
   const { setTheme, theme } = useTheme();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
@@ -39,6 +43,50 @@ export const ProjectHeader = ({ projectId }: Props) => {
   const handleThemeChange = (value: string) => {
     setTheme(value);
   };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Falha ao baixar o projeto');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `${project.name}-project.zip`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create download link and click it
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success('Projeto baixado com sucesso!');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Erro ao baixar o projeto. Tente novamente.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
       <DropdownMenu>
@@ -59,6 +107,11 @@ export const ProjectHeader = ({ projectId }: Props) => {
               <ChevronLeftIcon className="size-4" />
               <span>Go to Dashboard</span>
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleDownload} disabled={isDownloading}>
+            <DownloadIcon className="size-4" />
+            <span>{isDownloading ? 'Baixando...' : 'Baixar Projeto (ZIP)'}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuSub>
