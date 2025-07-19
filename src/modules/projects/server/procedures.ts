@@ -7,8 +7,84 @@ import { TRPCError } from '@trpc/server';
 import { consumeCredits } from '@/lib/usage';
 import { projectChannel } from '@/inngest/channels';
 import { getSubscriptionToken } from '@inngest/realtime';
+import { getSandbox } from '@/lib/sandbox';
 
 export const projectsRouter = createTRPCRouter({
+  updateFragment: protectedProcedure
+    .input(
+      z.object({
+        fragmentId: z.string().min(1, 'Fragment ID is required'),
+        files: z.record(z.string()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Verificar se o fragmento pertence ao usuário
+      const fragment = await prisma.fragment.findFirst({
+        where: {
+          id: input.fragmentId,
+          message: {
+            project: {
+              userId: ctx.auth.userId,
+            },
+          },
+        },
+        include: {
+          message: {
+            include: {
+              project: true,
+            },
+          },
+        },
+      });
+
+      if (!fragment) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Fragment not found',
+        });
+      }
+
+      try {
+        // Atualizar arquivos no banco de dados
+        const updatedFragment = await prisma.fragment.update({
+          where: { id: input.fragmentId },
+          data: {
+            files: input.files,
+          },
+        });
+
+        // Tentar atualizar arquivos no sandbox E2B (se ainda estiver ativo)
+        if (fragment.sandboxUrl) {
+          try {
+            // Extrair sandboxId da URL (assumindo formato padrão E2B)
+            const urlParts = fragment.sandboxUrl.split('.');
+            if (urlParts.length > 0) {
+              const sandboxId = urlParts[0].split('//')[1];
+              if (sandboxId) {
+                const sandbox = await getSandbox(sandboxId);
+                
+                // Atualizar cada arquivo no sandbox
+                for (const [filePath, content] of Object.entries(input.files)) {
+                  await sandbox.filesystem.write(filePath, content);
+                }
+              }
+            }
+          } catch (sandboxError) {
+            // Se falhar ao conectar com o sandbox, apenas log o erro
+            // O sandbox pode ter expirado ou estar indisponível
+            console.warn('Failed to update sandbox files:', sandboxError);
+          }
+        }
+
+        return updatedFragment;
+      } catch {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update fragment',
+        });
+      }
+    }),
+  
   generateSubscriptionToken: protectedProcedure
     .input(
       z.object({

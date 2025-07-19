@@ -152,7 +152,11 @@ export const ProjectView = ({ projectId }: Props) => {
                         <FragmentPreview fragment={activeFragment} />
                       </TabsContent>
                       <TabsContent value="code" className="h-full m-0">
-                        <FileExplore files={activeFragment.files as FileCollection} />
+                        <FileExplore 
+                          files={activeFragment.files as FileCollection} 
+                          fragmentId={activeFragment.id}
+                          readOnly={false}
+                        />
                       </TabsContent>
                     </Tabs>
                   )}
@@ -219,7 +223,11 @@ export const ProjectView = ({ projectId }: Props) => {
                 {!!activeFragment && <FragmentPreview fragment={activeFragment} />}
               </TabsContent>
               <TabsContent value="code" className="min-h-0">
-                {!!activeFragment && <FileExplore files={activeFragment.files as FileCollection} />}
+                {!!activeFragment && <FileExplore 
+                  files={activeFragment.files as FileCollection} 
+                  fragmentId={activeFragment.id}
+                  readOnly={false}
+                />}
               </TabsContent>
             </Tabs>
           </ResizablePanel>
