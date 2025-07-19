@@ -61,7 +61,7 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="pt-2 pr-1">
+        <div className="pt-1 sm:pt-2 pr-1">
           {allMessages.map((message) => (
             <MessageCard
               key={message.id}
@@ -80,8 +80,8 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
           <div ref={bottomRef} />
         </div>
       </div>
-      <div className="relative p-3 pt-1">
-        <div className="to-background/70 pointer-events-none absolute -top-6 right-0 left-0 h-6 bg-gradient-to-b from-transparent" />
+      <div className="relative p-2 sm:p-3 pt-1">
+        <div className="to-background/70 pointer-events-none absolute -top-4 sm:-top-6 right-0 left-0 h-4 sm:h-6 bg-gradient-to-b from-transparent" />
         <MessageForm projectId={projectId} />
       </div>
     </div>
