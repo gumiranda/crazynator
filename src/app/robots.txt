@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /pricing
+Allow: /sign-in
+Allow: /sign-up
+
+# Block admin/internal pages if they exist
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/private/
+Disallow: /_next/
+Disallow: /temp/
+
+# Sitemap location
+Sitemap: https://crazycode.com/sitemap.xml
+
+# Crawl delay (optional, in seconds)
+Crawl-delay: 1

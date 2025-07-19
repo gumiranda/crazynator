@@ -1,11 +1,25 @@
-DATABASE_URL='postgresql://neondb_owner:senha@url-do-bagulho.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
-NEXT_PUBLIC_APP_URL='http://localhost:3000'
-OPENAI_API_KEY='sk-proj-_'
-ANTHROPIC_API_KEY=
-E2B_API_KEY='e2b_'
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_
-CLERK_SECRET_KEY=sk_test_
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
-NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+# Database
+DATABASE_URL="postgresql://..."
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+# Application URL (important for SEO)
+NEXT_PUBLIC_APP_URL="https://crazycode.com"
+
+# Search Console Verification IDs (for SEO)
+GOOGLE_VERIFICATION_ID=
+YANDEX_VERIFICATION_ID=
+YAHOO_VERIFICATION_ID=
+
+# Analytics (optional)
+GOOGLE_ANALYTICS_ID=
+GOOGLE_TAG_MANAGER_ID=
+
+# Social Media (for Open Graph)
+TWITTER_HANDLE="@crazycode"
+
+# API Keys
+INNGEST_API_KEY=
+E2B_API_KEY=
