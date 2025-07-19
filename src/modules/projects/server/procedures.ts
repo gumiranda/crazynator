@@ -182,4 +182,71 @@ export const projectsRouter = createTRPCRouter({
       });
       return createdProject;
     }),
+
+  forkProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // First, verify the user has access to the original project
+      const originalProject = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
+        },
+      });
+
+      if (!originalProject) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      // Create the forked project
+      const forkedProject = await prisma.project.create({
+        data: {
+          name: `${originalProject.name} (fork)`,
+          userId: ctx.auth.userId,
+        },
+      });
+
+      // Copy all messages and fragments from the original project
+      for (const message of originalProject.messages) {
+        const newMessage = await prisma.message.create({
+          data: {
+            content: message.content,
+            role: message.role,
+            type: message.type,
+            projectId: forkedProject.id,
+          },
+        });
+
+        // If the message has a fragment, copy it too
+        if (message.fragment) {
+          await prisma.fragment.create({
+            data: {
+              messageId: newMessage.id,
+              sandboxUrl: message.fragment.sandboxUrl,
+              title: message.fragment.title,
+              files: message.fragment.files,
+            },
+          });
+        }
+      }
+
+      return forkedProject;
+    }),
 });

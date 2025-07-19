@@ -13,8 +13,19 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, GitForkIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -25,19 +36,52 @@ import {
   InngestConnectionStatusIndicator,
 } from '@/components/inngest-connection-status';
 import { useInngest } from '@/components/ui/inngest-provider';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 interface Props {
   projectId: string;
 }
 
 export const ProjectHeader = ({ projectId }: Props) => {
   const { setTheme, theme } = useTheme();
+  const router = useRouter();
+  const [isForking, setIsForking] = useState(false);
+  const [showForkDialog, setShowForkDialog] = useState(false);
 
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
   const { state: realtimeConnectionState } = useInngest();
 
+  const forkProjectMutation = trpc.projects.forkProject.useMutation({
+    onSuccess: (forkedProject) => {
+      toast.success('Project forked successfully! Opening the new project...');
+      // Redirect to the new forked project
+      setTimeout(() => {
+        router.push(`/projects/${forkedProject.id}`);
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error('Failed to fork project:', error);
+      toast.error('Failed to fork project. Please try again.');
+    },
+    onSettled: () => {
+      setIsForking(false);
+    },
+  });
+
   const handleThemeChange = (value: string) => {
     setTheme(value);
+  };
+
+  const handleForkProject = () => {
+    setShowForkDialog(true);
+  };
+
+  const confirmFork = () => {
+    setShowForkDialog(false);
+    setIsForking(true);
+    forkProjectMutation.mutate({ projectId });
   };
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
@@ -59,6 +103,13 @@ export const ProjectHeader = ({ projectId }: Props) => {
               <ChevronLeftIcon className="size-4" />
               <span>Go to Dashboard</span>
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={handleForkProject}
+            disabled={isForking}
+          >
+            <GitForkIcon className="size-4" />
+            <span>{isForking ? 'Forking...' : 'Fork Project'}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuSub>
@@ -99,6 +150,25 @@ export const ProjectHeader = ({ projectId }: Props) => {
           <InngestConnectionStatusLabel className="hidden sm:inline" />
         </InngestConnectionStatus>
       </div>
+
+      <AlertDialog open={showForkDialog} onOpenChange={setShowForkDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Fork Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will create a copy of "{project.name}" with all messages and code fragments. 
+              You'll be redirected to the new project where you can continue working independently.
+              Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmFork} disabled={isForking}>
+              {isForking ? 'Forking...' : 'Fork Project'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 };
