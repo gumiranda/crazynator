@@ -4,12 +4,13 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { z } from 'zod';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ArrowUpIcon, Loader2Icon } from 'lucide-react';
+import { ArrowUpIcon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
 import Usage from './usage';
@@ -42,6 +43,7 @@ const suggestionChips = [
 
 export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -51,6 +53,7 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       value: '',
     },
   });
+  
   const createMessage = useMutation(
     trpc.messages.create.mutationOptions({
       onSuccess: () => {
@@ -67,6 +70,22 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       },
     }),
   );
+
+  const enhancePrompt = useMutation(
+    trpc.messages.enhance.mutationOptions({
+      onSuccess: (data) => {
+        form.setValue('value', data.enhancedPrompt);
+        form.trigger('value');
+        toast.success('Prompt aprimorado com sucesso!');
+        setIsEnhancing(false);
+      },
+      onError: (error) => {
+        toast.error(`Erro ao aprimorar prompt: ${error.message}`);
+        setIsEnhancing(false);
+      },
+    }),
+  );
+
   const { data: usage, isPending: isLoadingUsage } = useQuery(trpc.usages.status.queryOptions());
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await createMessage.mutateAsync({
@@ -78,6 +97,24 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
   const handleSuggestionClick = (suggestion: string) => {
     form.setValue('value', suggestion);
     form.trigger('value');
+  };
+
+  const handleEnhancePrompt = async () => {
+    const currentValue = form.getValues('value');
+    if (!currentValue || currentValue.trim() === '') {
+      toast.error('Digite algo para aprimorar o prompt');
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      await enhancePrompt.mutateAsync({
+        prompt: currentValue,
+        projectId,
+      });
+    } catch (error) {
+      // Erro já tratado na mutação
+    }
   };
 
   const isPending = createMessage.isPending || isLoadingUsage;
@@ -136,6 +173,42 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
             />
           )}
         />
+        
+        {/* Botão de aprimorar prompt - aparece apenas quando há texto */}
+        {form.watch('value') && form.watch('value').trim() !== '' && (
+          <div className="flex justify-end pt-2 pb-1 animate-in fade-in duration-200">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-7 px-3 gap-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 rounded-md"
+                    onClick={handleEnhancePrompt}
+                    disabled={isEnhancing || isPending}
+                  >
+                    {isEnhancing ? (
+                      <>
+                        <Loader2Icon className="w-3 h-3 animate-spin" />
+                        <span>Aprimorando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <SparklesIcon className="w-3 h-3" />
+                        <span>Aprimorar prompt</span>
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>A IA irá aprimorar seu prompt tornando-o mais específico e eficaz</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+        
         <div className="flex gap-x-2 items-end justify-between pt-2">
           <div className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
             <kbd className="ml-auto pointer-events-none inline-flex h-4 sm:h-5 select-none items-center gap-1 rounded border bg-muted px-1 sm:px-1.5 font-mono text-[9px] sm:text-[10px] font-medium text-muted-foreground">
