@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useTRPC } from '@/trpc/client';
 import { Form, FormField } from '@/components/ui/form';
 import Usage from './usage';
@@ -24,6 +25,20 @@ const formSchema = z.object({
     .min(1, { message: "You can't send an empty message" })
     .max(10000, { message: 'Message is too long' }),
 });
+
+// Predefined suggestion messages
+const suggestionChips = [
+  "Explain this code",
+  "Add documentation",
+  "Fix bugs",
+  "Optimize performance", 
+  "Add unit tests",
+  "Refactor code",
+  "Add error handling",
+  "Review security",
+  "Create API endpoints",
+  "Add TypeScript types"
+];
 
 export const MessageForm = ({ projectId }: MessageFormProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -59,6 +74,12 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       value: values.value,
     });
   };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    form.setValue('value', suggestion);
+    form.trigger('value');
+  };
+
   const isPending = createMessage.isPending || isLoadingUsage;
   const isButtonDisabled = isPending || !form.formState.isValid;
   const showUsage = !!usage;
@@ -74,6 +95,25 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
           showUsage && 'rounded-t-none',
         )}
       >
+        {/* Suggestion chips */}
+        {!form.watch('value') && (
+          <div className="p-2 sm:p-3 pb-1 animate-in slide-in-from-top-2 duration-200">
+            <p className="text-xs text-muted-foreground mb-2">Quick suggestions:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestionChips.map((suggestion, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs px-2 py-1 hover:scale-105"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="value"
