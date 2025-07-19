@@ -56,17 +56,20 @@ export const projectsRouter = createTRPCRouter({
         // Tentar atualizar arquivos no sandbox E2B (se ainda estiver ativo)
         if (fragment.sandboxUrl) {
           try {
-            // Extrair sandboxId da URL (assumindo formato padrão E2B)
-            const urlParts = fragment.sandboxUrl.split('.');
-            if (urlParts.length > 0) {
-              const sandboxId = urlParts[0].split('//')[1];
-              if (sandboxId) {
-                const sandbox = await getSandbox(sandboxId);
-                
-                // Atualizar cada arquivo no sandbox
-                for (const [filePath, content] of Object.entries(input.files)) {
-                  await sandbox.filesystem.write(filePath, content);
-                }
+            // Extrair sandboxId da URL do E2B
+            // Formato esperado: https://sandboxId.e2b.dev ou https://sandboxId-port.e2b.dev
+            const url = new URL(fragment.sandboxUrl);
+            const hostname = url.hostname;
+            
+            // Extrair sandboxId do hostname (parte antes do primeiro ponto ou hífen)
+            const sandboxId = hostname.split('.')[0].split('-')[0];
+            
+            if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
+              const sandbox = await getSandbox(sandboxId);
+              
+              // Atualizar cada arquivo no sandbox
+              for (const [filePath, content] of Object.entries(input.files)) {
+                await sandbox.files.write(filePath, content);
               }
             }
           } catch (sandboxError) {

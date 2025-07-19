@@ -101,7 +101,7 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
   const updateFragment = useMutation(
     trpc.projects.updateFragment.mutationOptions({
       onSuccess: () => {
-        toast.success('Files saved successfully');
+        toast.success('Files saved and synced with sandbox');
         setHasUnsavedChanges(false);
         // Update the local files state
         setEditedFiles({ ...editedFiles });
@@ -200,7 +200,7 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
                           disabled={updateFragment.isPending}
                         >
                           <SaveIcon className="h-4 w-4" />
-                          {updateFragment.isPending ? 'Saving...' : 'Save'}
+                          {updateFragment.isPending ? 'Syncing...' : 'Save'}
                         </Button>
                       </Hint>
                     )}
