@@ -31,19 +31,20 @@ export default function Usage({ points, msBeforeNext }: UsageProps) {
   }, [msBeforeNext]);
 
   return (
-    <div className="bg-background rounded-t-xl border border-b-0 p-2.5">
+    <div className="bg-background rounded-t-xl border border-b-0 p-2 sm:p-2.5">
       <div className="flex items-center gap-x-2">
-        <div>
-          <p className="text-sm font-semibold">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm font-semibold">
             {points} {hasProAccess ? 'credits' : 'free credits'} remaining
           </p>
           <p className="text-muted-foreground text-xs">Reset in {resetTime}.</p>
         </div>
         {!hasProAccess && (
-          <Button variant="default" size="sm" className="ml-auto" asChild>
+          <Button variant="default" size="sm" className="ml-auto shrink-0" asChild>
             <Link href="/pricing">
-              <CrownIcon className="h-4 w-4" />
-              Upgrade
+              <CrownIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Upgrade</span>
+              <span className="sm:hidden text-xs">Up</span>
             </Link>
           </Button>
         )}
