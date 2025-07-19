@@ -1,13 +1,11 @@
-import { useTRPC } from '@/trpc/client';
+import { useMemo, useRef, useEffect } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { MessageCard } from './message-card';
 import { MessageForm } from './message-form';
-import { useRef, useEffect, useMemo } from 'react';
-
 import { Fragment } from '@/generated/prisma';
-
+import { useTRPC } from '@/trpc/client';
+import { useRealtime } from '@inngest/realtime';
 import { MessageLoading } from './message-loading';
-import { useInngest } from '@/components/ui/inngest-provider';
 
 interface Props {
   projectId: string;
@@ -16,20 +14,21 @@ interface Props {
 }
 
 export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment }: Props) => {
+  const trpc = useTRPC();
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssitantMessageIdRef = useRef<string | null>(null);
 
-  const trpc = useTRPC();
-  const { latestData: realtimeData } = useInngest();
+  const realtimeData = useRealtime({ id: projectId });
 
   const { data: messages, isPending } = useSuspenseQuery(
     trpc.messages.getMany.queryOptions(
       {
         projectId,
       },
-      { refetchInterval: Infinity },
+      { refetchInterval: 2500 },
     ),
   );
+
   const allMessages = useMemo(() => {
     const baseMessages = [...messages];
     if (realtimeData && realtimeData.data) {
@@ -39,8 +38,9 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
     }
     return baseMessages;
   }, [messages, realtimeData]);
+
+  const lastAssitantMessage = allMessages.findLast((message) => message.role === 'ASSISTANT');
   useEffect(() => {
-    const lastAssitantMessage = allMessages.findLast((message) => message.role === 'ASSISTANT');
     if (
       lastAssitantMessage?.fragment &&
       lastAssitantMessage?.id !== lastAssitantMessageIdRef.current
@@ -53,14 +53,15 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages.length]);
   if (isPending || !allMessages) {
-    return <div>Loading...</div>;
+    return <MessageLoading />;
   }
   const lastMessage = allMessages[allMessages.length - 1];
 
   const isLastMessageUser = lastMessage?.role === 'USER';
+
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className="flex h-full flex-col">
+      <div className="relative flex-1 overflow-y-auto">
         <div className="pt-1 sm:pt-2 pr-1">
           {allMessages.map((message) => (
             <MessageCard
@@ -74,6 +75,7 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
                 setActiveFragment(message.fragment);
               }}
               type={message.type}
+              images={message.images as string[] | undefined}
             />
           ))}
           {isLastMessageUser && <MessageLoading />}

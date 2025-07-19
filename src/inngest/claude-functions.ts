@@ -14,10 +14,12 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
+
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
 }
+
 const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   if (output[0].type !== 'text') {
     return defaultValue;
@@ -27,6 +29,36 @@ const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   }
   return output[0].content;
 };
+
+const formatMessageWithImages = (content: string, images?: string[]): Message => {
+  if (!images || images.length === 0) {
+    return {
+      role: 'user',
+      content: content,
+      type: 'text',
+    };
+  }
+
+  // Convert relative URLs to absolute URLs for the agent
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const imageContents = images.map((imageUrl) => ({
+    type: 'image' as const,
+    image: imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`,
+  }));
+
+  return {
+    role: 'user',
+    content: [
+      {
+        type: 'text' as const,
+        text: content || 'Please analyze the provided image(s) and help me with any coding or development tasks based on what you see.',
+      },
+      ...imageContents,
+    ],
+    type: 'multimodal' as const,
+  };
+};
+
 export const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
@@ -35,6 +67,7 @@ export const codeAgentFunction = inngest.createFunction(
       const sandbox = await createSandbox();
       return sandbox.sandboxId;
     });
+
     const previousMessages = await step.run('previous-messages', async () => {
       const formattedMessages: Message[] = [];
       const messages = await prisma.message.findMany({
@@ -46,15 +79,24 @@ export const codeAgentFunction = inngest.createFunction(
         },
         take: 5,
       });
+
       for (const message of messages) {
-        formattedMessages.push({
-          role: message.role === 'USER' ? 'user' : 'assistant',
-          content: message.content,
-          type: 'text',
-        });
+        if (message.role === 'USER') {
+          // Handle user messages with potential images
+          const images = message.images as string[] | undefined;
+          formattedMessages.push(formatMessageWithImages(message.content, images));
+        } else {
+          // Handle assistant messages (text only)
+          formattedMessages.push({
+            role: 'assistant',
+            content: message.content,
+            type: 'text',
+          });
+        }
       }
       return formattedMessages.reverse();
     });
+
     const state = createState<AgentState>(
       {
         summary: '',
@@ -64,10 +106,20 @@ export const codeAgentFunction = inngest.createFunction(
         messages: previousMessages,
       },
     );
+
     const codeAgent = createAgent<AgentState>({
       name: 'code-agent',
-      description: 'You are an expert code agent.',
-      system: PROMPT,
+      description: 'You are an expert code agent with vision capabilities. You can analyze images, screenshots, and visual content to help with coding tasks.',
+      system: `${PROMPT}
+
+ADDITIONAL CAPABILITIES:
+- You can analyze images, screenshots, UI mockups, diagrams, and other visual content
+- When provided with images, examine them carefully to understand the context and requirements
+- Use visual information to inform your coding decisions and implementation
+- If you see a UI mockup or design, implement it accurately
+- If you see an error screenshot, help debug and fix the issue
+- If you see a diagram or flowchart, implement the logic it describes
+- Always describe what you see in images before proceeding with code implementation`,
       model: anthropic({
         model: 'claude-opus-4-20250514',
         defaultParameters: { temperature: 0.1, max_tokens: 8000 },
@@ -180,9 +232,14 @@ export const codeAgentFunction = inngest.createFunction(
         return codeAgent;
       },
     });
-    const result = await network.run(event.data.value, {
+
+    // Create the initial message for the current request, including images if present
+    const currentMessage = formatMessageWithImages(event.data.value, event.data.images);
+    
+    const result = await network.run(currentMessage, {
       state,
     });
+
     const fragmentTitleGenerator = createAgent({
       name: 'Fragment Title Generator',
       description: 'An expert title generator for code fragments',
@@ -250,6 +307,7 @@ export const codeAgentFunction = inngest.createFunction(
         },
       });
     });
+
     return {
       message: savedMessage,
       url: sandboxUrl,

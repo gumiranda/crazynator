@@ -133,6 +133,7 @@ exports.Prisma.MessageScalarFieldEnum = {
   content: 'content',
   role: 'role',
   type: 'type',
+  images: 'images',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   projectId: 'projectId'
@@ -157,6 +158,11 @@ exports.Prisma.UsageScalarFieldEnum = {
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.JsonNullValueInput = {

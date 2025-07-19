@@ -39,6 +39,7 @@ model Message {
   content   String
   role      MessageRole
   type      MessageType
+  images    Json?       @default("[]")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   fragment  Fragment?
