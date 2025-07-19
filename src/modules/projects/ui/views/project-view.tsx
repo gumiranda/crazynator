@@ -101,7 +101,7 @@ export const ProjectView = ({ projectId }: Props) => {
                 <SheetHeader className="px-4 py-3 border-b">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-base font-medium">
-                      {activeFragment?.name || 'Fragment Preview'}
+                      {activeFragment?.title || 'Fragment Preview'}
                     </SheetTitle>
                     <Button
                       variant="ghost"
