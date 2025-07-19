@@ -34,6 +34,7 @@ export const messagesRouter = createTRPCRouter({
       z.object({
         value: z.string().min(1, { message: 'Message is required' }),
         projectId: z.string().min(1, { message: 'Project is required' }),
+        images: z.array(z.string()).optional().default([]),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -70,6 +71,7 @@ export const messagesRouter = createTRPCRouter({
           role: 'USER',
           type: 'RESULT',
           projectId: project.id,
+          images: input.images,
         },
       });
       await inngest.send({
@@ -77,6 +79,7 @@ export const messagesRouter = createTRPCRouter({
         data: {
           value: input.value,
           projectId: project.id,
+          images: input.images,
         },
       });
       return createdMessage;

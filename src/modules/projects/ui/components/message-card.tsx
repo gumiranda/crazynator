@@ -4,14 +4,37 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ChevronRightIcon, Code2Icon } from 'lucide-react';
 import Image from 'next/image';
+
 interface UserMessageProps {
   content: string;
+  images?: string[];
 }
-const UserMessage = ({ content }: UserMessageProps) => {
+
+const UserMessage = ({ content, images }: UserMessageProps) => {
   return (
     <div className="flex justify-end pb-4 pr-2 pl-4 sm:pl-10">
       <Card className="rounded-lg bg-muted p-3 shadow-none border-none max-w-[90%] sm:max-w-[80%] break-words">
-        <CardContent className="p-0">{content}</CardContent>
+        <CardContent className="p-0">
+          {/* Display images if any */}
+          {images && images.length > 0 && (
+            <div className="mb-3 space-y-2">
+              {images.map((imageUrl, index) => (
+                <div key={index} className="relative">
+                  <Image
+                    src={imageUrl}
+                    alt={`User uploaded image ${index + 1}`}
+                    width={300}
+                    height={200}
+                    className="rounded-lg object-cover w-full max-w-sm"
+                    style={{ aspectRatio: '3/2' }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Display text content */}
+          {content && <div>{content}</div>}
+        </CardContent>
       </Card>
     </div>
   );
@@ -95,6 +118,7 @@ interface MessageCardProps {
   isActiveFragment: boolean;
   onFragmentClick: (fragment: Fragment) => void;
   type: MessageType;
+  images?: string[];
 }
 
 export const MessageCard = ({
@@ -105,6 +129,7 @@ export const MessageCard = ({
   isActiveFragment,
   onFragmentClick,
   type,
+  images,
 }: MessageCardProps) => {
   if (role === 'ASSISTANT') {
     return (
@@ -118,5 +143,5 @@ export const MessageCard = ({
       />
     );
   }
-  return <UserMessage content={content} />;
+  return <UserMessage content={content} images={images} />;
 };
