@@ -1,0 +1,153 @@
+import { z } from 'zod';
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/trpc/init';
+import { TRPCError } from '@trpc/server';
+
+// Input validation schemas
+const create{{pascalCase name}}Input = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+});
+
+const update{{pascalCase name}}Input = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Name is required').optional(),
+  description: z.string().optional(),
+});
+
+const get{{pascalCase name}}Input = z.object({
+  id: z.string(),
+});
+
+const list{{pascalCase name}}Input = z.object({
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().optional(),
+  search: z.string().optional(),
+});
+
+export const {{camelCase name}}Procedures = createTRPCRouter({
+  // List all {{camelCase name}}s with pagination
+  list: protectedProcedure
+    .input(list{{pascalCase name}}Input)
+    .query(async ({ input, ctx }) => {
+      const { limit, cursor, search } = input;
+      const userId = ctx.user.id;
+
+      const items = await ctx.db.{{camelCase name}}.findMany({
+        take: limit + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        where: {
+          userId,
+          ...(search && {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          }),
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      let nextCursor: string | undefined = undefined;
+      if (items.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+
+  // Get a single {{camelCase name}} by ID
+  getById: protectedProcedure
+    .input(get{{pascalCase name}}Input)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      const item = await ctx.db.{{camelCase name}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!item) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found',
+        });
+      }
+
+      return item;
+    }),
+
+  // Create a new {{camelCase name}}
+  create: protectedProcedure
+    .input(create{{pascalCase name}}Input)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.user.id;
+
+      const item = await ctx.db.{{camelCase name}}.create({
+        data: {
+          ...input,
+          userId,
+        },
+      });
+
+      return item;
+    }),
+
+  // Update an existing {{camelCase name}}
+  update: protectedProcedure
+    .input(update{{pascalCase name}}Input)
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      const userId = ctx.user.id;
+
+      // Check if item exists and belongs to user
+      const existingItem = await ctx.db.{{camelCase name}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!existingItem) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found or unauthorized',
+        });
+      }
+
+      const item = await ctx.db.{{camelCase name}}.update({
+        where: { id },
+        data,
+      });
+
+      return item;
+    }),
+
+  // Delete a {{camelCase name}}
+  delete: protectedProcedure
+    .input(get{{pascalCase name}}Input)
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      // Check if item exists and belongs to user
+      const existingItem = await ctx.db.{{camelCase name}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!existingItem) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found or unauthorized',
+        });
+      }
+
+      await ctx.db.{{camelCase name}}.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    }),
+});

@@ -1,0 +1,138 @@
+{{#if (eq type 'state')}}
+import { useState, useCallback } from 'react';
+
+export interface Use{{pascalCase name}}Return {
+  {{camelCase name}}: string; // Change this type as needed
+  set{{pascalCase name}}: (value: string) => void;
+  clear{{pascalCase name}}: () => void;
+  isValid: boolean;
+}
+
+export function use{{pascalCase name}}(initialValue: string = ''): Use{{pascalCase name}}Return {
+  const [{{camelCase name}}, set{{pascalCase name}}] = useState<string>(initialValue);
+
+  const clear{{pascalCase name}} = useCallback(() => {
+    set{{pascalCase name}}(initialValue);
+  }, [initialValue]);
+
+  const isValid = {{camelCase name}}.length > 0; // Add your validation logic
+
+  return {
+    {{camelCase name}},
+    set{{pascalCase name}},
+    clear{{pascalCase name}},
+    isValid,
+  };
+}
+{{/if}}
+
+{{#if (eq type 'effect')}}
+import { useEffect, useRef } from 'react';
+
+export interface Use{{pascalCase name}}Options {
+  // Add your options here
+  enabled?: boolean;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+
+export function use{{pascalCase name}}(
+  callback: () => void | Promise<void>,
+  dependencies: React.DependencyList,
+  options: Use{{pascalCase name}}Options = {}
+) {
+  const { enabled = true, onSuccess, onError } = options;
+  const isFirstRun = useRef(true);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const runEffect = async () => {
+      try {
+        await callback();
+        onSuccess?.();
+      } catch (error) {
+        onError?.(error as Error);
+      }
+    };
+
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+    }
+
+    runEffect();
+  }, [...dependencies, enabled]);
+}
+{{/if}}
+
+{{#if (eq type 'query')}}
+import { trpc } from '@/trpc/client';
+
+export interface Use{{pascalCase name}}Options {
+  enabled?: boolean;
+  refetchOnWindowFocus?: boolean;
+}
+
+export function use{{pascalCase name}}(
+  input?: any, // Define your input type
+  options: Use{{pascalCase name}}Options = {}
+) {
+  return trpc.{{camelCase name}}.list.useQuery(input, {
+    enabled: options.enabled,
+    refetchOnWindowFocus: options.refetchOnWindowFocus,
+  });
+}
+
+export function use{{pascalCase name}}Mutation() {
+  return trpc.{{camelCase name}}.create.useMutation();
+}
+{{/if}}
+
+{{#if (eq type 'custom')}}
+import { useState, useEffect, useCallback } from 'react';
+
+export interface Use{{pascalCase name}}Return {
+  // Define your return type here
+  data: any;
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => void;
+}
+
+export function use{{pascalCase name}}(): Use{{pascalCase name}}Return {
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Implement your data fetching logic here
+      const result = await fetch('/api/{{kebabCase name}}');
+      const data = await result.json();
+      setData(data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const refetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+  };
+}
+{{/if}}

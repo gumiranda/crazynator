@@ -1,0 +1,128 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+// Request validation schemas
+const GET{{pascalCase name}}Schema = z.object({
+  id: z.string().optional(),
+  limit: z.string().transform(Number).optional(),
+  offset: z.string().transform(Number).optional(),
+});
+
+const POST{{pascalCase name}}Schema = z.object({
+  // Define your POST body schema here
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+});
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const params = Object.fromEntries(searchParams);
+    
+    const validatedParams = GET{{pascalCase name}}Schema.parse(params);
+    
+    // Implement your GET logic here
+    const result = {
+      message: 'GET {{pascalCase name}} endpoint',
+      params: validatedParams,
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request parameters', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
+    console.error('{{pascalCase name}} GET error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedBody = POST{{pascalCase name}}Schema.parse(body);
+    
+    // Implement your POST logic here
+    const result = {
+      message: 'POST {{pascalCase name}} endpoint',
+      data: validatedBody,
+    };
+
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request body', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
+    console.error('{{pascalCase name}} POST error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedBody = POST{{pascalCase name}}Schema.parse(body);
+    
+    // Implement your PUT logic here
+    const result = {
+      message: 'PUT {{pascalCase name}} endpoint',
+      data: validatedBody,
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request body', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
+    console.error('{{pascalCase name}} PUT error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID parameter is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Implement your DELETE logic here
+    const result = {
+      message: `Deleted {{pascalCase name}} with ID: ${id}`,
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('{{pascalCase name}} DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

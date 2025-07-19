@@ -1,0 +1,93 @@
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import type { {{pascalCase name}}, {{pascalCase name}}State, {{pascalCase name}}Actions } from '../types';
+
+type {{pascalCase name}}Store = {{pascalCase name}}State & {{pascalCase name}}Actions;
+
+export const use{{pascalCase name}}Store = create<{{pascalCase name}}Store>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        // Initial state
+        {{camelCase name}}s: [],
+        isLoading: false,
+        error: null,
+        selected{{pascalCase name}}Id: null,
+
+        // Actions
+        set{{pascalCase name}}s: ({{camelCase name}}s) =>
+          set({ {{camelCase name}}s }, false, 'set{{pascalCase name}}s'),
+
+        add{{pascalCase name}}: ({{camelCase name}}) =>
+          set(
+            (state) => ({
+              {{camelCase name}}s: [{{camelCase name}}, ...state.{{camelCase name}}s],
+            }),
+            false,
+            'add{{pascalCase name}}'
+          ),
+
+        update{{pascalCase name}}: (id, updates) =>
+          set(
+            (state) => ({
+              {{camelCase name}}s: state.{{camelCase name}}s.map((item) =>
+                item.id === id ? { ...item, ...updates } : item
+              ),
+            }),
+            false,
+            'update{{pascalCase name}}'
+          ),
+
+        remove{{pascalCase name}}: (id) =>
+          set(
+            (state) => ({
+              {{camelCase name}}s: state.{{camelCase name}}s.filter((item) => item.id !== id),
+              selected{{pascalCase name}}Id:
+                state.selected{{pascalCase name}}Id === id ? null : state.selected{{pascalCase name}}Id,
+            }),
+            false,
+            'remove{{pascalCase name}}'
+          ),
+
+        setLoading: (isLoading) =>
+          set({ isLoading }, false, 'setLoading'),
+
+        setError: (error) =>
+          set({ error }, false, 'setError'),
+
+        setSelected{{pascalCase name}}Id: (selected{{pascalCase name}}Id) =>
+          set({ selected{{pascalCase name}}Id }, false, 'setSelected{{pascalCase name}}Id'),
+      }),
+      {
+        name: '{{kebabCase name}}-store',
+        partialize: (state) => ({
+          selected{{pascalCase name}}Id: state.selected{{pascalCase name}}Id,
+        }),
+      }
+    ),
+    {
+      name: '{{pascalCase name}}Store',
+    }
+  )
+);
+
+// Selectors
+export const use{{pascalCase name}}Selectors = () => {
+  const store = use{{pascalCase name}}Store();
+  
+  return {
+    get{{pascalCase name}}ById: (id: string) =>
+      store.{{camelCase name}}s.find((item) => item.id === id),
+    
+    getSelected{{pascalCase name}}: () =>
+      store.selected{{pascalCase name}}Id
+        ? store.{{camelCase name}}s.find((item) => item.id === store.selected{{pascalCase name}}Id)
+        : null,
+    
+    get{{pascalCase name}}Count: () => store.{{camelCase name}}s.length,
+    
+    hasAny{{pascalCase name}}s: () => store.{{camelCase name}}s.length > 0,
+    
+    isSelected: (id: string) => store.selected{{pascalCase name}}Id === id,
+  };
+};

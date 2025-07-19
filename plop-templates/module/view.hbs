@@ -1,0 +1,65 @@
+'use client';
+
+import React from 'react';
+import { {{pascalCase name}}List, {{pascalCase name}}Form } from '../components';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+export default function {{pascalCase name}}View() {
+  const [isFormOpen, setIsFormOpen] = React.useState(false);
+  const [editing{{pascalCase name}}Id, setEditing{{pascalCase name}}Id] = React.useState<string | undefined>();
+
+  const handleAdd = () => {
+    setEditing{{pascalCase name}}Id(undefined);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (id: string) => {
+    setEditing{{pascalCase name}}Id(id);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setEditing{{pascalCase name}}Id(undefined);
+  };
+
+  const handleFormCancel = () => {
+    setIsFormOpen(false);
+    setEditing{{pascalCase name}}Id(undefined);
+  };
+
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">{{titleCase name}} Management</h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            Manage your {{camelCase name}}s
+          </p>
+        </header>
+
+        <main>
+          <{{pascalCase name}}List 
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+          />
+        </main>
+
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {editing{{pascalCase name}}Id ? 'Edit {{pascalCase name}}' : 'Add New {{pascalCase name}}'}
+              </DialogTitle>
+            </DialogHeader>
+            <{{pascalCase name}}Form
+              {{camelCase name}}Id={editing{{pascalCase name}}Id}
+              onSuccess={handleFormSuccess}
+              onCancel={handleFormCancel}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}

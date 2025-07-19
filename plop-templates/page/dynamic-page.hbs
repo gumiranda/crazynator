@@ -1,0 +1,60 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+interface {{pascalCase name}}PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: {{pascalCase name}}PageProps): Promise<Metadata> {
+  const { id } = await params;
+  
+  // Fetch data based on id for metadata
+  // const item = await fetch{{pascalCase name}}(id);
+  
+  return {
+    title: `{{titleCase name}} - ${id}`,
+    description: `Details for {{titleCase name}} ${id}`,
+  };
+}
+
+export default async function {{pascalCase name}}Page({ params }: {{pascalCase name}}PageProps) {
+  const { id } = await params;
+
+  // Validate the id parameter
+  if (!id) {
+    notFound();
+  }
+
+  // Fetch your data here
+  // const item = await fetch{{pascalCase name}}(id);
+  // if (!item) notFound();
+
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">
+            {{titleCase name}} Details
+          </h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            Viewing {{titleCase name}} with ID: {id}
+          </p>
+        </header>
+
+        <main>
+          <div className="grid gap-6">
+            <div className="border rounded-lg p-6">
+              <h2 className="text-2xl font-semibold mb-4">{{titleCase name}} Information</h2>
+              <div className="space-y-4">
+                <div>
+                  <span className="font-medium">ID:</span> {id}
+                </div>
+                {/* Add more fields based on your data */}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

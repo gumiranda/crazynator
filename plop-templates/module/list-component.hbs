@@ -1,0 +1,160 @@
+'use client';
+
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Trash2, Edit, Plus } from 'lucide-react';
+import { trpc } from '@/trpc/client';
+import { toast } from 'sonner';
+
+export interface {{pascalCase name}}ListProps {
+  onEdit?: (id: string) => void;
+  onAdd?: () => void;
+  className?: string;
+}
+
+export default function {{pascalCase name}}List({ 
+  onEdit, 
+  onAdd, 
+  className 
+}: {{pascalCase name}}ListProps) {
+  const [search, setSearch] = React.useState('');
+  
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    fetchNextPage, 
+    hasNextPage,
+    refetch 
+  } = trpc.{{camelCase name}}.list.useInfiniteQuery(
+    { limit: 10, search },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+
+  const deleteMutation = trpc.{{camelCase name}}.delete.useMutation({
+    onSuccess: () => {
+      toast.success('{{pascalCase name}} deleted successfully');
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete {{camelCase name}}');
+    },
+  });
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this {{camelCase name}}?')) {
+      return;
+    }
+    
+    await deleteMutation.mutateAsync({ id });
+  };
+
+  const items = data?.pages.flatMap(page => page.items) ?? [];
+
+  if (error) {
+    return (
+      <Card className={className}>
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            Error loading {{camelCase name}}s: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>{{pascalCase name}}s</CardTitle>
+            {onAdd && (
+              <Button onClick={onAdd} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add {{pascalCase name}}
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search {{camelCase name}}s..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No {{camelCase name}}s found
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium">{item.name}</h3>
+                    {item.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {item.description}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Created: {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {onEdit && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(item.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(item.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              
+              {hasNextPage && (
+                <div className="text-center pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchNextPage()}
+                    disabled={isLoading}
+                  >
+                    Load More
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

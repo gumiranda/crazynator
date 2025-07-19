@@ -1,0 +1,112 @@
+import { z } from 'zod';
+
+// Base {{pascalCase entityName}} schema for database
+export const {{camelCase entityName}}Schema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  status: z.enum(['active', 'inactive', 'draft']),
+  userId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+// Input schemas for API operations
+export const create{{pascalCase entityName}}Schema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  status: z.enum(['active', 'inactive', 'draft']).default('draft'),
+});
+
+export const update{{pascalCase entityName}}Schema = create{{pascalCase entityName}}Schema.partial().extend({
+  id: z.string(),
+});
+
+export const {{camelCase entityName}}QuerySchema = z.object({
+  id: z.string(),
+});
+
+export const {{camelCase entityName}}ListSchema = z.object({
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().optional(),
+  search: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'draft']).optional(),
+  sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+// Type exports
+export type {{pascalCase entityName}} = z.infer<typeof {{camelCase entityName}}Schema>;
+export type Create{{pascalCase entityName}}Input = z.infer<typeof create{{pascalCase entityName}}Schema>;
+export type Update{{pascalCase entityName}}Input = z.infer<typeof update{{pascalCase entityName}}Schema>;
+export type {{pascalCase entityName}}Query = z.infer<typeof {{camelCase entityName}}QuerySchema>;
+export type {{pascalCase entityName}}ListQuery = z.infer<typeof {{camelCase entityName}}ListSchema>;
+
+// API Response types
+export interface {{pascalCase entityName}}ListResponse {
+  items: {{pascalCase entityName}}[];
+  nextCursor?: string;
+  total: number;
+}
+
+export interface {{pascalCase entityName}}Stats {
+  total: number;
+  active: number;
+  inactive: number;
+  draft: number;
+}
+
+// Component prop types
+export interface {{pascalCase entityName}}CardProps {
+  {{camelCase entityName}}: {{pascalCase entityName}};
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onStatusChange?: (id: string, status: {{pascalCase entityName}}['status']) => void;
+}
+
+export interface {{pascalCase entityName}}TableProps {
+  {{camelCase entityName}}s: {{pascalCase entityName}}[];
+  isLoading?: boolean;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onSort?: (column: string) => void;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+// Form types
+export interface {{pascalCase entityName}}FormData {
+  name: string;
+  description?: string;
+  status: 'active' | 'inactive' | 'draft';
+}
+
+export interface {{pascalCase entityName}}FormProps {
+  {{camelCase entityName}}Id?: string;
+  initialData?: Partial<{{pascalCase entityName}}FormData>;
+  onSuccess?: ({{camelCase entityName}}: {{pascalCase entityName}}) => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
+}
+
+// Filter types
+export interface {{pascalCase entityName}}Filters {
+  search: string;
+  status: {{pascalCase entityName}}['status'] | 'all';
+  sortBy: {{pascalCase entityName}}ListQuery['sortBy'];
+  sortOrder: {{pascalCase entityName}}ListQuery['sortOrder'];
+}
+
+// State management
+export interface {{pascalCase entityName}}State {
+  {{camelCase entityName}}s: {{pascalCase entityName}}[];
+  selected{{pascalCase entityName}}s: string[];
+  filters: {{pascalCase entityName}}Filters;
+  pagination: {
+    cursor?: string;
+    hasMore: boolean;
+    isLoading: boolean;
+  };
+  stats: {{pascalCase entityName}}Stats | null;
+  error: string | null;
+}

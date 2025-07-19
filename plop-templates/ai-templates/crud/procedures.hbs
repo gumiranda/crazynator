@@ -1,0 +1,248 @@
+import { z } from 'zod';
+import { createTRPCRouter, protectedProcedure } from '@/trpc/init';
+import { TRPCError } from '@trpc/server';
+import {
+  {{camelCase entityName}}Schema,
+  create{{pascalCase entityName}}Schema,
+  update{{pascalCase entityName}}Schema,
+  {{camelCase entityName}}QuerySchema,
+  {{camelCase entityName}}ListSchema,
+} from './types';
+
+export const {{camelCase entityName}}Router = createTRPCRouter({
+  // Get paginated list with filtering and sorting
+  list: protectedProcedure
+    .input({{camelCase entityName}}ListSchema)
+    .query(async ({ input, ctx }) => {
+      const { limit, cursor, search, status, sortBy, sortOrder } = input;
+      const userId = ctx.user.id;
+
+      const where = {
+        userId,
+        ...(status && { status }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { description: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }),
+      };
+
+      const [items, total] = await Promise.all([
+        ctx.db.{{camelCase entityName}}.findMany({
+          take: limit + 1,
+          cursor: cursor ? { id: cursor } : undefined,
+          where,
+          orderBy: { [sortBy]: sortOrder },
+        }),
+        ctx.db.{{camelCase entityName}}.count({ where }),
+      ]);
+
+      let nextCursor: string | undefined = undefined;
+      if (items.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+        total,
+      };
+    }),
+
+  // Get statistics
+  stats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.id;
+
+    const [total, active, inactive, draft] = await Promise.all([
+      ctx.db.{{camelCase entityName}}.count({ where: { userId } }),
+      ctx.db.{{camelCase entityName}}.count({ where: { userId, status: 'active' } }),
+      ctx.db.{{camelCase entityName}}.count({ where: { userId, status: 'inactive' } }),
+      ctx.db.{{camelCase entityName}}.count({ where: { userId, status: 'draft' } }),
+    ]);
+
+    return {
+      total,
+      active,
+      inactive,
+      draft,
+    };
+  }),
+
+  // Get single item by ID
+  getById: protectedProcedure
+    .input({{camelCase entityName}}QuerySchema)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      const {{camelCase entityName}} = await ctx.db.{{camelCase entityName}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!{{camelCase entityName}}) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase entityName}} not found',
+        });
+      }
+
+      return {{camelCase entityName}};
+    }),
+
+  // Create new item
+  create: protectedProcedure
+    .input(create{{pascalCase entityName}}Schema)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.user.id;
+
+      const {{camelCase entityName}} = await ctx.db.{{camelCase entityName}}.create({
+        data: {
+          ...input,
+          userId,
+        },
+      });
+
+      return {{camelCase entityName}};
+    }),
+
+  // Update existing item
+  update: protectedProcedure
+    .input(update{{pascalCase entityName}}Schema)
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      const userId = ctx.user.id;
+
+      // Check if item exists and belongs to user
+      const existing{{pascalCase entityName}} = await ctx.db.{{camelCase entityName}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!existing{{pascalCase entityName}}) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase entityName}} not found or unauthorized',
+        });
+      }
+
+      const {{camelCase entityName}} = await ctx.db.{{camelCase entityName}}.update({
+        where: { id },
+        data,
+      });
+
+      return {{camelCase entityName}};
+    }),
+
+  // Delete item
+  delete: protectedProcedure
+    .input({{camelCase entityName}}QuerySchema)
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      // Check if item exists and belongs to user
+      const existing{{pascalCase entityName}} = await ctx.db.{{camelCase entityName}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!existing{{pascalCase entityName}}) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase entityName}} not found or unauthorized',
+        });
+      }
+
+      await ctx.db.{{camelCase entityName}}.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    }),
+
+  // Bulk operations
+  bulkDelete: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()) }))
+    .mutation(async ({ input, ctx }) => {
+      const { ids } = input;
+      const userId = ctx.user.id;
+
+      // Verify all items belong to the user
+      const count = await ctx.db.{{camelCase entityName}}.count({
+        where: { id: { in: ids }, userId },
+      });
+
+      if (count !== ids.length) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Some items do not belong to you or do not exist',
+        });
+      }
+
+      const result = await ctx.db.{{camelCase entityName}}.deleteMany({
+        where: { id: { in: ids }, userId },
+      });
+
+      return { deleted: result.count };
+    }),
+
+  // Bulk update status
+  bulkUpdateStatus: protectedProcedure
+    .input(z.object({ 
+      ids: z.array(z.string()),
+      status: z.enum(['active', 'inactive', 'draft'])
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { ids, status } = input;
+      const userId = ctx.user.id;
+
+      // Verify all items belong to the user
+      const count = await ctx.db.{{camelCase entityName}}.count({
+        where: { id: { in: ids }, userId },
+      });
+
+      if (count !== ids.length) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Some items do not belong to you or do not exist',
+        });
+      }
+
+      const result = await ctx.db.{{camelCase entityName}}.updateMany({
+        where: { id: { in: ids }, userId },
+        data: { status },
+      });
+
+      return { updated: result.count };
+    }),
+
+  // Duplicate item
+  duplicate: protectedProcedure
+    .input({{camelCase entityName}}QuerySchema)
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.user.id;
+
+      const original = await ctx.db.{{camelCase entityName}}.findFirst({
+        where: { id, userId },
+      });
+
+      if (!original) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase entityName}} not found',
+        });
+      }
+
+      const duplicate = await ctx.db.{{camelCase entityName}}.create({
+        data: {
+          name: `${original.name} (Copy)`,
+          description: original.description,
+          status: 'draft',
+          userId,
+        },
+      });
+
+      return duplicate;
+    }),
+});
