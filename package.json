@@ -9,7 +9,15 @@
     "lint": "next lint",
     "postinstall": "bunx prisma generate",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "generate": "plop",
+    "gen:component": "plop component",
+    "gen:page": "plop page",
+    "gen:module": "plop module",
+    "gen:trpc": "plop trpc-router",
+    "gen:hook": "plop hook",
+    "gen:store": "plop store",
+    "gen:ai": "plop ai-template"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.25.4",
