@@ -9,3 +9,9 @@ NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
 NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+
+# Cloudflare R2 Configuration
+CLOUDFLARE_R2_ENDPOINT='https://your-account-id.r2.cloudflarestorage.com'
+CLOUDFLARE_R2_ACCESS_KEY_ID='your-access-key-id'
+CLOUDFLARE_R2_SECRET_ACCESS_KEY='your-secret-access-key'
+CLOUDFLARE_R2_BUCKET_NAME='your-bucket-name'

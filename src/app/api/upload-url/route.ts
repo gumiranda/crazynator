@@ -1,12 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 import { r2Client } from '@/lib/r2';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,68 +23,61 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Storage configuration error' }, { status: 500 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const body = await req.json();
+    const { filename, contentType, size } = body;
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    if (!filename || !contentType) {
+      return NextResponse.json({ 
+        error: 'Filename and content type are required' 
+      }, { status: 400 });
     }
 
     // Validar tipo de arquivo
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!ALLOWED_TYPES.includes(contentType)) {
       return NextResponse.json({ 
         error: 'Invalid file type. Only images are allowed.' 
       }, { status: 400 });
     }
 
     // Validar tamanho do arquivo
-    if (file.size > MAX_FILE_SIZE) {
+    if (size && size > MAX_FILE_SIZE) {
       return NextResponse.json({ 
         error: 'File too large. Maximum size is 5MB.' 
       }, { status: 400 });
     }
 
     // Gerar nome único para o arquivo
-    const extension = file.name.split('.').pop() || '';
+    const extension = filename.split('.').pop() || '';
     const fileName = `${randomUUID()}.${extension}`;
     const key = `images/${fileName}`;
 
-    // Converter arquivo para buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Upload para Cloudflare R2
-    const uploadCommand = new PutObjectCommand({
+    // Criar comando para upload
+    const putObjectCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
-      Body: buffer,
-      ContentType: file.type,
-      ContentLength: file.size,
+      ContentType: contentType,
+      ContentLength: size,
       Metadata: {
-        originalName: file.name,
+        originalName: filename,
         uploadedBy: userId,
         uploadedAt: new Date().toISOString(),
       },
     });
 
-    await r2Client.send(uploadCommand);
+    // Gerar URL presignada válida por 1 hora
+    const signedUrl = await getSignedUrl(r2Client, putObjectCommand, {
+      expiresIn: 3600, // 1 hora
+    });
 
-    // Construir URL do arquivo
-    // Para R2 público, a URL seria: https://pub-{hash}.r2.dev/{key}
-    // Para R2 privado com domínio customizado: https://your-domain.com/{key}
-    // Para este exemplo, vamos retornar o key e construir a URL no frontend
-    const fileUrl = `/api/files/${key}`;
-    
     return NextResponse.json({
       success: true,
-      url: fileUrl,
+      uploadUrl: signedUrl,
       key: key,
-      filename: file.name,
-      size: file.size,
-      type: file.type
+      fileUrl: `/api/files/${key}`,
     });
 
   } catch (error) {
-    console.error('Error uploading to R2:', error);
+    console.error('Error generating signed URL:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

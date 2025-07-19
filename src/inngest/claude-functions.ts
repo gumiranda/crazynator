@@ -30,33 +30,18 @@ const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   return output[0].content;
 };
 
-const formatMessageWithImages = (content: string, images?: string[]): Message => {
+const formatMessageWithImages = (content: string, images?: string[]): string => {
   if (!images || images.length === 0) {
-    return {
-      role: 'user',
-      content: content,
-      type: 'text',
-    };
+    return content;
   }
 
-  // Convert relative URLs to absolute URLs for the agent
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const imageContents = images.map((imageUrl) => ({
-    type: 'image' as const,
-    image: imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`,
-  }));
+  const imageDescriptions = images.map((imageUrl, index) => {
+    const fullUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`;
+    return `\n\nImage ${index + 1}: ${fullUrl}\n[This is an image that the user has shared. Please analyze it and incorporate your observations into your response.]`;
+  });
 
-  return {
-    role: 'user',
-    content: [
-      {
-        type: 'text' as const,
-        text: content || 'Please analyze the provided image(s) and help me with any coding or development tasks based on what you see.',
-      },
-      ...imageContents,
-    ],
-    type: 'multimodal' as const,
-  };
+  return content + imageDescriptions.join('');
 };
 
 export const codeAgentFunction = inngest.createFunction(
@@ -84,7 +69,12 @@ export const codeAgentFunction = inngest.createFunction(
         if (message.role === 'USER') {
           // Handle user messages with potential images
           const images = message.images as string[] | undefined;
-          formattedMessages.push(formatMessageWithImages(message.content, images));
+          const enhancedContent = formatMessageWithImages(message.content, images);
+          formattedMessages.push({
+            role: 'user',
+            content: enhancedContent,
+            type: 'text',
+          });
         } else {
           // Handle assistant messages (text only)
           formattedMessages.push({
@@ -119,7 +109,8 @@ ADDITIONAL CAPABILITIES:
 - If you see a UI mockup or design, implement it accurately
 - If you see an error screenshot, help debug and fix the issue
 - If you see a diagram or flowchart, implement the logic it describes
-- Always describe what you see in images before proceeding with code implementation`,
+- Always describe what you see in images before proceeding with code implementation
+- Image URLs will be provided in the message content for your reference`,
       model: anthropic({
         model: 'claude-opus-4-20250514',
         defaultParameters: { temperature: 0.1, max_tokens: 8000 },
@@ -234,9 +225,9 @@ ADDITIONAL CAPABILITIES:
     });
 
     // Create the initial message for the current request, including images if present
-    const currentMessage = formatMessageWithImages(event.data.value, event.data.images);
+    const enhancedMessage = formatMessageWithImages(event.data.value, event.data.images);
     
-    const result = await network.run(currentMessage, {
+    const result = await network.run(enhancedMessage, {
       state,
     });
 

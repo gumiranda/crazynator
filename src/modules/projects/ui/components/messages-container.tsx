@@ -4,7 +4,7 @@ import { MessageCard } from './message-card';
 import { MessageForm } from './message-form';
 import { Fragment } from '@/generated/prisma';
 import { useTRPC } from '@/trpc/client';
-import { useRealtime } from '@inngest/realtime';
+import { useInngest } from '@/components/ui/inngest-provider';
 import { MessageLoading } from './message-loading';
 
 interface Props {
@@ -18,14 +18,14 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssitantMessageIdRef = useRef<string | null>(null);
 
-  const realtimeData = useRealtime({ id: projectId });
+  const { latestData: realtimeData } = useInngest();
 
   const { data: messages, isPending } = useSuspenseQuery(
     trpc.messages.getMany.queryOptions(
       {
         projectId,
       },
-      { refetchInterval: 2500 },
+      { refetchInterval: Infinity },
     ),
   );
 
