@@ -4,6 +4,7 @@ import {
   createNetwork,
   createTool,
   openai,
+  anthropic,
   type Tool,
   type Message,
   createState,
@@ -14,6 +15,7 @@ import { prisma } from '@/lib/db';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
 import { projectChannel } from './channels';
+import { getUserAIConfig, createAIModelConfig } from '@/lib/user-settings';
 
 interface AgentState {
   summary: string;
@@ -36,6 +38,21 @@ export const codeAgentFunction = inngest.createFunction(
       const sandbox = await createSandbox();
       return sandbox.sandboxId;
     });
+
+    const project = await step.run('get-project', async () => {
+      return await prisma.project.findUnique({
+        where: { id: event.data.projectId },
+      });
+    });
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    const userAIConfig = await step.run('get-user-ai-config', async () => {
+      return await getUserAIConfig(project.userId);
+    });
+
     const previousMessages = await step.run('previous-messages', async () => {
       const formattedMessages: Message[] = [];
       const messages = await prisma.message.findMany({
@@ -65,14 +82,25 @@ export const codeAgentFunction = inngest.createFunction(
         messages: previousMessages,
       },
     );
+
+    const modelConfig = createAIModelConfig(userAIConfig);
+    const modelInstance = userAIConfig.provider === 'anthropic' 
+      ? anthropic({
+          model: modelConfig.model,
+          apiKey: modelConfig.apiKey,
+          defaultParameters: modelConfig.defaultParameters,
+        })
+      : openai({
+          model: modelConfig.model,
+          apiKey: modelConfig.apiKey,
+          defaultParameters: modelConfig.defaultParameters,
+        });
+
     const codeAgent = createAgent<AgentState>({
       name: 'code-agent',
       description: 'You are an expert code agent.',
       system: PROMPT,
-      model: openai({
-        model: 'gpt-4.1',
-        defaultParameters: { temperature: 0.1 },
-      }),
+      model: modelInstance,
       tools: [
         createTool({
           name: 'terminal',
@@ -188,18 +216,14 @@ export const codeAgentFunction = inngest.createFunction(
       name: 'Fragment Title Generator',
       description: 'An expert title generator for code fragments',
       system: FRAGMENT_TITLE_PROMPT,
-      model: openai({
-        model: 'gpt-4o-mini',
-      }),
+      model: modelInstance,
     });
 
     const responseGenerator = createAgent({
       name: 'Response Generator',
       description: 'An expert response generator for code fragments',
       system: RESPONSE_PROMPT,
-      model: openai({
-        model: 'gpt-4o-mini',
-      }),
+      model: modelInstance,
     });
 
     const [fragmentTitleOutput, responseOutput] = await Promise.all([

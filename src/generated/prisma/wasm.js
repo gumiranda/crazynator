@@ -120,6 +120,18 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  openaiApiKey: 'openaiApiKey',
+  anthropicApiKey: 'anthropicApiKey',
+  preferredProvider: 'preferredProvider',
+  openaiModel: 'openaiModel',
+  anthropicModel: 'anthropicModel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -168,15 +180,15 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
-};
-
-exports.Prisma.NullsOrder = {
-  first: 'first',
-  last: 'last'
 };
 exports.MessageRole = exports.$Enums.MessageRole = {
   USER: 'USER',
@@ -189,6 +201,7 @@ exports.MessageType = exports.$Enums.MessageType = {
 };
 
 exports.Prisma.ModelName = {
+  UserSettings: 'UserSettings',
   Project: 'Project',
   Message: 'Message',
   Fragment: 'Fragment',

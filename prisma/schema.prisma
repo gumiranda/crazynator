@@ -13,6 +13,19 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model UserSettings {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  openaiApiKey      String?
+  anthropicApiKey   String?
+  preferredProvider String   @default("openai") // "openai" or "anthropic"
+  openaiModel       String   @default("gpt-4o")
+  anthropicModel    String   @default("claude-3-5-sonnet-20241022")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 model Project {
   id        String   @id @default(uuid())
   name      String
@@ -58,8 +71,6 @@ model Fragment {
   title      String
   files      Json
 }
-
-
 
 model Usage {
   key    String    @id
