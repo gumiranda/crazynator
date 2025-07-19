@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "bunx prisma generate",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
