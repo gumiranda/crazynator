@@ -1,15 +1,25 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { updateSession } from '@/lib/supabase/middleware';
+import { NextRequest } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/login(.*)',
+  '/register(.*)',
   '/',
   '/api/inngest(.*)',
   '/api/trpc(.*)',
   '/pricing(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // Handle Supabase auth for routes that start with /supabase
+  if (req.nextUrl.pathname.startsWith('/supabase')) {
+    return await updateSession(req);
+  }
+
+  // Handle Clerk auth for other protected routes
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
