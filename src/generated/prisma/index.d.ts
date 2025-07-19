@@ -48,7 +48,8 @@ export type MessageRole = (typeof MessageRole)[keyof typeof MessageRole]
 
 export const MessageType: {
   RESULT: 'RESULT',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
+  STREAMING: 'STREAMING'
 };
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]

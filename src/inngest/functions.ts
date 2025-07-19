@@ -330,13 +330,14 @@ export const streamingCodeAgentFunction = inngest.createFunction(
       name: 'streaming-code-agent',
       description: 'You are an expert code agent that provides streaming updates.',
       system: PROMPT,
-      model: openai({
-        model: 'gpt-4o',
-        defaultParameters: { 
-          temperature: 0.1,
-          stream: true,
-        },
-      }),
+             model: openai({
+         model: 'gpt-4o',
+         defaultParameters: { 
+           temperature: 0.1,
+           // Note: streaming may not work with all models/configurations
+           stream: false, // Set to true when streaming is properly supported
+         },
+       }),
       tools: [
         createTool({
           name: 'terminal',

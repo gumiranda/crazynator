@@ -94,7 +94,7 @@ const StreamingText = ({ content }: { content: string }) => {
       const timer = setTimeout(() => {
         setDisplayedContent(content.slice(0, currentIndex + 1));
         setCurrentIndex(currentIndex + 1);
-      }, 20); // Adjust speed here (lower = faster)
+             }, 50); // Adjust speed here (lower = faster)
 
       return () => clearTimeout(timer);
     }

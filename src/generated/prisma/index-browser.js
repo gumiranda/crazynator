@@ -185,7 +185,8 @@ exports.MessageRole = exports.$Enums.MessageRole = {
 
 exports.MessageType = exports.$Enums.MessageType = {
   RESULT: 'RESULT',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
+  STREAMING: 'STREAMING'
 };
 
 exports.Prisma.ModelName = {

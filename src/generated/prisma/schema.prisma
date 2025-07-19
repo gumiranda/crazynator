@@ -32,6 +32,7 @@ enum MessageRole {
 enum MessageType {
   RESULT
   ERROR
+  STREAMING
 }
 
 model Message {
