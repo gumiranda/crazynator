@@ -7,17 +7,20 @@ import {
   type Tool,
   type Message,
   createState,
-  anthropic,
 } from '@inngest/agent-kit';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
+import { projectChannel } from './channels';
+
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
+  streamingContent: string;
 }
+
 const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   if (output[0].type !== 'text') {
     return defaultValue;
@@ -27,14 +30,28 @@ const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   }
   return output[0].content;
 };
-export const codeAgentFunction = inngest.createFunction(
-  { id: 'code-agent' },
-  { event: 'code-agent/run' },
-  async ({ event, step }) => {
+
+export const streamingCodeAgentFunction = inngest.createFunction(
+  { id: 'streaming-code-agent' },
+  { event: 'streaming-code-agent/run' },
+  async ({ event, step, publish }) => {
+    // Create a temporary message for streaming
+    const streamingMessage = await step.run('create-streaming-message', async () => {
+      return await prisma.message.create({
+        data: {
+          content: '',
+          role: 'ASSISTANT',
+          type: 'STREAMING',
+          projectId: event.data.projectId,
+        },
+      });
+    });
+
     const sandboxId = await step.run('get-sandbox-id', async () => {
       const sandbox = await createSandbox();
       return sandbox.sandboxId;
     });
+
     const previousMessages = await step.run('previous-messages', async () => {
       const formattedMessages: Message[] = [];
       const messages = await prisma.message.findMany({
@@ -47,36 +64,51 @@ export const codeAgentFunction = inngest.createFunction(
         take: 5,
       });
       for (const message of messages) {
-        formattedMessages.push({
-          role: message.role === 'USER' ? 'user' : 'assistant',
-          content: message.content,
-          type: 'text',
-        });
+        if (message.type !== 'STREAMING') { // Exclude streaming messages from context
+          formattedMessages.push({
+            role: message.role === 'USER' ? 'user' : 'assistant',
+            content: message.content,
+            type: 'text',
+          });
+        }
       }
       return formattedMessages.reverse();
     });
+
     const state = createState<AgentState>(
       {
         summary: '',
         files: {},
+        streamingContent: '',
       },
       {
         messages: previousMessages,
       },
     );
+
     const codeAgent = createAgent<AgentState>({
-      name: 'code-agent',
-      description: 'You are an expert code agent.',
+      name: 'streaming-code-agent',
+      description: 'You are an expert code agent that provides streaming updates.',
       system: PROMPT,
-      model: anthropic({
-        model: 'claude-opus-4-20250514',
-        defaultParameters: { temperature: 0.1, max_tokens: 8000 },
+      model: openai({
+        model: 'gpt-4o',
+        defaultParameters: { 
+          temperature: 0.1,
+          stream: true,
+        },
       }),
       tools: [
         createTool({
           name: 'terminal',
           description: 'Use the terminal to run commands',
           handler: async ({ command }, { step }) => {
+            // Send status update
+            await publish(projectChannel(event.data.projectId).streaming({
+              messageId: streamingMessage.id,
+              content: `Running: ${command}`,
+              type: 'tool_use',
+            }));
+
             return await step?.run('terminal', async () => {
               const buffers = { stdout: '', stderr: '' };
               try {
@@ -113,6 +145,13 @@ export const codeAgentFunction = inngest.createFunction(
             ),
           }),
           handler: async ({ files }, { step, network }: Tool.Options<AgentState>) => {
+            // Send status update
+            await publish(projectChannel(event.data.projectId).streaming({
+              messageId: streamingMessage.id,
+              content: `Creating files: ${files.map(f => f.path).join(', ')}`,
+              type: 'tool_use',
+            }));
+
             const newFiles = await step?.run('createOrUpdateFiles', async () => {
               try {
                 const updatedFiles = network.state.data.files || {};
@@ -138,6 +177,13 @@ export const codeAgentFunction = inngest.createFunction(
             files: z.array(z.string()),
           }),
           handler: async ({ files }, { step }) => {
+            // Send status update
+            await publish(projectChannel(event.data.projectId).streaming({
+              messageId: streamingMessage.id,
+              content: `Reading files: ${files.join(', ')}`,
+              type: 'tool_use',
+            }));
+
             return await step?.run('readFiles', async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
@@ -158,6 +204,16 @@ export const codeAgentFunction = inngest.createFunction(
         onResponse: async ({ result, network }) => {
           const lastAssistantMessageText = lastAssistantTextMessageContent(result);
           if (lastAssistantMessageText && network) {
+            // Update streaming content
+            network.state.data.streamingContent += lastAssistantMessageText;
+            
+            // Send streaming update
+            await publish(projectChannel(event.data.projectId).streaming({
+              messageId: streamingMessage.id,
+              content: network.state.data.streamingContent,
+              type: 'response',
+            }));
+
             if (lastAssistantMessageText.includes('<task_summary>')) {
               network.state.data.summary = lastAssistantMessageText;
             }
@@ -168,7 +224,7 @@ export const codeAgentFunction = inngest.createFunction(
     });
 
     const network = createNetwork<AgentState>({
-      name: 'coding-agent-network',
+      name: 'streaming-coding-agent-network',
       agents: [codeAgent],
       maxIter: 15,
       defaultState: state,
@@ -180,9 +236,11 @@ export const codeAgentFunction = inngest.createFunction(
         return codeAgent;
       },
     });
+
     const result = await network.run(event.data.value, {
       state,
     });
+
     const fragmentTitleGenerator = createAgent({
       name: 'Fragment Title Generator',
       description: 'An expert title generator for code fragments',
@@ -208,13 +266,19 @@ export const codeAgentFunction = inngest.createFunction(
 
     const isError =
       !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
+    
     const sandboxUrl = await step.run('get-sandbox-url', async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000);
       return `https://${host}`;
     });
 
-    const savedMessage = await step.run('save-result', async () => {
+    const finalMessage = await step.run('save-result', async () => {
+      // Delete the streaming message
+      await prisma.message.delete({
+        where: { id: streamingMessage.id },
+      });
+
       if (isError) {
         return await prisma.message.create({
           data: {
@@ -228,6 +292,7 @@ export const codeAgentFunction = inngest.createFunction(
           },
         });
       }
+      
       return await prisma.message.create({
         data: {
           projectId: event.data.projectId,
@@ -250,13 +315,17 @@ export const codeAgentFunction = inngest.createFunction(
         },
       });
     });
+
+    // Send final update
+    await publish(projectChannel(event.data.projectId).realtime(finalMessage));
+
     return {
-      message: savedMessage,
+      message: finalMessage,
       url: sandboxUrl,
-      title: savedMessage.fragment?.title || 'Fragment',
+      title: finalMessage.fragment?.title || 'Fragment',
       files: result.state.data.files,
       summary: result.state.data.summary,
-      fragment: savedMessage.fragment,
+      fragment: finalMessage.fragment,
     };
   },
 );

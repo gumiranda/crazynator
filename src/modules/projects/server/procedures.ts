@@ -174,7 +174,7 @@ export const projectsRouter = createTRPCRouter({
         },
       });
       await inngest.send({
-        name: 'code-agent/run',
+        name: 'streaming-code-agent/run',
         data: {
           projectId: createdProject.id,
           value: input.value,

@@ -27,6 +27,7 @@ export const InngestProvider = ({
 
   const value = useInngestSubscription({
     refreshToken: () => generateToken({ projectId }),
+    topics: ['realtime', 'streaming'],
   });
 
   useEffect(() => {

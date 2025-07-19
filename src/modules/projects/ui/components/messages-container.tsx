@@ -2,11 +2,12 @@ import { useTRPC } from '@/trpc/client';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { MessageCard } from './message-card';
 import { MessageForm } from './message-form';
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
 
 import { Fragment } from '@/generated/prisma';
 
 import { MessageLoading } from './message-loading';
+import { StreamingMessage } from './streaming-message';
 import { useInngest } from '@/components/ui/inngest-provider';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAssitantMessageIdRef = useRef<string | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
 
   const trpc = useTRPC();
   const { latestData: realtimeData } = useInngest();
@@ -32,7 +34,7 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
   );
   const allMessages = useMemo(() => {
     const baseMessages = [...messages];
-    if (realtimeData && realtimeData.data) {
+    if (realtimeData && realtimeData.data && realtimeData.topic === 'realtime') {
       if (!baseMessages.find((message) => message.id === realtimeData.data.id)) {
         return [...baseMessages, realtimeData.data];
       }
@@ -52,6 +54,21 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages.length]);
+
+  // Track streaming messages
+  useEffect(() => {
+    if (realtimeData?.topic === 'streaming') {
+      const streamingData = realtimeData.data;
+      if (streamingData?.messageId && !streamingMessageId) {
+        setStreamingMessageId(streamingData.messageId);
+      }
+    } else if (realtimeData?.topic === 'realtime') {
+      // When we get a final message, clear streaming state
+      if (streamingMessageId) {
+        setStreamingMessageId(null);
+      }
+    }
+  }, [realtimeData, streamingMessageId]);
   if (isPending || !allMessages) {
     return <div>Loading...</div>;
   }
@@ -76,7 +93,13 @@ export const MessagesContainer = ({ projectId, activeFragment, setActiveFragment
               type={message.type}
             />
           ))}
-          {isLastMessageUser && <MessageLoading />}
+          {isLastMessageUser && !streamingMessageId && <MessageLoading />}
+          {streamingMessageId && (
+            <StreamingMessage
+              messageId={streamingMessageId}
+              projectId={projectId}
+            />
+          )}
           <div ref={bottomRef} />
         </div>
       </div>
