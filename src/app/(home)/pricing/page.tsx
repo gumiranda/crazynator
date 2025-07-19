@@ -3,7 +3,7 @@
 import { useCurrentTheme } from '@/hooks/use-current-theme';
 import { PricingTable } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/whitelabel/brand-logo';
 
 export default function PricingPage() {
   const currentTheme = useCurrentTheme();
@@ -11,9 +11,7 @@ export default function PricingPage() {
     <div className="flex flex-col max-w-3xl mx-auto w-full">
       <section className="space-y-6 pt-[16vh] 2xl:pt-48">
         <div className="flex flex-col items-center">
-          <Image
-            src="/logo.svg"
-            alt="Crazy Code"
+          <BrandLogo
             width={50}
             height={50}
             className="hidden md:block"

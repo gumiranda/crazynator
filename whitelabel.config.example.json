@@ -1,0 +1,32 @@
+{
+  "brand": {
+    "name": "Your Brand Name",
+    "tagline": "Build something with Your Brand",
+    "description": "Create apps and websites by chatting with AI"
+  },
+  "colors": {
+    "primary": "#a48fff",
+    "secondary": "#secondary-color",
+    "accent": "#accent-color"
+  },
+  "logos": {
+    "main": "/your-logo.svg",
+    "favicon": "/your-favicon.ico",
+    "alt": "Your Brand Logo"
+  },
+  "meta": {
+    "title": "Your AI Code Generator",
+    "description": "Generate code and applications using AI with Your Brand",
+    "keywords": ["AI", "code", "generator", "development", "your", "keywords"]
+  },
+  "features": {
+    "pricing": true,
+    "signUp": true,
+    "signIn": true
+  },
+  "contact": {
+    "email": "support@yourbrand.com",
+    "website": "https://yourbrand.com",
+    "support": "https://yourbrand.com/support"
+  }
+}

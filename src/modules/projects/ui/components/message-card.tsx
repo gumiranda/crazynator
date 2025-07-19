@@ -3,7 +3,8 @@ import { Fragment, MessageRole, MessageType } from '@/generated/prisma';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ChevronRightIcon, Code2Icon } from 'lucide-react';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/whitelabel/brand-logo';
+import { BrandText } from '@/components/whitelabel/brand-text';
 interface UserMessageProps {
   content: string;
 }
@@ -67,8 +68,8 @@ const AssistantMessage = ({
       )}
     >
       <div className="flex items-center gap-2 pl-2 mb-2">
-        <Image src="/logo.svg" alt="Crazy Code" width={16} height={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
-        <span className="text-xs sm:text-sm font-medium">Crazy Code</span>
+        <BrandLogo width={16} height={16} className="sm:w-[18px] sm:h-[18px]" />
+        <BrandText variant="small" />
         <span className="text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
           {format(createdAt, "HH:mm 'on' MMM dd, yyyy")}
         </span>

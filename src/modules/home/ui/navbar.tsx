@@ -1,15 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import UserControl from '@/components/user-control';
 import { useScroll } from '@/hooks/use-scroll';
 import { cn } from '@/lib/utils';
+import { BrandHeader } from '@/components/whitelabel/brand-header';
+import { useFeatures } from '@/hooks/use-whitelabel';
 
 export default function Navbar() {
   const isScrolled = useScroll();
+  const features = useFeatures();
+  
   return (
     <nav
       className={cn(
@@ -18,20 +21,23 @@ export default function Navbar() {
       )}
     >
       <div className="flex justify-between items-center max-w-5xl mx-auto w-full">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="Crazy Code" width={24} height={24} />
-          <span className="text-lg font-semibold">Crazy Code</span>
+        <Link href="/">
+          <BrandHeader logoSize={24} />
         </Link>
         <SignedOut>
           <div className="flex gap-2">
-            <SignUpButton>
-              <Button size="sm" variant="outline">
-                Sign up
-              </Button>
-            </SignUpButton>
-            <SignInButton>
-              <Button size="sm">Sign in</Button>
-            </SignInButton>
+            {features.signUp && (
+              <SignUpButton>
+                <Button size="sm" variant="outline">
+                  Sign up
+                </Button>
+              </SignUpButton>
+            )}
+            {features.signIn && (
+              <SignInButton>
+                <Button size="sm">Sign in</Button>
+              </SignInButton>
+            )}
           </div>
         </SignedOut>
         <SignedIn>
