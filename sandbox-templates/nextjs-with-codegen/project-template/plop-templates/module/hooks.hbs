@@ -1,0 +1,108 @@
+import { trpc } from '@/trpc/client';
+import { use{{pascalCase name}}Store } from '../stores/{{camelCase name}}Store';
+import type { {{pascalCase name}}, Create{{pascalCase name}}Input, Update{{pascalCase name}}Input } from '../types';
+
+export function use{{pascalCase name}}() {
+  const store = use{{pascalCase name}}Store();
+  
+  // Queries
+  const listQuery = trpc.{{camelCase name}}.list.useInfiniteQuery(
+    { limit: 10 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      onSuccess: (data) => {
+        const items = data.pages.flatMap(page => page.items);
+        store.set{{pascalCase name}}s(items);
+      },
+      onError: (error) => {
+        store.setError(error.message);
+      },
+    }
+  );
+
+  const getByIdQuery = (id: string) => 
+    trpc.{{camelCase name}}.getById.useQuery(
+      { id },
+      { enabled: !!id }
+    );
+
+  // Mutations
+  const createMutation = trpc.{{camelCase name}}.create.useMutation({
+    onSuccess: (new{{pascalCase name}}) => {
+      store.add{{pascalCase name}}(new{{pascalCase name}});
+      listQuery.refetch();
+    },
+    onError: (error) => {
+      store.setError(error.message);
+    },
+  });
+
+  const updateMutation = trpc.{{camelCase name}}.update.useMutation({
+    onSuccess: (updated{{pascalCase name}}) => {
+      store.update{{pascalCase name}}(updated{{pascalCase name}}.id, updated{{pascalCase name}});
+      listQuery.refetch();
+    },
+    onError: (error) => {
+      store.setError(error.message);
+    },
+  });
+
+  const deleteMutation = trpc.{{camelCase name}}.delete.useMutation({
+    onSuccess: (_, variables) => {
+      store.remove{{pascalCase name}}(variables.id);
+      listQuery.refetch();
+    },
+    onError: (error) => {
+      store.setError(error.message);
+    },
+  });
+
+  // Helper functions
+  const create{{pascalCase name}} = (data: Create{{pascalCase name}}Input) => {
+    return createMutation.mutateAsync(data);
+  };
+
+  const update{{pascalCase name}} = (data: Update{{pascalCase name}}Input) => {
+    return updateMutation.mutateAsync(data);
+  };
+
+  const delete{{pascalCase name}} = (id: string) => {
+    return deleteMutation.mutateAsync({ id });
+  };
+
+  const get{{pascalCase name}} = (id: string) => {
+    return getByIdQuery(id);
+  };
+
+  return {
+    // Data
+    {{camelCase name}}s: store.{{camelCase name}}s,
+    selected{{pascalCase name}}Id: store.selected{{pascalCase name}}Id,
+    
+    // Loading states
+    isLoading: listQuery.isLoading || store.isLoading,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+    
+    // Error state
+    error: store.error || listQuery.error?.message,
+    
+    // Actions
+    create{{pascalCase name}},
+    update{{pascalCase name}},
+    delete{{pascalCase name}},
+    get{{pascalCase name}},
+    
+    // Pagination
+    fetchNextPage: listQuery.fetchNextPage,
+    hasNextPage: listQuery.hasNextPage,
+    
+    // Store actions
+    setSelected{{pascalCase name}}Id: store.setSelected{{pascalCase name}}Id,
+    clearError: () => store.setError(null),
+    
+    // Refetch
+    refetch: listQuery.refetch,
+  };
+}

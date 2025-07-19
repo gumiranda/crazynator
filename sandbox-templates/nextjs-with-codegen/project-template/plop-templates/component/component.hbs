@@ -1,0 +1,29 @@
+'use client';
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+interface {{pascalCase name}}Props {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export default function {{pascalCase name}}({ 
+  className,
+  children,
+  ...props 
+}: {{pascalCase name}}Props) {
+  return (
+    <div 
+      className={cn(
+        "{{kebabCase name}}-container",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+{{pascalCase name}}.displayName = '{{pascalCase name}}';

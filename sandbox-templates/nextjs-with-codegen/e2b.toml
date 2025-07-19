@@ -1,0 +1,8 @@
+# Template E2B com Sistema de Geração Automatizada de Código
+# Este template inclui Next.js + TypeScript + tRPC + Prisma + Sistema Plop
+
+team_id = "1443b94e-e03b-44b2-8d63-b6952854c471"
+start_cmd = "/setup_project.sh"
+dockerfile = "e2b.Dockerfile"
+template_name = "crazystack-codegen"
+template_id = "TEMPLATE_ID_PLACEHOLDER"

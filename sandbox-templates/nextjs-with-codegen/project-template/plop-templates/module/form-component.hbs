@@ -1,0 +1,159 @@
+'use client';
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { trpc } from '@/trpc/client';
+import { toast } from 'sonner';
+
+// Form validation schema
+const {{camelCase name}}FormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+});
+
+type {{pascalCase name}}FormData = z.infer<typeof {{camelCase name}}FormSchema>;
+
+export interface {{pascalCase name}}FormProps {
+  {{camelCase name}}Id?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export default function {{pascalCase name}}Form({ 
+  {{camelCase name}}Id, 
+  onSuccess, 
+  onCancel, 
+  className 
+}: {{pascalCase name}}FormProps) {
+  const isEditing = Boolean({{camelCase name}}Id);
+  
+  const { data: {{camelCase name}}Data } = trpc.{{camelCase name}}.getById.useQuery(
+    { id: {{camelCase name}}Id! },
+    { enabled: isEditing }
+  );
+
+  const createMutation = trpc.{{camelCase name}}.create.useMutation({
+    onSuccess: () => {
+      toast.success('{{pascalCase name}} created successfully');
+      reset();
+      onSuccess?.();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to create {{camelCase name}}');
+    },
+  });
+
+  const updateMutation = trpc.{{camelCase name}}.update.useMutation({
+    onSuccess: () => {
+      toast.success('{{pascalCase name}} updated successfully');
+      onSuccess?.();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update {{camelCase name}}');
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<{{pascalCase name}}FormData>({
+    resolver: zodResolver({{camelCase name}}FormSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
+
+  // Update form when data is loaded
+  React.useEffect(() => {
+    if ({{camelCase name}}Data) {
+      reset({
+        name: {{camelCase name}}Data.name,
+        description: {{camelCase name}}Data.description || '',
+      });
+    }
+  }, [{{camelCase name}}Data, reset]);
+
+  const onSubmit = async (data: {{pascalCase name}}FormData) => {
+    if (isEditing) {
+      await updateMutation.mutateAsync({
+        id: {{camelCase name}}Id!,
+        ...data,
+      });
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>
+          {isEditing ? 'Edit {{pascalCase name}}' : 'Create {{pascalCase name}}'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              {...register('name')}
+              placeholder="Enter {{camelCase name}} name"
+              disabled={isPending}
+            />
+            {errors.name && (
+              <p className="text-sm text-red-600">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder="Enter {{camelCase name}} description (optional)"
+              disabled={isPending}
+              rows={3}
+            />
+            {errors.description && (
+              <p className="text-sm text-red-600">{errors.description.message}</p>
+            )}
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="flex-1"
+            >
+              {isPending ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+            </Button>
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}

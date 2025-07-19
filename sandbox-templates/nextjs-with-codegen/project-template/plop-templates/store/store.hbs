@@ -1,0 +1,121 @@
+import { create } from 'zustand';
+{{#if (includes features 'devtools')}}
+import { devtools } from 'zustand/middleware';
+{{/if}}
+{{#if (includes features 'persist')}}
+import { persist } from 'zustand/middleware';
+{{/if}}
+
+export interface {{pascalCase name}}State {
+  // Define your state properties here
+  count: number;
+  items: any[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface {{pascalCase name}}Actions {
+  // Define your actions here
+  increment: () => void;
+  decrement: () => void;
+  reset: () => void;
+  setItems: (items: any[]) => void;
+  addItem: (item: any) => void;
+  removeItem: (id: string) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  {{#if (includes features 'async')}}
+  fetchItems: () => Promise<void>;
+  {{/if}}
+}
+
+type {{pascalCase name}}Store = {{pascalCase name}}State & {{pascalCase name}}Actions;
+
+export const use{{pascalCase name}}Store = create<{{pascalCase name}}Store>()(
+  {{#if (includes features 'devtools')}}
+  devtools(
+  {{/if}}
+  {{#if (includes features 'persist')}}
+    persist(
+  {{/if}}
+      (set, get) => ({
+        // Initial state
+        count: 0,
+        items: [],
+        isLoading: false,
+        error: null,
+
+        // Actions
+        increment: () =>
+          set((state) => ({ count: state.count + 1 }), false, 'increment'),
+
+        decrement: () =>
+          set((state) => ({ count: state.count - 1 }), false, 'decrement'),
+
+        reset: () =>
+          set({ count: 0, items: [], error: null }, false, 'reset'),
+
+        setItems: (items) =>
+          set({ items }, false, 'setItems'),
+
+        addItem: (item) =>
+          set((state) => ({ items: [...state.items, item] }), false, 'addItem'),
+
+        removeItem: (id) =>
+          set(
+            (state) => ({ items: state.items.filter((item) => item.id !== id) }),
+            false,
+            'removeItem'
+          ),
+
+        setLoading: (isLoading) =>
+          set({ isLoading }, false, 'setLoading'),
+
+        setError: (error) =>
+          set({ error }, false, 'setError'),
+
+        {{#if (includes features 'async')}}
+        fetchItems: async () => {
+          const { setLoading, setError, setItems } = get();
+          
+          setLoading(true);
+          setError(null);
+          
+          try {
+            // Implement your async logic here
+            const response = await fetch('/api/{{kebabCase name}}');
+            const data = await response.json();
+            setItems(data);
+          } catch (error) {
+            setError(error instanceof Error ? error.message : 'An error occurred');
+          } finally {
+            setLoading(false);
+          }
+        },
+        {{/if}}
+      }){{#if (includes features 'persist')}},
+      {
+        name: '{{kebabCase name}}-store',
+        partialize: (state) => ({
+          count: state.count,
+          items: state.items,
+        }),
+      }
+    ){{/if}}{{#if (includes features 'devtools')}},
+    {
+      name: '{{pascalCase name}}Store',
+    }
+  ){{/if}}
+);
+
+// Selectors (optional)
+export const use{{pascalCase name}}Selectors = () => {
+  const store = use{{pascalCase name}}Store();
+  
+  return {
+    getItemById: (id: string) => store.items.find((item) => item.id === id),
+    getItemCount: () => store.items.length,
+    hasItems: () => store.items.length > 0,
+    isPositiveCount: () => store.count > 0,
+  };
+};

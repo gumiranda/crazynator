@@ -1,0 +1,411 @@
+'use client';
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Save, X, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { trpc } from '@/trpc/client';
+import { toast } from 'sonner';
+import { 
+  create{{pascalCase entityName}}Schema, 
+  type Create{{pascalCase entityName}}Input,
+  type {{pascalCase entityName}}
+} from './types';
+
+type {{pascalCase entityName}}FormData = Create{{pascalCase entityName}}Input;
+
+export interface {{pascalCase entityName}}FormProps {
+  {{camelCase entityName}}Id?: string;
+  initialData?: Partial<{{pascalCase entityName}}FormData>;
+  onSuccess?: ({{camelCase entityName}}: {{pascalCase entityName}}) => void;
+  onCancel?: () => void;
+  className?: string;
+  mode?: 'create' | 'edit' | 'view';
+}
+
+export default function {{pascalCase entityName}}Form({ 
+  {{camelCase entityName}}Id, 
+  initialData,
+  onSuccess, 
+  onCancel, 
+  className,
+  mode = {{camelCase entityName}}Id ? 'edit' : 'create'
+}: {{pascalCase entityName}}FormProps) {
+  const isEditing = mode === 'edit';
+  const isViewing = mode === 'view';
+  const isReadOnly = isViewing;
+
+  // Fetch existing data if editing
+  const { data: {{camelCase entityName}}Data, isLoading: isLoadingData } = trpc.{{camelCase entityName}}.getById.useQuery(
+    { id: {{camelCase entityName}}Id! },
+    { enabled: !!{{camelCase entityName}}Id }
+  );
+
+  // Mutations
+  const createMutation = trpc.{{camelCase entityName}}.create.useMutation({
+    onSuccess: (new{{pascalCase entityName}}) => {
+      toast.success('{{pascalCase entityName}} created successfully');
+      reset();
+      onSuccess?.(new{{pascalCase entityName}});
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to create {{camelCase entityName}}');
+    },
+  });
+
+  const updateMutation = trpc.{{camelCase entityName}}.update.useMutation({
+    onSuccess: (updated{{pascalCase entityName}}) => {
+      toast.success('{{pascalCase entityName}} updated successfully');
+      onSuccess?.(updated{{pascalCase entityName}});
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update {{camelCase entityName}}');
+    },
+  });
+
+  // Form setup
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting, isDirty, isValid },
+  } = useForm<{{pascalCase entityName}}FormData>({
+    resolver: zodResolver(create{{pascalCase entityName}}Schema),
+    defaultValues: {
+      name: '',
+      description: '',
+      status: 'draft',
+      ...initialData,
+    },
+    mode: 'onChange',
+  });
+
+  // Watch form values for real-time updates
+  const watchedValues = watch();
+
+  // Update form when data is loaded
+  React.useEffect(() => {
+    if ({{camelCase entityName}}Data) {
+      reset({
+        name: {{camelCase entityName}}Data.name,
+        description: {{camelCase entityName}}Data.description || '',
+        status: {{camelCase entityName}}Data.status,
+      });
+    }
+  }, [{{camelCase entityName}}Data, reset]);
+
+  const onSubmit = async (data: {{pascalCase entityName}}FormData) => {
+    try {
+      if (isEditing && {{camelCase entityName}}Id) {
+        await updateMutation.mutateAsync({
+          id: {{camelCase entityName}}Id,
+          ...data,
+        });
+      } else {
+        await createMutation.mutateAsync(data);
+      }
+    } catch (error) {
+      // Error is handled by mutation callbacks
+    }
+  };
+
+  const handleCancel = () => {
+    if (isDirty && !isViewing) {
+      if (!confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+        return;
+      }
+    }
+    onCancel?.();
+  };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
+  const hasError = Object.keys(errors).length > 0;
+
+  if (isLoadingData) {
+    return (
+      <Card className={className}>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Loading {{camelCase entityName}}...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={className}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>
+              {mode === 'create' && 'Create {{pascalCase entityName}}'}
+              {mode === 'edit' && 'Edit {{pascalCase entityName}}'}
+              {mode === 'view' && 'View {{pascalCase entityName}}'}
+            </CardTitle>
+            {isEditing && {{camelCase entityName}}Data && (
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline">
+                  ID: {{{camelCase entityName}}Data.id.slice(0, 8)}...
+                </Badge>
+                <Badge variant={
+                  {{camelCase entityName}}Data.status === 'active' ? 'default' :
+                  {{camelCase entityName}}Data.status === 'inactive' ? 'secondary' : 'outline'
+                }>
+                  {{{camelCase entityName}}Data.status}
+                </Badge>
+              </div>
+            )}
+          </div>
+          
+          {/* Form Status Indicator */}
+          <div className="flex items-center gap-2">
+            {!isViewing && isDirty && (
+              <Badge variant="outline" className="text-orange-600">
+                Unsaved changes
+              </Badge>
+            )}
+            {hasError && (
+              <Badge variant="destructive">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {Object.keys(errors).length} error{Object.keys(errors).length > 1 ? 's' : ''}
+              </Badge>
+            )}
+            {!hasError && isValid && isDirty && !isViewing && (
+              <Badge variant="default" className="bg-green-600">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Ready to save
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">Basic Information</h3>
+              <p className="text-sm text-muted-foreground">
+                Provide the basic details for your {{camelCase entityName}}.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  {...register('name')}
+                  placeholder="Enter {{camelCase entityName}} name"
+                  disabled={isPending || isReadOnly}
+                  className={errors.name ? 'border-red-500' : ''}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.name.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Character count: {watchedValues.name?.length || 0}/100
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Enter {{camelCase entityName}} description (optional)"
+                  disabled={isPending || isReadOnly}
+                  rows={4}
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.description.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Character count: {watchedValues.description?.length || 0}/500
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Status & Settings */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">Status & Settings</h3>
+              <p className="text-sm text-muted-foreground">
+                Configure the status and visibility settings.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={watchedValues.status}
+                  onValueChange={(value) => setValue('status', value as any, { shouldDirty: true })}
+                  disabled={isPending || isReadOnly}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                        <span>Draft</span>
+                        <span className="text-xs text-muted-foreground">- Not visible to others</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="active">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        <span>Active</span>
+                        <span className="text-xs text-muted-foreground">- Visible and active</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="inactive">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                        <span>Inactive</span>
+                        <span className="text-xs text-muted-foreground">- Hidden from view</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.status && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.status.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Metadata (if editing) */}
+          {isEditing && {{camelCase entityName}}Data && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium">Metadata</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Information about this {{camelCase entityName}}.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label className="font-medium">Created</Label>
+                    <p className="text-muted-foreground">
+                      {new Date({{camelCase entityName}}Data.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="font-medium">Last Updated</Label>
+                    <p className="text-muted-foreground">
+                      {new Date({{camelCase entityName}}Data.updatedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Error Summary */}
+          {hasError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Please fix the following errors before saving:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  {Object.entries(errors).map(([field, error]) => (
+                    <li key={field} className="text-sm">
+                      <span className="font-medium capitalize">{field}:</span> {error.message}
+                    </li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Form Actions */}
+          {!isViewing && (
+            <div className="flex gap-3 pt-6 border-t">
+              <Button
+                type="submit"
+                disabled={isPending || !isValid}
+                className="flex-1 sm:flex-none"
+              >
+                {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <Save className="h-4 w-4 mr-2" />
+                {isEditing ? 'Update {{pascalCase entityName}}' : 'Create {{pascalCase entityName}}'}
+              </Button>
+              
+              {onCancel && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isPending}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              )}
+
+              {/* Reset to defaults (create mode) */}
+              {mode === 'create' && isDirty && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => reset()}
+                  disabled={isPending}
+                >
+                  Reset
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* View Mode Actions */}
+          {isViewing && (
+            <div className="flex gap-3 pt-6 border-t">
+              <Button
+                type="button"
+                onClick={() => onCancel?.()}
+                variant="outline"
+              >
+                Close
+              </Button>
+            </div>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+  );
+}

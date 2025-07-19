@@ -1,0 +1,74 @@
+import { z } from 'zod';
+
+// Base {{pascalCase name}} schema
+export const {{camelCase name}}Schema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  userId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+// Create/Update schemas
+export const create{{pascalCase name}}Schema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+});
+
+export const update{{pascalCase name}}Schema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Name is required').optional(),
+  description: z.string().optional(),
+});
+
+// List/Query schemas
+export const list{{pascalCase name}}Schema = z.object({
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().optional(),
+  search: z.string().optional(),
+});
+
+// Type exports
+export type {{pascalCase name}} = z.infer<typeof {{camelCase name}}Schema>;
+export type Create{{pascalCase name}}Input = z.infer<typeof create{{pascalCase name}}Schema>;
+export type Update{{pascalCase name}}Input = z.infer<typeof update{{pascalCase name}}Schema>;
+export type List{{pascalCase name}}Input = z.infer<typeof list{{pascalCase name}}Schema>;
+
+// API Response types
+export interface {{pascalCase name}}ListResponse {
+  items: {{pascalCase name}}[];
+  nextCursor?: string;
+}
+
+// Component prop types
+export interface {{pascalCase name}}ListProps {
+  onEdit?: (id: string) => void;
+  onAdd?: () => void;
+  className?: string;
+}
+
+export interface {{pascalCase name}}FormProps {
+  {{camelCase name}}Id?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  className?: string;
+}
+
+// State management types
+export interface {{pascalCase name}}State {
+  {{camelCase name}}s: {{pascalCase name}}[];
+  isLoading: boolean;
+  error: string | null;
+  selected{{pascalCase name}}Id: string | null;
+}
+
+export interface {{pascalCase name}}Actions {
+  set{{pascalCase name}}s: ({{camelCase name}}s: {{pascalCase name}}[]) => void;
+  add{{pascalCase name}}: ({{camelCase name}}: {{pascalCase name}}) => void;
+  update{{pascalCase name}}: (id: string, updates: Partial<{{pascalCase name}}>) => void;
+  remove{{pascalCase name}}: (id: string) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  setSelected{{pascalCase name}}Id: (id: string | null) => void;
+}

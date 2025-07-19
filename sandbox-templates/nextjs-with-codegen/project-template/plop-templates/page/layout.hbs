@@ -1,0 +1,41 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | {{titleCase name}}',
+    default: '{{titleCase name}}',
+  },
+  description: 'Layout for {{titleCase name}} pages',
+};
+
+interface {{pascalCase name}}LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function {{pascalCase name}}Layout({ children }: {{pascalCase name}}LayoutProps) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Navigation or header specific to {{pascalCase name}} */}
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold">{{titleCase name}}</h1>
+            {/* Add navigation items here */}
+          </nav>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1">
+        {children}
+      </main>
+
+      {/* Footer specific to {{pascalCase name}} */}
+      <footer className="border-t mt-auto">
+        <div className="container mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
+          {{titleCase name}} Section Footer
+        </div>
+      </footer>
+    </div>
+  );
+}

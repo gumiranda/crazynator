@@ -1,0 +1,45 @@
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+
+const {{camelCase name}}Variants = cva(
+  "{{kebabCase name}}-base",
+  {
+    variants: {
+      variant: {
+        default: "{{kebabCase name}}-default",
+        secondary: "{{kebabCase name}}-secondary",
+        outline: "{{kebabCase name}}-outline",
+      },
+      size: {
+        default: "{{kebabCase name}}-size-default",
+        sm: "{{kebabCase name}}-size-sm",
+        lg: "{{kebabCase name}}-size-lg",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface {{pascalCase name}}Props
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof {{camelCase name}}Variants> {}
+
+const {{pascalCase name}} = React.forwardRef<HTMLDivElement, {{pascalCase name}}Props>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <div
+        className={cn({{camelCase name}}Variants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+
+{{pascalCase name}}.displayName = "{{pascalCase name}}";
+
+export { {{pascalCase name}}, {{camelCase name}}Variants };

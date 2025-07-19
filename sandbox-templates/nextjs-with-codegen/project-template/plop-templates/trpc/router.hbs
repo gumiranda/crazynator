@@ -1,0 +1,178 @@
+import { z } from 'zod';
+import { 
+  createTRPCRouter, 
+  {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}} 
+} from '@/trpc/init';
+
+// Input schemas
+const create{{pascalCase name}}Schema = z.object({
+  // Add your fields here
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+});
+
+const update{{pascalCase name}}Schema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Name is required').optional(),
+  description: z.string().optional(),
+});
+
+const get{{pascalCase name}}Schema = z.object({
+  id: z.string(),
+});
+
+const list{{pascalCase name}}Schema = z.object({
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().optional(),
+  search: z.string().optional(),
+});
+
+export const {{camelCase name}}Router = createTRPCRouter({
+{{#if (includes procedures 'list')}}
+  list: {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}}
+    .input(list{{pascalCase name}}Schema)
+    .query(async ({ input, ctx }) => {
+      const { limit, cursor, search } = input;
+      
+      // Implement your list logic here
+      const items = await ctx.db.{{camelCase name}}.findMany({
+        take: limit + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        where: search ? {
+          name: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        } : undefined,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      let nextCursor: string | undefined = undefined;
+      if (items.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.id;
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+{{/if}}
+
+{{#if (includes procedures 'getById')}}
+  getById: {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}}
+    .input(get{{pascalCase name}}Schema)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      
+      const item = await ctx.db.{{camelCase name}}.findUnique({
+        where: { id },
+      });
+
+      if (!item) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found',
+        });
+      }
+
+      return item;
+    }),
+{{/if}}
+
+{{#if (includes procedures 'create')}}
+  create: {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}}
+    .input(create{{pascalCase name}}Schema)
+    .mutation(async ({ input, ctx }) => {
+      {{#if withAuth}}
+      const userId = ctx.user.id;
+      {{/if}}
+      
+      const item = await ctx.db.{{camelCase name}}.create({
+        data: {
+          ...input,
+          {{#if withAuth}}
+          userId,
+          {{/if}}
+        },
+      });
+
+      return item;
+    }),
+{{/if}}
+
+{{#if (includes procedures 'update')}}
+  update: {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}}
+    .input(update{{pascalCase name}}Schema)
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      {{#if withAuth}}
+      const userId = ctx.user.id;
+      {{/if}}
+
+      // Check if item exists {{#if withAuth}}and belongs to user{{/if}}
+      const existingItem = await ctx.db.{{camelCase name}}.findFirst({
+        where: { 
+          id,
+          {{#if withAuth}}
+          userId,
+          {{/if}}
+        },
+      });
+
+      if (!existingItem) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found{{#if withAuth}} or unauthorized{{/if}}',
+        });
+      }
+
+      const item = await ctx.db.{{camelCase name}}.update({
+        where: { id },
+        data,
+      });
+
+      return item;
+    }),
+{{/if}}
+
+{{#if (includes procedures 'delete')}}
+  delete: {{#if withAuth}}protectedProcedure{{else}}publicProcedure{{/if}}
+    .input(get{{pascalCase name}}Schema)
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      {{#if withAuth}}
+      const userId = ctx.user.id;
+      {{/if}}
+
+      // Check if item exists {{#if withAuth}}and belongs to user{{/if}}
+      const existingItem = await ctx.db.{{camelCase name}}.findFirst({
+        where: { 
+          id,
+          {{#if withAuth}}
+          userId,
+          {{/if}}
+        },
+      });
+
+      if (!existingItem) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{{pascalCase name}} not found{{#if withAuth}} or unauthorized{{/if}}',
+        });
+      }
+
+      await ctx.db.{{camelCase name}}.delete({
+        where: { id },
+      });
+
+      return { success: true };
+    }),
+{{/if}}
+});
+
+// Export types
+export type {{pascalCase name}}Router = typeof {{camelCase name}}Router;

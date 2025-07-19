@@ -182,4 +182,57 @@ export const projectsRouter = createTRPCRouter({
       });
       return createdProject;
     }),
+  
+  createWithCodegen: protectedProcedure
+    .input(
+      z.object({
+        value: z.string().min(1, { message: 'Prompt is required' }).max(10000, {
+          message: 'Prompt is too long',
+        }),
+        useCodegen: z.boolean().default(true),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await consumeCredits();
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Something went wrong',
+          });
+        } else {
+          throw new TRPCError({
+            code: 'TOO_MANY_REQUESTS',
+            message: 'You have no credits left',
+          });
+        }
+      }
+      
+      const createdProject = await prisma.project.create({
+        data: {
+          name: generateSlug(2, { format: 'kebab' }),
+          userId: ctx.auth.userId,
+          messages: {
+            create: {
+              content: input.value,
+              role: 'USER',
+              type: 'RESULT',
+            },
+          },
+        },
+      });
+      
+      // Usar função específica para criar sandbox com sistema de geração de código
+      await inngest.send({
+        name: input.useCodegen ? 'code-agent/run-with-codegen' : 'code-agent/run',
+        data: {
+          projectId: createdProject.id,
+          value: input.value,
+          useCodegen: input.useCodegen,
+        },
+      });
+      
+      return createdProject;
+    }),
 });
