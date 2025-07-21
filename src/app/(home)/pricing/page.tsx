@@ -1,14 +1,18 @@
 'use client';
 
-import { useCurrentTheme } from '@/hooks/use-current-theme';
-import { PricingTable } from '@clerk/nextjs';
-import { dark } from '@clerk/themes';
 import Image from 'next/image';
+import { PricingTable } from '@/modules/billing/ui/components/pricing-table';
+import { useTRPC } from '@/trpc/client';
+import { useQuery } from '@tanstack/react-query';
 
 export default function PricingPage() {
-  const currentTheme = useCurrentTheme();
+  const trpc = useTRPC();
+  const { data: currentSubscription } = useQuery(
+    trpc.billing.getSubscription.queryOptions()
+  );
+
   return (
-    <div className="flex flex-col max-w-3xl mx-auto w-full">
+    <div className="flex flex-col max-w-7xl mx-auto w-full px-4">
       <section className="space-y-6 pt-[16vh] 2xl:pt-48">
         <div className="flex flex-col items-center">
           <Image
@@ -23,12 +27,9 @@ export default function PricingPage() {
         <p className="text-muted-foreground text-center text-sm md:text-base">
           Choose the plan that fits your needs
         </p>
-        <PricingTable
-          appearance={{
-            baseTheme: currentTheme === 'dark' ? dark : undefined,
-            elements: { pricingTableCard: 'border! shadow-none! rounded-lg!' },
-          }}
-        />
+        <div className="pt-8">
+          <PricingTable currentSubscription={currentSubscription} />
+        </div>
       </section>
     </div>
   );

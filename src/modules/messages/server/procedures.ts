@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { inngest } from '@/inngest/client';
 import { TRPCError } from '@trpc/server';
-import { consumeCredits } from '@/lib/usage';
+import { consumeCreditsWithStripe } from '@/lib/usage-integration';
 
 export const messagesRouter = createTRPCRouter({
   getMany: protectedProcedure
@@ -50,17 +50,27 @@ export const messagesRouter = createTRPCRouter({
         });
       }
       try {
-        await consumeCredits();
-      } catch (error) {
-        if (error instanceof Error) {
+        await consumeCreditsWithStripe();
+      } catch (error: any) {
+        if (error.code === 'USAGE_LIMIT_EXCEEDED') {
           throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Something went wrong',
+            code: 'TOO_MANY_REQUESTS',
+            message: `Usage limit exceeded for ${error.resourceType}. You've used ${error.current} out of ${error.limit} allowed.`,
+          });
+        } else if (error.code === 'NO_SUBSCRIPTION') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Please subscribe to a plan to continue using this feature.',
+          });
+        } else if (error.code === 'INACTIVE_SUBSCRIPTION') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Your subscription is not active. Please check your billing status.',
           });
         } else {
           throw new TRPCError({
-            code: 'TOO_MANY_REQUESTS',
-            message: 'You have no credits left',
+            code: 'BAD_REQUEST',
+            message: 'Something went wrong',
           });
         }
       }

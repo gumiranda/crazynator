@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 import { inngest } from '@/inngest/client';
 import { generateSlug } from 'random-word-slugs';
 import { TRPCError } from '@trpc/server';
-import { consumeCredits } from '@/lib/usage';
+import { recordProjectCreation } from '@/lib/usage-integration';
 import { projectChannel } from '@/inngest/channels';
 import { getSubscriptionToken } from '@inngest/realtime';
 import { getSandbox } from '@/lib/sandbox';
@@ -146,17 +146,27 @@ export const projectsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        await consumeCredits();
-      } catch (error) {
-        if (error instanceof Error) {
+        await recordProjectCreation();
+      } catch (error: any) {
+        if (error.code === 'USAGE_LIMIT_EXCEEDED') {
           throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Something went wrong',
+            code: 'TOO_MANY_REQUESTS',
+            message: `Usage limit exceeded for projects. You've used ${error.current} out of ${error.limit} allowed.`,
+          });
+        } else if (error.code === 'NO_SUBSCRIPTION') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Please subscribe to a plan to continue creating projects.',
+          });
+        } else if (error.code === 'INACTIVE_SUBSCRIPTION') {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Your subscription is not active. Please check your billing status.',
           });
         } else {
           throw new TRPCError({
-            code: 'TOO_MANY_REQUESTS',
-            message: 'You have no credits left',
+            code: 'BAD_REQUEST',
+            message: 'Something went wrong',
           });
         }
       }

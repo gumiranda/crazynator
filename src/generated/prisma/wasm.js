@@ -154,12 +154,62 @@ exports.Prisma.UsageScalarFieldEnum = {
   expire: 'expire'
 };
 
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  status: 'status',
+  planId: 'planId',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PlanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  stripePriceId: 'stripePriceId',
+  stripeProductId: 'stripeProductId',
+  price: 'price',
+  currency: 'currency',
+  interval: 'interval',
+  features: 'features',
+  active: 'active',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UsageRecordScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  resourceType: 'resourceType',
+  amount: 'amount',
+  timestamp: 'timestamp',
+  metadata: 'metadata'
+};
+
+exports.Prisma.BillingEventScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  eventType: 'eventType',
+  stripeEventId: 'stripeEventId',
+  data: 'data',
+  processedAt: 'processedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
 exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -188,11 +238,24 @@ exports.MessageType = exports.$Enums.MessageType = {
   ERROR: 'ERROR'
 };
 
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  CANCELED: 'CANCELED',
+  PAST_DUE: 'PAST_DUE',
+  UNPAID: 'UNPAID',
+  INCOMPLETE: 'INCOMPLETE',
+  TRIALING: 'TRIALING'
+};
+
 exports.Prisma.ModelName = {
   Project: 'Project',
   Message: 'Message',
   Fragment: 'Fragment',
-  Usage: 'Usage'
+  Usage: 'Usage',
+  Subscription: 'Subscription',
+  Plan: 'Plan',
+  UsageRecord: 'UsageRecord',
+  BillingEvent: 'BillingEvent'
 };
 
 /**

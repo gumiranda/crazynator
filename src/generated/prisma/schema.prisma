@@ -65,3 +65,82 @@ model Usage {
   points Int
   expire DateTime?
 }
+
+// Stripe Billing Models
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique
+  stripeCustomerId     String             @unique
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus
+  planId               String
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  plan          Plan           @relation(fields: [planId], references: [id])
+  usageRecords  UsageRecord[]
+  billingEvents BillingEvent[]
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+model Plan {
+  id              String   @id @default(uuid())
+  name            String
+  stripePriceId   String   @unique
+  stripeProductId String
+  price           Int // em centavos
+  currency        String   @default("usd")
+  interval        String // month, year
+  features        Json // limites e recursos
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  subscriptions Subscription[]
+
+  @@index([stripePriceId])
+  @@index([active])
+}
+
+model UsageRecord {
+  id             String   @id @default(uuid())
+  subscriptionId String
+  resourceType   String // "api_calls", "storage", "projects", etc
+  amount         Int
+  timestamp      DateTime @default(now())
+  metadata       Json?
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, resourceType])
+  @@index([timestamp])
+}
+
+model BillingEvent {
+  id             String   @id @default(uuid())
+  subscriptionId String
+  eventType      String // "payment_succeeded", "subscription_canceled", etc
+  stripeEventId  String   @unique
+  data           Json
+  processedAt    DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([stripeEventId])
+  @@index([eventType])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+  TRIALING
+}
