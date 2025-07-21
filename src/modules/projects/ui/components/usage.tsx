@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { formatDuration, intervalToDuration } from 'date-fns';
-import { useAuth } from '@clerk/nextjs';
 import { CrownIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -11,8 +10,7 @@ type UsageProps = {
 };
 
 export default function Usage({ points, msBeforeNext }: UsageProps) {
-  const { has } = useAuth();
-  const hasProAccess = has?.({ plan: 'pro' });
+  const hasProAccess = false;
 
   const resetTime = useMemo(() => {
     try {

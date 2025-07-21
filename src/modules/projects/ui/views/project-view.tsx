@@ -12,7 +12,6 @@ import FragmentPreview from '../components/fragment-preview';
 import FileExplore from '@/components/file-explore';
 import type { FileCollection } from '@/types/files';
 import UserControl from '@/components/user-control';
-import { useAuth } from '@clerk/nextjs';
 import { ErrorBoundary } from 'react-error-boundary';
 import { InngestProvider } from '@/components/ui/inngest-provider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -22,8 +21,7 @@ interface Props {
 }
 
 export const ProjectView = ({ projectId }: Props) => {
-  const { has } = useAuth();
-  const hasProAccess = has?.({ plan: 'pro' });
+  const hasProAccess = false;
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
@@ -194,7 +192,7 @@ export const ProjectView = ({ projectId }: Props) => {
                 <div className="ml-auto flex items-center gap-x-2">
                   {!hasProAccess && (
                     <Button variant="tertiary" size="sm" asChild>
-                      <Link href={`/projects/${projectId}`}>
+                      <Link href={`/pricing`}>
                         <CrownIcon className="h-4 w-4" />
                         <span>Upgrade</span>
                       </Link>
