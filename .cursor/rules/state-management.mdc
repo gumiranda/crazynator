@@ -1,0 +1,36 @@
+# Gerenciamento de Estado
+
+## Bibliotecas de Estado
+
+- **Zustand**: Para estado global em [src/stores/](mdc:src/stores/)
+- **React Query**: Para cache de dados via tRPC
+- **React Hook Form**: Para formulários
+
+## Stores Disponíveis
+
+- **Inngest Connection**: [src/stores/inngest-connection-store.ts](mdc:src/stores/inngest-connection-store.ts) - Status de conexão
+
+## Hooks Customizados
+
+- **useCurrentTheme**: [src/hooks/use-current-theme.ts](mdc:src/hooks/use-current-theme.ts) - Tema atual
+- **useMobile**: [src/hooks/use-mobile.ts](mdc:src/hooks/use-mobile.ts) - Detecção mobile
+- **useScroll**: [src/hooks/use-scroll.ts](mdc:src/hooks/use-scroll.ts) - Scroll behavior
+
+## Padrões de Estado
+
+- **Server State**: tRPC + React Query para dados do servidor
+- **Client State**: Zustand para estado local/global
+- **Form State**: React Hook Form para formulários
+- **UI State**: Estado local de componentes
+
+## Convenções
+
+- Usar Zustand para estado global compartilhado
+- React Query para cache e sincronização de dados
+- Hooks customizados para lógica reutilizável
+- Separar estado do servidor do estado do cliente
+  description:
+  globs:
+  alwaysApply: false
+
+---

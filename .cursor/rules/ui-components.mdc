@@ -1,0 +1,45 @@
+# Componentes UI e Interface
+
+## Biblioteca de Componentes
+
+- **Radix UI**: Componentes base acessíveis
+- **Shadcn/ui**: Componentes customizados em [src/components/ui/](mdc:src/components/ui/)
+- **Tailwind CSS**: Estilização utilitária
+
+## Estrutura de Componentes
+
+```
+src/components/
+├── ui/           # Componentes base (shadcn/ui)
+├── code-view/    # Visualização de código
+├── file-explore.tsx
+├── file-tree-view.tsx
+├── hint.tsx
+├── inngest-connection-status.tsx
+└── user-control.tsx
+```
+
+## Padrões de Design
+
+- **Tema**: Suporte a tema claro/escuro com next-themes
+- **Responsividade**: Mobile-first com Tailwind
+- **Acessibilidade**: Componentes Radix UI já acessíveis
+- **Consistência**: Design system unificado
+
+## Componentes Específicos
+
+- **Code View**: [src/components/code-view/](mdc:src/components/code-view/) - Visualização de código
+- **File Tree**: [src/components/file-tree-view.tsx](mdc:src/components/file-tree-view.tsx) - Navegação de arquivos
+- **Message Components**: [src/modules/projects/ui/components/](mdc:src/modules/projects/ui/components/) - Chat/mensagens
+
+## Convenções
+
+- Usar `cn()` para combinar classes Tailwind
+- Componentes devem ser tipados com TypeScript
+- Seguir padrões de acessibilidade
+- Usar variants do class-variance-authority quando apropriado
+  description:
+  globs:
+  alwaysApply: false
+
+---

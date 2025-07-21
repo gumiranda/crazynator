@@ -51,7 +51,7 @@ export default function CodeEditor({
         onChange(value);
       }
     },
-    500 // 500ms delay
+    500, // 500ms delay
   );
 
   const handleEditorChange = useCallback(
@@ -60,7 +60,7 @@ export default function CodeEditor({
         debouncedOnChange(value);
       }
     },
-    [debouncedOnChange]
+    [debouncedOnChange],
   );
 
   const monacoLanguage = getMonacoLanguage(language);

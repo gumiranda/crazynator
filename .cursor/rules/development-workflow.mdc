@@ -1,0 +1,43 @@
+# Workflow de Desenvolvimento
+
+## Scripts Disponíveis
+
+- `bun dev` - Servidor de desenvolvimento com Turbopack
+- `bun build` - Build de produção
+- `bun start` - Servidor de produção
+- `bun lint` - Linting com ESLint
+- `bun format` - Formatação com Prettier
+- `bun postinstall` - Geração do cliente Prisma
+
+## Ferramentas de Desenvolvimento
+
+- **Bun**: Package manager e runtime
+- **TypeScript**: Tipagem estática
+- **ESLint**: Linting de código
+- **Prettier**: Formatação automática
+- **Turbopack**: Bundler rápido para desenvolvimento
+
+## Configurações
+
+- **TypeScript**: [tsconfig.json](mdc:tsconfig.json) - Configuração strict
+- **ESLint**: [eslint.config.mjs](mdc:eslint.config.mjs) - Regras de linting
+- **Prettier**: [.prettierrc](mdc:.prettierrc) - Formatação
+- **Next.js**: [next.config.ts](mdc:next.config.ts) - Configuração do framework
+
+## Banco de Dados
+
+- **Prisma**: ORM com PostgreSQL
+- **Migrations**: [prisma/migrations/](mdc:prisma/migrations/) - Histórico de mudanças
+- **Schema**: [prisma/schema.prisma](mdc:prisma/schema.prisma) - Definição dos modelos
+
+## Convenções
+
+- Sempre usar TypeScript strict mode
+- Seguir padrões de formatação do Prettier
+- Commits devem passar linting
+- Usar Bun para todos os comandos de desenvolvimento
+  description:
+  globs:
+  alwaysApply: false
+
+---

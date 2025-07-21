@@ -1,0 +1,39 @@
+# Integração com IA e Sandbox
+
+## Claude AI Integration
+
+- **Functions**: [src/inngest/claude-functions.ts](mdc:src/inngest/claude-functions.ts) - Jobs de IA
+- **Análise de Código**: Processamento assíncrono via Inngest
+- **Rate Limiting**: Controle de uso via modelo Usage
+
+## E2B Sandbox
+
+- **Execução Segura**: Sandbox isolado para código
+- **Package**: `@e2b/code-interpreter`
+- **Templates**: [sandbox-templates/](mdc:sandbox-templates/) - Templates de sandbox
+
+## Fluxo de IA
+
+1. Usuário envia mensagem via chat
+2. Sistema processa em background job
+3. Claude analisa e gera resposta
+4. Código executado em sandbox E2B se necessário
+5. Resultado retornado ao usuário
+
+## Componentes de Chat
+
+- **Message Form**: [src/modules/projects/ui/components/message-form.tsx](mdc:src/modules/projects/ui/components/message-form.tsx)
+- **Message Card**: [src/modules/projects/ui/components/message-card.tsx](mdc:src/modules/projects/ui/components/message-card.tsx)
+- **Fragment Preview**: [src/modules/projects/ui/components/fragment-preview.tsx](mdc:src/modules/projects/ui/components/fragment-preview.tsx)
+
+## Convenções
+
+- Sempre usar sandbox para execução de código
+- Processar IA em background jobs
+- Implementar rate limiting adequado
+- Tratar erros de execução de código
+  description:
+  globs:
+  alwaysApply: false
+
+---

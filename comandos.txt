@@ -63,4 +63,4 @@ bun add rate-limiter-flexible @inngest/realtime react-error-boundary
 
 
 
-
+npx inngest-cli@latest dev

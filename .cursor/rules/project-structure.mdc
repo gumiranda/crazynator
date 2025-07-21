@@ -1,0 +1,45 @@
+# Estrutura do Projeto Crazy Code
+
+Este é um projeto Next.js 15 com App Router que utiliza tRPC, Prisma, Clerk para autenticação, Inngest para background jobs, e E2B para sandbox de código.
+
+## Arquitetura Principal
+
+### Entry Points
+
+- [src/app/layout.tsx](mdc:src/app/layout.tsx) - Layout principal da aplicação
+- [src/app/page.tsx](<mdc:src/app/(home)/page.tsx>) - Página inicial
+- [src/middleware.ts](mdc:src/middleware.ts) - Middleware de autenticação com Clerk
+
+### Estrutura de Módulos
+
+O projeto segue uma arquitetura modular em [src/modules/](mdc:src/modules/):
+
+- **home** - Página inicial e navegação
+- **projects** - Gerenciamento de projetos
+- **messages** - Sistema de mensagens/chat
+- **usage** - Controle de uso/rate limiting
+
+### API e Backend
+
+- **tRPC**: Configurado em [src/trpc/](mdc:src/trpc/) com routers modulares
+- **Prisma**: ORM com schema em [prisma/schema.prisma](mdc:prisma/schema.prisma)
+- **Inngest**: Background jobs em [src/inngest/](mdc:src/inngest/)
+- **E2B**: Sandbox de código para execução segura
+
+### Componentes UI
+
+- **Radix UI**: Componentes base em [src/components/ui/](mdc:src/components/ui/)
+- **Tailwind CSS**: Estilização com configuração em [tailwind.config.js](mdc:tailwind.config.js)
+- **Shadcn/ui**: Componentes reutilizáveis
+
+## Padrões de Desenvolvimento
+
+- TypeScript strict mode
+- ESLint + Prettier para formatação
+- Bun como package manager
+- PostgreSQL como banco de dados
+  description:
+  globs:
+  alwaysApply: false
+
+---

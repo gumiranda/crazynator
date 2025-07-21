@@ -1,0 +1,40 @@
+# Autenticação e Middleware
+
+## Clerk Authentication
+
+- **Middleware**: [src/middleware.ts](mdc:src/middleware.ts) - Proteção de rotas
+- **Provider**: Clerk para autenticação completa
+- **Rotas Públicas**: sign-in, sign-up, home, API routes
+
+## Rotas Protegidas
+
+Rotas que requerem autenticação:
+
+- `/projects/*` - Gerenciamento de projetos
+- `/dashboard` - Dashboard do usuário
+- Qualquer rota não listada como pública
+
+## Rotas Públicas
+
+- `/` - Página inicial
+- `/sign-in/*` - Login
+- `/sign-up/*` - Registro
+- `/pricing/*` - Preços
+- `/api/*` - APIs (tRPC, Inngest)
+
+## Padrões de Uso
+
+- Usar `auth.protect()` para rotas protegidas
+- Verificar `auth.userId` para dados do usuário
+- Usar `createRouteMatcher` para definir rotas públicas
+- Middleware roda em todas as rotas exceto assets estáticos
+
+## Componentes de Auth
+
+- Integração com Clerk em [src/app/layout.tsx](mdc:src/app/layout.tsx)
+- Componentes de sign-in/sign-up em [src/app/(home)/](<mdc:src/app/(home)/>)
+  description:
+  globs:
+  alwaysApply: false
+
+---

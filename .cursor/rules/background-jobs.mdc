@@ -1,0 +1,32 @@
+# Background Jobs com Inngest
+
+## Estrutura Inngest
+
+- **Functions**: [src/inngest/functions.ts](mdc:src/inngest/functions.ts) - Jobs principais
+- **Claude Functions**: [src/inngest/claude-functions.ts](mdc:src/inngest/claude-functions.ts) - Integração AI
+- **Client**: [src/inngest/client.ts](mdc:src/inngest/client.ts) - Cliente Inngest
+- **Utils**: [src/inngest/utils.ts](mdc:src/inngest/utils.ts) - Utilitários
+- **Channels**: [src/inngest/channels.ts](mdc:src/inngest/channels.ts) - Canais de comunicação
+
+## API Route
+
+- **Webhook**: [src/app/api/inngest/route.ts](mdc:src/app/api/inngest/route.ts) - Endpoint para Inngest
+
+## Padrões de Jobs
+
+- Jobs assíncronos para processamento pesado
+- Integração com Claude AI para análise de código
+- Sandbox E2B para execução segura
+- Rate limiting e controle de uso
+
+## Convenções
+
+- Usar `inngest.createFunction` para criar jobs
+- Definir triggers apropriados (cron, event-driven)
+- Tratar erros e retry logic
+- Usar channels para comunicação entre jobs
+  description:
+  globs:
+  alwaysApply: false
+
+---
