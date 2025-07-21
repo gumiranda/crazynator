@@ -74,6 +74,63 @@ export const billingRouter = createTRPCRouter({
       }
     }),
 
+  createFreeSubscription: protectedProcedure
+    .input(
+      z.object({
+        planId: z.string().min(1, { message: 'Plan ID is required' }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        // Verificar se o plano é realmente gratuito
+        const plan = await subscriptionService.getPlanById(input.planId);
+        
+        if (!plan) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Plan not found',
+          });
+        }
+
+        if (plan.price !== 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'This endpoint is only for free plans',
+          });
+        }
+
+        // Verificar se o usuário já tem uma subscription
+        const existingSubscription = await subscriptionService.getUserSubscription(ctx.auth.userId);
+        
+        if (existingSubscription) {
+          // Atualizar subscription existente para o plano gratuito
+          await subscriptionService.updateSubscriptionPlan(
+            existingSubscription.id,
+            input.planId
+          );
+        } else {
+          // Criar customer no Stripe (mesmo para planos gratuitos, para facilitar upgrades futuros)
+          const customer = await stripeService.getOrCreateCustomer(ctx.auth.userId);
+          
+          // Criar subscription gratuita diretamente no banco
+          await subscriptionService.createSubscription({
+            userId: ctx.auth.userId,
+            stripeCustomerId: customer.id,
+            planId: input.planId,
+            status: 'ACTIVE',
+          });
+        }
+
+        return { success: true };
+      } catch (error) {
+        console.error('Error creating free subscription:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create free subscription',
+        });
+      }
+    }),
+
   createPortalSession: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       const subscription = await subscriptionService.getUserSubscription(ctx.auth.userId);

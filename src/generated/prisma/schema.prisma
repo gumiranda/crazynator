@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -15,23 +9,12 @@ datasource db {
 }
 
 model Project {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  messages Message[]
-}
-
-enum MessageRole {
-  USER
-  ASSISTANT
-}
-
-enum MessageType {
-  RESULT
-  ERROR
+  messages  Message[]
 }
 
 model Message {
@@ -41,23 +24,20 @@ model Message {
   type      MessageType
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  fragment  Fragment?
-
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fragment  Fragment?
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Fragment {
-  id        String  @id @default(uuid())
-  messageId String  @unique
-  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
+  id         String   @id @default(uuid())
+  messageId  String   @unique
+  createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   sandboxUrl String
   title      String
   files      Json
+  message    Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
 
 model Usage {
@@ -66,7 +46,6 @@ model Usage {
   expire DateTime?
 }
 
-// Stripe Billing Models
 model Subscription {
   id                   String             @id @default(uuid())
   userId               String             @unique
@@ -79,10 +58,9 @@ model Subscription {
   cancelAtPeriodEnd    Boolean            @default(false)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
-
-  plan          Plan           @relation(fields: [planId], references: [id])
-  usageRecords  UsageRecord[]
-  billingEvents BillingEvent[]
+  billingEvents        BillingEvent[]
+  plan                 Plan               @relation(fields: [planId], references: [id])
+  usageRecords         UsageRecord[]
 
   @@index([userId])
   @@index([stripeCustomerId])
@@ -90,50 +68,57 @@ model Subscription {
 }
 
 model Plan {
-  id              String   @id @default(uuid())
+  id              String         @id @default(uuid())
   name            String
-  stripePriceId   String   @unique
+  stripePriceId   String         @unique
   stripeProductId String
-  price           Int // em centavos
-  currency        String   @default("usd")
-  interval        String // month, year
-  features        Json // limites e recursos
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-
-  subscriptions Subscription[]
+  price           Int
+  currency        String         @default("usd")
+  interval        String
+  features        Json
+  active          Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  subscriptions   Subscription[]
 
   @@index([stripePriceId])
   @@index([active])
 }
 
 model UsageRecord {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   subscriptionId String
-  resourceType   String // "api_calls", "storage", "projects", etc
+  resourceType   String
   amount         Int
-  timestamp      DateTime @default(now())
+  timestamp      DateTime     @default(now())
   metadata       Json?
-
-  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId, resourceType])
   @@index([timestamp])
 }
 
 model BillingEvent {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   subscriptionId String
-  eventType      String // "payment_succeeded", "subscription_canceled", etc
-  stripeEventId  String   @unique
+  eventType      String
+  stripeEventId  String       @unique
   data           Json
-  processedAt    DateTime @default(now())
-
-  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  processedAt    DateTime     @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
   @@index([stripeEventId])
   @@index([eventType])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum MessageType {
+  RESULT
+  ERROR
 }
 
 enum SubscriptionStatus {

@@ -11,7 +11,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "plans:setup": "bunx tsx scripts/setup-plans.ts",
+    "plans:check": "bunx tsx scripts/check-plans.ts",
+    "plans:reset": "bunx tsx scripts/reset-plans.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.25.4",

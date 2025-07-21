@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { stripe } from './stripe';
 import { prisma } from './db';
-import type { Plan, Subscription, SubscriptionStatus } from '../generated/prisma';
+import type { SubscriptionStatus } from '../generated/prisma';
 
 export interface CreateSubscriptionData {
   userId: string;
@@ -29,7 +29,7 @@ export class StripeService {
     cancelUrl: string
   ): Promise<string> {
     try {
-      let customer = await this.getOrCreateCustomer(userId);
+      const customer = await this.getOrCreateCustomer(userId);
 
       const session = await stripe.checkout.sessions.create({
         customer: customer.id,

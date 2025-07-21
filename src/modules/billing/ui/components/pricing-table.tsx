@@ -12,7 +12,7 @@ import type { Plan, Subscription } from '@/generated/prisma';
 import { PlanLimits } from '@/lib/stripe-service';
 
 interface PricingTableProps {
-  currentSubscription?: (Subscription & { plan: Plan; usageRecords: any[] }) | null;
+  currentSubscription?: (Subscription & { plan: Plan; usageRecords: unknown[] }) | null;
 }
 
 export function PricingTable({ currentSubscription }: PricingTableProps) {
@@ -33,8 +33,23 @@ export function PricingTable({ currentSubscription }: PricingTableProps) {
     },
     })
   );
+  
+  const createFreeSubscriptionMutation = useMutation(
+    trpc.billing.createFreeSubscription.mutationOptions({
+    onSuccess: () => {
+      toast.success('Free plan activated successfully!');
+      setLoadingPlanId(null);
+      // Refresh the page to update the subscription status
+      window.location.reload();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      setLoadingPlanId(null);
+    },
+    })
+  );
 
-  const handleSelectPlan = async (priceId: string, planId: string) => {
+  const handleSelectPlan = async (priceId: string, planId: string, price: number) => {
     if (currentSubscription?.planId === planId) {
       return; // Already on this plan
     }
@@ -42,9 +57,15 @@ export function PricingTable({ currentSubscription }: PricingTableProps) {
     setLoadingPlanId(planId);
     
     try {
-      await createCheckoutMutation.mutateAsync({ priceId });
+      if (price === 0) {
+        // Para planos gratuitos, criar subscription diretamente
+        await createFreeSubscriptionMutation.mutateAsync({ planId });
+      } else {
+        // Para planos pagos, usar checkout do Stripe
+        await createCheckoutMutation.mutateAsync({ priceId });
+      }
     } catch (error) {
-      console.error('Error creating checkout:', error);
+      console.error('Error selecting plan:', error);
     }
   };
 
@@ -105,7 +126,7 @@ export function PricingTable({ currentSubscription }: PricingTableProps) {
             <CardFooter>
               <Button
                 className="w-full"
-                onClick={() => handleSelectPlan(plan.stripePriceId, plan.id)}
+                onClick={() => handleSelectPlan(plan.stripePriceId, plan.id, plan.price)}
                 disabled={isCurrentPlan || isLoading}
                 variant={isCurrentPlan ? 'outline' : 'default'}
               >

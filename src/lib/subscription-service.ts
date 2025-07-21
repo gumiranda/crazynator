@@ -343,6 +343,34 @@ export class SubscriptionService {
     }
   }
 
+  async getPlanById(planId: string): Promise<Plan | null> {
+    try {
+      const plan = await prisma.plan.findUnique({
+        where: { id: planId },
+      });
+
+      return plan;
+    } catch (error) {
+      console.error('Error getting plan by ID:', error);
+      throw error;
+    }
+  }
+
+  async updateSubscriptionPlan(subscriptionId: string, planId: string): Promise<void> {
+    try {
+      await prisma.subscription.update({
+        where: { id: subscriptionId },
+        data: {
+          planId,
+          updatedAt: new Date(),
+        },
+      });
+    } catch (error) {
+      console.error('Error updating subscription plan:', error);
+      throw error;
+    }
+  }
+
   async logBillingEvent(
     subscriptionId: string,
     eventType: string,

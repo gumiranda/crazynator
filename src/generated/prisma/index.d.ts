@@ -1582,13 +1582,13 @@ export namespace Prisma {
    */
 
   export type SubscriptionCountOutputType = {
-    usageRecords: number
     billingEvents: number
+    usageRecords: number
   }
 
   export type SubscriptionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    usageRecords?: boolean | SubscriptionCountOutputTypeCountUsageRecordsArgs
     billingEvents?: boolean | SubscriptionCountOutputTypeCountBillingEventsArgs
+    usageRecords?: boolean | SubscriptionCountOutputTypeCountUsageRecordsArgs
   }
 
   // Custom InputTypes
@@ -1605,15 +1605,15 @@ export namespace Prisma {
   /**
    * SubscriptionCountOutputType without action
    */
-  export type SubscriptionCountOutputTypeCountUsageRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: UsageRecordWhereInput
+  export type SubscriptionCountOutputTypeCountBillingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BillingEventWhereInput
   }
 
   /**
    * SubscriptionCountOutputType without action
    */
-  export type SubscriptionCountOutputTypeCountBillingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: BillingEventWhereInput
+  export type SubscriptionCountOutputTypeCountUsageRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UsageRecordWhereInput
   }
 
 
@@ -1665,25 +1665,25 @@ export namespace Prisma {
   export type ProjectMinAggregateOutputType = {
     id: string | null
     name: string | null
-    userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    userId: string | null
   }
 
   export type ProjectMaxAggregateOutputType = {
     id: string | null
     name: string | null
-    userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    userId: string | null
   }
 
   export type ProjectCountAggregateOutputType = {
     id: number
     name: number
-    userId: number
     createdAt: number
     updatedAt: number
+    userId: number
     _all: number
   }
 
@@ -1691,25 +1691,25 @@ export namespace Prisma {
   export type ProjectMinAggregateInputType = {
     id?: true
     name?: true
-    userId?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
   }
 
   export type ProjectMaxAggregateInputType = {
     id?: true
     name?: true
-    userId?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
   }
 
   export type ProjectCountAggregateInputType = {
     id?: true
     name?: true
-    userId?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
     _all?: true
   }
 
@@ -1788,9 +1788,9 @@ export namespace Prisma {
   export type ProjectGroupByOutputType = {
     id: string
     name: string
-    userId: string
     createdAt: Date
     updatedAt: Date
+    userId: string
     _count: ProjectCountAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
@@ -1813,9 +1813,9 @@ export namespace Prisma {
   export type ProjectSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
     messages?: boolean | Project$messagesArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
@@ -1823,28 +1823,28 @@ export namespace Prisma {
   export type ProjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
   }, ExtArgs["result"]["project"]>
 
   export type ProjectSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
-    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
   }, ExtArgs["result"]["project"]>
 
   export type ProjectSelectScalar = {
     id?: boolean
     name?: boolean
-    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
   }
 
-  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
+  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["project"]>
   export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     messages?: boolean | Project$messagesArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
@@ -1860,9 +1860,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
-      userId: string
       createdAt: Date
       updatedAt: Date
+      userId: string
     }, ExtArgs["result"]["project"]>
     composites: {}
   }
@@ -2289,9 +2289,9 @@ export namespace Prisma {
   interface ProjectFieldRefs {
     readonly id: FieldRef<"Project", 'String'>
     readonly name: FieldRef<"Project", 'String'>
-    readonly userId: FieldRef<"Project", 'String'>
     readonly createdAt: FieldRef<"Project", 'DateTime'>
     readonly updatedAt: FieldRef<"Project", 'DateTime'>
+    readonly userId: FieldRef<"Project", 'String'>
   }
     
 
@@ -6124,9 +6124,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    billingEvents?: boolean | Subscription$billingEventsArgs<ExtArgs>
     plan?: boolean | PlanDefaultArgs<ExtArgs>
     usageRecords?: boolean | Subscription$usageRecordsArgs<ExtArgs>
-    billingEvents?: boolean | Subscription$billingEventsArgs<ExtArgs>
     _count?: boolean | SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subscription"]>
 
@@ -6176,9 +6176,9 @@ export namespace Prisma {
 
   export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "stripeCustomerId" | "stripeSubscriptionId" | "status" | "planId" | "currentPeriodStart" | "currentPeriodEnd" | "cancelAtPeriodEnd" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
   export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    billingEvents?: boolean | Subscription$billingEventsArgs<ExtArgs>
     plan?: boolean | PlanDefaultArgs<ExtArgs>
     usageRecords?: boolean | Subscription$usageRecordsArgs<ExtArgs>
-    billingEvents?: boolean | Subscription$billingEventsArgs<ExtArgs>
     _count?: boolean | SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SubscriptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6191,9 +6191,9 @@ export namespace Prisma {
   export type $SubscriptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Subscription"
     objects: {
+      billingEvents: Prisma.$BillingEventPayload<ExtArgs>[]
       plan: Prisma.$PlanPayload<ExtArgs>
       usageRecords: Prisma.$UsageRecordPayload<ExtArgs>[]
-      billingEvents: Prisma.$BillingEventPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6601,9 +6601,9 @@ export namespace Prisma {
    */
   export interface Prisma__SubscriptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    billingEvents<T extends Subscription$billingEventsArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$billingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BillingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     plan<T extends PlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PlanDefaultArgs<ExtArgs>>): Prisma__PlanClient<$Result.GetResult<Prisma.$PlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     usageRecords<T extends Subscription$usageRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$usageRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UsageRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    billingEvents<T extends Subscription$billingEventsArgs<ExtArgs> = {}>(args?: Subset<T, Subscription$billingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BillingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7040,30 +7040,6 @@ export namespace Prisma {
   }
 
   /**
-   * Subscription.usageRecords
-   */
-  export type Subscription$usageRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UsageRecord
-     */
-    select?: UsageRecordSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UsageRecord
-     */
-    omit?: UsageRecordOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UsageRecordInclude<ExtArgs> | null
-    where?: UsageRecordWhereInput
-    orderBy?: UsageRecordOrderByWithRelationInput | UsageRecordOrderByWithRelationInput[]
-    cursor?: UsageRecordWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: UsageRecordScalarFieldEnum | UsageRecordScalarFieldEnum[]
-  }
-
-  /**
    * Subscription.billingEvents
    */
   export type Subscription$billingEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7085,6 +7061,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BillingEventScalarFieldEnum | BillingEventScalarFieldEnum[]
+  }
+
+  /**
+   * Subscription.usageRecords
+   */
+  export type Subscription$usageRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UsageRecord
+     */
+    select?: UsageRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UsageRecord
+     */
+    omit?: UsageRecordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UsageRecordInclude<ExtArgs> | null
+    where?: UsageRecordWhereInput
+    orderBy?: UsageRecordOrderByWithRelationInput | UsageRecordOrderByWithRelationInput[]
+    cursor?: UsageRecordWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UsageRecordScalarFieldEnum | UsageRecordScalarFieldEnum[]
   }
 
   /**
@@ -10456,9 +10456,9 @@ export namespace Prisma {
   export const ProjectScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    userId: 'userId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    userId: 'userId'
   };
 
   export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
@@ -10737,18 +10737,18 @@ export namespace Prisma {
     NOT?: ProjectWhereInput | ProjectWhereInput[]
     id?: StringFilter<"Project"> | string
     name?: StringFilter<"Project"> | string
-    userId?: StringFilter<"Project"> | string
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
+    userId?: StringFilter<"Project"> | string
     messages?: MessageListRelationFilter
   }
 
   export type ProjectOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
-    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
     messages?: MessageOrderByRelationAggregateInput
   }
 
@@ -10758,18 +10758,18 @@ export namespace Prisma {
     OR?: ProjectWhereInput[]
     NOT?: ProjectWhereInput | ProjectWhereInput[]
     name?: StringFilter<"Project"> | string
-    userId?: StringFilter<"Project"> | string
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
+    userId?: StringFilter<"Project"> | string
     messages?: MessageListRelationFilter
   }, "id">
 
   export type ProjectOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
-    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
     _count?: ProjectCountOrderByAggregateInput
     _max?: ProjectMaxOrderByAggregateInput
     _min?: ProjectMinOrderByAggregateInput
@@ -10781,9 +10781,9 @@ export namespace Prisma {
     NOT?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Project"> | string
     name?: StringWithAggregatesFilter<"Project"> | string
-    userId?: StringWithAggregatesFilter<"Project"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
+    userId?: StringWithAggregatesFilter<"Project"> | string
   }
 
   export type MessageWhereInput = {
@@ -10978,9 +10978,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    billingEvents?: BillingEventListRelationFilter
     plan?: XOR<PlanScalarRelationFilter, PlanWhereInput>
     usageRecords?: UsageRecordListRelationFilter
-    billingEvents?: BillingEventListRelationFilter
   }
 
   export type SubscriptionOrderByWithRelationInput = {
@@ -10995,9 +10995,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    billingEvents?: BillingEventOrderByRelationAggregateInput
     plan?: PlanOrderByWithRelationInput
     usageRecords?: UsageRecordOrderByRelationAggregateInput
-    billingEvents?: BillingEventOrderByRelationAggregateInput
   }
 
   export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
@@ -11015,9 +11015,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    billingEvents?: BillingEventListRelationFilter
     plan?: XOR<PlanScalarRelationFilter, PlanWhereInput>
     usageRecords?: UsageRecordListRelationFilter
-    billingEvents?: BillingEventListRelationFilter
   }, "id" | "userId" | "stripeCustomerId" | "stripeSubscriptionId">
 
   export type SubscriptionOrderByWithAggregationInput = {
@@ -11261,61 +11261,61 @@ export namespace Prisma {
   export type ProjectCreateInput = {
     id?: string
     name: string
-    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
     messages?: MessageCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateInput = {
     id?: string
     name: string
-    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
     messages?: MessageUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
     messages?: MessageUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
     messages?: MessageUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectCreateManyInput = {
     id?: string
     name: string
-    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
   }
 
   export type ProjectUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MessageCreateInput = {
@@ -11513,9 +11513,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    billingEvents?: BillingEventCreateNestedManyWithoutSubscriptionInput
     plan: PlanCreateNestedOneWithoutSubscriptionsInput
     usageRecords?: UsageRecordCreateNestedManyWithoutSubscriptionInput
-    billingEvents?: BillingEventCreateNestedManyWithoutSubscriptionInput
   }
 
   export type SubscriptionUncheckedCreateInput = {
@@ -11530,8 +11530,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    usageRecords?: UsageRecordUncheckedCreateNestedManyWithoutSubscriptionInput
     billingEvents?: BillingEventUncheckedCreateNestedManyWithoutSubscriptionInput
+    usageRecords?: UsageRecordUncheckedCreateNestedManyWithoutSubscriptionInput
   }
 
   export type SubscriptionUpdateInput = {
@@ -11545,9 +11545,9 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    billingEvents?: BillingEventUpdateManyWithoutSubscriptionNestedInput
     plan?: PlanUpdateOneRequiredWithoutSubscriptionsNestedInput
     usageRecords?: UsageRecordUpdateManyWithoutSubscriptionNestedInput
-    billingEvents?: BillingEventUpdateManyWithoutSubscriptionNestedInput
   }
 
   export type SubscriptionUncheckedUpdateInput = {
@@ -11562,8 +11562,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    usageRecords?: UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput
     billingEvents?: BillingEventUncheckedUpdateManyWithoutSubscriptionNestedInput
+    usageRecords?: UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput
   }
 
   export type SubscriptionCreateManyInput = {
@@ -11865,25 +11865,25 @@ export namespace Prisma {
   export type ProjectCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type ProjectMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type ProjectMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
-    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -12184,6 +12184,12 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type BillingEventListRelationFilter = {
+    every?: BillingEventWhereInput
+    some?: BillingEventWhereInput
+    none?: BillingEventWhereInput
+  }
+
   export type PlanScalarRelationFilter = {
     is?: PlanWhereInput
     isNot?: PlanWhereInput
@@ -12195,17 +12201,11 @@ export namespace Prisma {
     none?: UsageRecordWhereInput
   }
 
-  export type BillingEventListRelationFilter = {
-    every?: BillingEventWhereInput
-    some?: BillingEventWhereInput
-    none?: BillingEventWhereInput
-  }
-
-  export type UsageRecordOrderByRelationAggregateInput = {
+  export type BillingEventOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type BillingEventOrderByRelationAggregateInput = {
+  export type UsageRecordOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -12584,6 +12584,13 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
+  export type BillingEventCreateNestedManyWithoutSubscriptionInput = {
+    create?: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput> | BillingEventCreateWithoutSubscriptionInput[] | BillingEventUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: BillingEventCreateOrConnectWithoutSubscriptionInput | BillingEventCreateOrConnectWithoutSubscriptionInput[]
+    createMany?: BillingEventCreateManySubscriptionInputEnvelope
+    connect?: BillingEventWhereUniqueInput | BillingEventWhereUniqueInput[]
+  }
+
   export type PlanCreateNestedOneWithoutSubscriptionsInput = {
     create?: XOR<PlanCreateWithoutSubscriptionsInput, PlanUncheckedCreateWithoutSubscriptionsInput>
     connectOrCreate?: PlanCreateOrConnectWithoutSubscriptionsInput
@@ -12597,7 +12604,7 @@ export namespace Prisma {
     connect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
   }
 
-  export type BillingEventCreateNestedManyWithoutSubscriptionInput = {
+  export type BillingEventUncheckedCreateNestedManyWithoutSubscriptionInput = {
     create?: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput> | BillingEventCreateWithoutSubscriptionInput[] | BillingEventUncheckedCreateWithoutSubscriptionInput[]
     connectOrCreate?: BillingEventCreateOrConnectWithoutSubscriptionInput | BillingEventCreateOrConnectWithoutSubscriptionInput[]
     createMany?: BillingEventCreateManySubscriptionInputEnvelope
@@ -12611,13 +12618,6 @@ export namespace Prisma {
     connect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
   }
 
-  export type BillingEventUncheckedCreateNestedManyWithoutSubscriptionInput = {
-    create?: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput> | BillingEventCreateWithoutSubscriptionInput[] | BillingEventUncheckedCreateWithoutSubscriptionInput[]
-    connectOrCreate?: BillingEventCreateOrConnectWithoutSubscriptionInput | BillingEventCreateOrConnectWithoutSubscriptionInput[]
-    createMany?: BillingEventCreateManySubscriptionInputEnvelope
-    connect?: BillingEventWhereUniqueInput | BillingEventWhereUniqueInput[]
-  }
-
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -12628,28 +12628,6 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
-  }
-
-  export type PlanUpdateOneRequiredWithoutSubscriptionsNestedInput = {
-    create?: XOR<PlanCreateWithoutSubscriptionsInput, PlanUncheckedCreateWithoutSubscriptionsInput>
-    connectOrCreate?: PlanCreateOrConnectWithoutSubscriptionsInput
-    upsert?: PlanUpsertWithoutSubscriptionsInput
-    connect?: PlanWhereUniqueInput
-    update?: XOR<XOR<PlanUpdateToOneWithWhereWithoutSubscriptionsInput, PlanUpdateWithoutSubscriptionsInput>, PlanUncheckedUpdateWithoutSubscriptionsInput>
-  }
-
-  export type UsageRecordUpdateManyWithoutSubscriptionNestedInput = {
-    create?: XOR<UsageRecordCreateWithoutSubscriptionInput, UsageRecordUncheckedCreateWithoutSubscriptionInput> | UsageRecordCreateWithoutSubscriptionInput[] | UsageRecordUncheckedCreateWithoutSubscriptionInput[]
-    connectOrCreate?: UsageRecordCreateOrConnectWithoutSubscriptionInput | UsageRecordCreateOrConnectWithoutSubscriptionInput[]
-    upsert?: UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput | UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput[]
-    createMany?: UsageRecordCreateManySubscriptionInputEnvelope
-    set?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
-    disconnect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
-    delete?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
-    connect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
-    update?: UsageRecordUpdateWithWhereUniqueWithoutSubscriptionInput | UsageRecordUpdateWithWhereUniqueWithoutSubscriptionInput[]
-    updateMany?: UsageRecordUpdateManyWithWhereWithoutSubscriptionInput | UsageRecordUpdateManyWithWhereWithoutSubscriptionInput[]
-    deleteMany?: UsageRecordScalarWhereInput | UsageRecordScalarWhereInput[]
   }
 
   export type BillingEventUpdateManyWithoutSubscriptionNestedInput = {
@@ -12666,7 +12644,15 @@ export namespace Prisma {
     deleteMany?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
   }
 
-  export type UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput = {
+  export type PlanUpdateOneRequiredWithoutSubscriptionsNestedInput = {
+    create?: XOR<PlanCreateWithoutSubscriptionsInput, PlanUncheckedCreateWithoutSubscriptionsInput>
+    connectOrCreate?: PlanCreateOrConnectWithoutSubscriptionsInput
+    upsert?: PlanUpsertWithoutSubscriptionsInput
+    connect?: PlanWhereUniqueInput
+    update?: XOR<XOR<PlanUpdateToOneWithWhereWithoutSubscriptionsInput, PlanUpdateWithoutSubscriptionsInput>, PlanUncheckedUpdateWithoutSubscriptionsInput>
+  }
+
+  export type UsageRecordUpdateManyWithoutSubscriptionNestedInput = {
     create?: XOR<UsageRecordCreateWithoutSubscriptionInput, UsageRecordUncheckedCreateWithoutSubscriptionInput> | UsageRecordCreateWithoutSubscriptionInput[] | UsageRecordUncheckedCreateWithoutSubscriptionInput[]
     connectOrCreate?: UsageRecordCreateOrConnectWithoutSubscriptionInput | UsageRecordCreateOrConnectWithoutSubscriptionInput[]
     upsert?: UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput | UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput[]
@@ -12692,6 +12678,20 @@ export namespace Prisma {
     update?: BillingEventUpdateWithWhereUniqueWithoutSubscriptionInput | BillingEventUpdateWithWhereUniqueWithoutSubscriptionInput[]
     updateMany?: BillingEventUpdateManyWithWhereWithoutSubscriptionInput | BillingEventUpdateManyWithWhereWithoutSubscriptionInput[]
     deleteMany?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
+  }
+
+  export type UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput = {
+    create?: XOR<UsageRecordCreateWithoutSubscriptionInput, UsageRecordUncheckedCreateWithoutSubscriptionInput> | UsageRecordCreateWithoutSubscriptionInput[] | UsageRecordUncheckedCreateWithoutSubscriptionInput[]
+    connectOrCreate?: UsageRecordCreateOrConnectWithoutSubscriptionInput | UsageRecordCreateOrConnectWithoutSubscriptionInput[]
+    upsert?: UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput | UsageRecordUpsertWithWhereUniqueWithoutSubscriptionInput[]
+    createMany?: UsageRecordCreateManySubscriptionInputEnvelope
+    set?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
+    disconnect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
+    delete?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
+    connect?: UsageRecordWhereUniqueInput | UsageRecordWhereUniqueInput[]
+    update?: UsageRecordUpdateWithWhereUniqueWithoutSubscriptionInput | UsageRecordUpdateWithWhereUniqueWithoutSubscriptionInput[]
+    updateMany?: UsageRecordUpdateManyWithWhereWithoutSubscriptionInput | UsageRecordUpdateManyWithWhereWithoutSubscriptionInput[]
+    deleteMany?: UsageRecordScalarWhereInput | UsageRecordScalarWhereInput[]
   }
 
   export type SubscriptionCreateNestedManyWithoutPlanInput = {
@@ -13120,17 +13120,17 @@ export namespace Prisma {
   export type ProjectCreateWithoutMessagesInput = {
     id?: string
     name: string
-    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
   }
 
   export type ProjectUncheckedCreateWithoutMessagesInput = {
     id?: string
     name: string
-    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
   }
 
   export type ProjectCreateOrConnectWithoutMessagesInput = {
@@ -13181,17 +13181,17 @@ export namespace Prisma {
   export type ProjectUpdateWithoutMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectUncheckedUpdateWithoutMessagesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MessageCreateWithoutFragmentInput = {
@@ -13248,6 +13248,32 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projectId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BillingEventCreateWithoutSubscriptionInput = {
+    id?: string
+    eventType: string
+    stripeEventId: string
+    data: JsonNullValueInput | InputJsonValue
+    processedAt?: Date | string
+  }
+
+  export type BillingEventUncheckedCreateWithoutSubscriptionInput = {
+    id?: string
+    eventType: string
+    stripeEventId: string
+    data: JsonNullValueInput | InputJsonValue
+    processedAt?: Date | string
+  }
+
+  export type BillingEventCreateOrConnectWithoutSubscriptionInput = {
+    where: BillingEventWhereUniqueInput
+    create: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput>
+  }
+
+  export type BillingEventCreateManySubscriptionInputEnvelope = {
+    data: BillingEventCreateManySubscriptionInput | BillingEventCreateManySubscriptionInput[]
+    skipDuplicates?: boolean
   }
 
   export type PlanCreateWithoutSubscriptionsInput = {
@@ -13307,30 +13333,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type BillingEventCreateWithoutSubscriptionInput = {
-    id?: string
-    eventType: string
-    stripeEventId: string
-    data: JsonNullValueInput | InputJsonValue
-    processedAt?: Date | string
-  }
-
-  export type BillingEventUncheckedCreateWithoutSubscriptionInput = {
-    id?: string
-    eventType: string
-    stripeEventId: string
-    data: JsonNullValueInput | InputJsonValue
-    processedAt?: Date | string
-  }
-
-  export type BillingEventCreateOrConnectWithoutSubscriptionInput = {
+  export type BillingEventUpsertWithWhereUniqueWithoutSubscriptionInput = {
     where: BillingEventWhereUniqueInput
+    update: XOR<BillingEventUpdateWithoutSubscriptionInput, BillingEventUncheckedUpdateWithoutSubscriptionInput>
     create: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput>
   }
 
-  export type BillingEventCreateManySubscriptionInputEnvelope = {
-    data: BillingEventCreateManySubscriptionInput | BillingEventCreateManySubscriptionInput[]
-    skipDuplicates?: boolean
+  export type BillingEventUpdateWithWhereUniqueWithoutSubscriptionInput = {
+    where: BillingEventWhereUniqueInput
+    data: XOR<BillingEventUpdateWithoutSubscriptionInput, BillingEventUncheckedUpdateWithoutSubscriptionInput>
+  }
+
+  export type BillingEventUpdateManyWithWhereWithoutSubscriptionInput = {
+    where: BillingEventScalarWhereInput
+    data: XOR<BillingEventUpdateManyMutationInput, BillingEventUncheckedUpdateManyWithoutSubscriptionInput>
+  }
+
+  export type BillingEventScalarWhereInput = {
+    AND?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
+    OR?: BillingEventScalarWhereInput[]
+    NOT?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
+    id?: StringFilter<"BillingEvent"> | string
+    subscriptionId?: StringFilter<"BillingEvent"> | string
+    eventType?: StringFilter<"BillingEvent"> | string
+    stripeEventId?: StringFilter<"BillingEvent"> | string
+    data?: JsonFilter<"BillingEvent">
+    processedAt?: DateTimeFilter<"BillingEvent"> | Date | string
   }
 
   export type PlanUpsertWithoutSubscriptionsInput = {
@@ -13398,34 +13426,6 @@ export namespace Prisma {
     metadata?: JsonNullableFilter<"UsageRecord">
   }
 
-  export type BillingEventUpsertWithWhereUniqueWithoutSubscriptionInput = {
-    where: BillingEventWhereUniqueInput
-    update: XOR<BillingEventUpdateWithoutSubscriptionInput, BillingEventUncheckedUpdateWithoutSubscriptionInput>
-    create: XOR<BillingEventCreateWithoutSubscriptionInput, BillingEventUncheckedCreateWithoutSubscriptionInput>
-  }
-
-  export type BillingEventUpdateWithWhereUniqueWithoutSubscriptionInput = {
-    where: BillingEventWhereUniqueInput
-    data: XOR<BillingEventUpdateWithoutSubscriptionInput, BillingEventUncheckedUpdateWithoutSubscriptionInput>
-  }
-
-  export type BillingEventUpdateManyWithWhereWithoutSubscriptionInput = {
-    where: BillingEventScalarWhereInput
-    data: XOR<BillingEventUpdateManyMutationInput, BillingEventUncheckedUpdateManyWithoutSubscriptionInput>
-  }
-
-  export type BillingEventScalarWhereInput = {
-    AND?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
-    OR?: BillingEventScalarWhereInput[]
-    NOT?: BillingEventScalarWhereInput | BillingEventScalarWhereInput[]
-    id?: StringFilter<"BillingEvent"> | string
-    subscriptionId?: StringFilter<"BillingEvent"> | string
-    eventType?: StringFilter<"BillingEvent"> | string
-    stripeEventId?: StringFilter<"BillingEvent"> | string
-    data?: JsonFilter<"BillingEvent">
-    processedAt?: DateTimeFilter<"BillingEvent"> | Date | string
-  }
-
   export type SubscriptionCreateWithoutPlanInput = {
     id?: string
     userId: string
@@ -13437,8 +13437,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    usageRecords?: UsageRecordCreateNestedManyWithoutSubscriptionInput
     billingEvents?: BillingEventCreateNestedManyWithoutSubscriptionInput
+    usageRecords?: UsageRecordCreateNestedManyWithoutSubscriptionInput
   }
 
   export type SubscriptionUncheckedCreateWithoutPlanInput = {
@@ -13452,8 +13452,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    usageRecords?: UsageRecordUncheckedCreateNestedManyWithoutSubscriptionInput
     billingEvents?: BillingEventUncheckedCreateNestedManyWithoutSubscriptionInput
+    usageRecords?: UsageRecordUncheckedCreateNestedManyWithoutSubscriptionInput
   }
 
   export type SubscriptionCreateOrConnectWithoutPlanInput = {
@@ -13510,8 +13510,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    plan: PlanCreateNestedOneWithoutSubscriptionsInput
     billingEvents?: BillingEventCreateNestedManyWithoutSubscriptionInput
+    plan: PlanCreateNestedOneWithoutSubscriptionsInput
   }
 
   export type SubscriptionUncheckedCreateWithoutUsageRecordsInput = {
@@ -13556,8 +13556,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    plan?: PlanUpdateOneRequiredWithoutSubscriptionsNestedInput
     billingEvents?: BillingEventUpdateManyWithoutSubscriptionNestedInput
+    plan?: PlanUpdateOneRequiredWithoutSubscriptionsNestedInput
   }
 
   export type SubscriptionUncheckedUpdateWithoutUsageRecordsInput = {
@@ -13689,14 +13689,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type UsageRecordCreateManySubscriptionInput = {
-    id?: string
-    resourceType: string
-    amount: number
-    timestamp?: Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-  }
-
   export type BillingEventCreateManySubscriptionInput = {
     id?: string
     eventType: string
@@ -13705,27 +13697,11 @@ export namespace Prisma {
     processedAt?: Date | string
   }
 
-  export type UsageRecordUpdateWithoutSubscriptionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    resourceType?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-  }
-
-  export type UsageRecordUncheckedUpdateWithoutSubscriptionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    resourceType?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-  }
-
-  export type UsageRecordUncheckedUpdateManyWithoutSubscriptionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    resourceType?: StringFieldUpdateOperationsInput | string
-    amount?: IntFieldUpdateOperationsInput | number
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type UsageRecordCreateManySubscriptionInput = {
+    id?: string
+    resourceType: string
+    amount: number
+    timestamp?: Date | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
@@ -13753,6 +13729,30 @@ export namespace Prisma {
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UsageRecordUpdateWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    resourceType?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type UsageRecordUncheckedUpdateWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    resourceType?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type UsageRecordUncheckedUpdateManyWithoutSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    resourceType?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
   export type SubscriptionCreateManyPlanInput = {
     id?: string
     userId: string
@@ -13777,8 +13777,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    usageRecords?: UsageRecordUpdateManyWithoutSubscriptionNestedInput
     billingEvents?: BillingEventUpdateManyWithoutSubscriptionNestedInput
+    usageRecords?: UsageRecordUpdateManyWithoutSubscriptionNestedInput
   }
 
   export type SubscriptionUncheckedUpdateWithoutPlanInput = {
@@ -13792,8 +13792,8 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    usageRecords?: UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput
     billingEvents?: BillingEventUncheckedUpdateManyWithoutSubscriptionNestedInput
+    usageRecords?: UsageRecordUncheckedUpdateManyWithoutSubscriptionNestedInput
   }
 
   export type SubscriptionUncheckedUpdateManyWithoutPlanInput = {
