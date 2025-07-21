@@ -1,0 +1,132 @@
+# Implementation Plan - Migração Stripe Billing
+
+- [ ] 1. Setup inicial da infraestrutura Stripe
+  - Instalar dependências do Stripe SDK
+  - Configurar variáveis de ambiente para chaves da API
+  - Criar configuração base do cliente Stripe
+  - _Requirements: 5.1, 5.2_
+
+- [ ] 2. Extensão do schema do banco de dados
+  - [ ] 2.1 Criar modelos de Subscription, Plan, UsageRecord e BillingEvent
+    - Adicionar novos modelos ao schema.prisma
+    - Definir relacionamentos entre modelos
+    - Criar enums para SubscriptionStatus
+    - _Requirements: 4.1, 4.3_
+  - [ ] 2.2 Gerar e executar migração do banco
+    - Executar prisma migrate para criar tabelas
+    - Verificar integridade dos relacionamentos
+    - Criar índices para otimização de queries
+    - _Requirements: 4.1_
+
+- [ ] 3. Implementar Stripe Service Layer
+  - [ ] 3.1 Criar serviço base de integração com Stripe
+    - Implementar StripeService com métodos de customer management
+    - Adicionar métodos para criação de checkout sessions
+    - Implementar tratamento de erros da API Stripe
+    - _Requirements: 1.2, 2.2_
+  - [ ] 3.2 Implementar métodos de gerenciamento de assinaturas
+    - Adicionar métodos para criar, atualizar e cancelar assinaturas
+    - Implementar criação de portal sessions
+    - Adicionar validação de webhooks da Stripe
+    - _Requirements: 2.1, 2.3, 3.1_
+
+- [ ] 4. Criar sistema de controle de uso e limites
+  - [ ] 4.1 Implementar SubscriptionService
+    - Criar serviço para gerenciar assinaturas de usuários
+    - Implementar métodos de tracking de uso
+    - Adicionar validação de limites por plano
+    - _Requirements: 4.1, 4.2_
+  - [ ] 4.2 Criar middleware de verificação de limites
+    - Implementar middleware para verificar limites antes de ações
+    - Adicionar lógica de bloqueio quando limites são excedidos
+    - Criar sistema de reset de contadores
+    - _Requirements: 4.1, 4.2, 4.3_
+
+- [ ] 5. Implementar handlers de webhooks
+  - [ ] 5.1 Criar endpoint de webhook e validação
+    - Implementar rota API para receber webhooks da Stripe
+    - Adicionar verificação de assinatura dos webhooks
+    - Implementar rate limiting para segurança
+    - _Requirements: 3.1, 3.2, 5.2, 5.3_
+  - [ ] 5.2 Implementar processamento de eventos críticos
+    - Criar handlers para subscription.created, updated, deleted
+    - Implementar handler para invoice.payment_succeeded/failed
+    - Adicionar logging de eventos para auditoria
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+
+- [ ] 6. Criar APIs tRPC para frontend
+  - [ ] 6.1 Implementar procedures de billing
+    - Criar procedures para listar planos disponíveis
+    - Implementar procedure para criar checkout session
+    - Adicionar procedure para obter status da assinatura
+    - _Requirements: 1.1, 1.2, 2.1_
+  - [ ] 6.2 Implementar procedures de gerenciamento
+    - Criar procedure para acessar portal do cliente
+    - Implementar procedure para cancelar assinatura
+    - Adicionar procedure para obter histórico de uso
+    - _Requirements: 2.2, 2.3, 4.1_
+
+- [ ] 7. Desenvolver componentes de frontend
+  - [ ] 7.1 Criar nova página de pricing
+    - Substituir PricingTable do Clerk por componente customizado
+    - Implementar seleção de planos e redirecionamento para checkout
+    - Adicionar indicadores de plano atual para usuários logados
+    - _Requirements: 1.1, 1.3_
+  - [ ] 7.2 Implementar dashboard de assinatura
+    - Criar página para gerenciar assinatura atual
+    - Implementar botões para upgrade/downgrade de planos
+    - Adicionar visualização de uso atual e limites
+    - _Requirements: 2.1, 4.1_
+  - [ ] 7.3 Criar componente de portal do cliente
+    - Implementar redirecionamento para portal da Stripe
+    - Adicionar handling de retorno do portal
+    - Criar feedback visual para ações de billing
+    - _Requirements: 2.2, 2.4_
+
+- [ ] 8. Implementar sistema de migração
+  - [ ] 8.1 Criar script de migração de dados
+    - Implementar mapeamento de usuários Clerk para Stripe customers
+    - _Requirements: 6.1_
+
+- [ ] 9. Adicionar testes automatizados
+  - [ ] 9.1 Criar testes unitários para services
+    - Implementar testes para StripeService com mocks
+    - Criar testes para SubscriptionService
+    - Adicionar testes para handlers de webhook
+    - _Requirements: 5.1, 5.2_
+  - [ ] 9.2 Implementar testes de integração
+    - Criar testes para fluxo completo de checkout
+    - Implementar testes de webhook handling
+    - Adicionar testes de sincronização de dados
+    - _Requirements: 3.1, 3.2, 3.3_
+
+- [ ] 10. Configurar monitoramento e logging
+  - [ ] 10.1 Implementar logging de eventos de billing
+    - Adicionar logs estruturados para todas as operações
+    - Implementar alertas para falhas de pagamento
+    - Criar dashboard de métricas de assinaturas
+    - _Requirements: 3.1, 3.2, 5.3_
+  - [ ] 10.2 Configurar monitoramento de webhooks
+    - Implementar alertas para webhooks falhando
+    - Adicionar métricas de performance de processamento
+    - Criar sistema de retry para eventos críticos
+    - _Requirements: 3.1, 5.3_
+
+- [ ] 11. Implementar segurança e validações
+  - [ ] 11.1 Adicionar middleware de autenticação
+    - Implementar verificação de usuário logado para APIs de billing
+    - Adicionar validação de ownership de assinaturas
+    - Criar rate limiting específico para operações de billing
+    - _Requirements: 5.1, 5.3_
+  - [ ] 11.2 Implementar validações de dados
+    - Adicionar validação de entrada para todas as APIs
+    - Implementar sanitização de dados de webhook
+    - Criar validação de integridade de dados críticos
+    - _Requirements: 5.1, 5.2_
+
+- [ ] 12. Deploy e configuração de produção
+  - [ ] 12.1 Configurar webhooks em produção
+    - Registrar endpoints de webhook na Stripe
+    - Configurar URLs de retorno para checkout e portal
+    - Testar conectividade e autenticação
+    - _Requirements: 3.1, 5.2_
