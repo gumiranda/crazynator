@@ -50,7 +50,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
           >
             <Image
               src="/logo.svg"
-              alt="Dev Crazy"
+              alt="CrazyNator"
               width={16}
               height={16}
               className="shrink-0 sm:w-[18px] sm:h-[18px]"
