@@ -1,0 +1,144 @@
+# Implementation Plan - Completar Integração de Pagamento
+
+- [ ] 1. Configurar ambiente Stripe
+  - Atualizar arquivo .env com chaves reais da Stripe
+  - Criar validador de configuração de ambiente
+  - Implementar verificação de conectividade com Stripe API
+  - _Requirements: 1.1, 1.2, 1.3_
+
+- [ ] 2. Criar sistema de seeding de planos
+  - [ ] 2.1 Implementar script de criação de planos iniciais
+    - Criar PlanSeeder class com planos padrão (Free, Pro)
+    - Implementar método para criar/atualizar planos no banco
+    - Adicionar validação de dados de planos
+    - _Requirements: 2.1, 2.2_
+  - [ ] 2.2 Implementar sincronização com Stripe
+    - Melhorar método syncProducts() no StripeService
+    - Adicionar comando CLI para sincronizar planos
+    - Implementar verificação de consistência entre Stripe e banco local
+    - _Requirements: 2.3_
+
+- [ ] 3. Integrar controle de uso nas funcionalidades principais
+  - [ ] 3.1 Integrar middleware de uso na criação de projetos
+    - Modificar procedures de criação de projeto para verificar limites
+    - Adicionar registro de uso após criação bem-sucedida
+    - Implementar mensagens de erro quando limite é excedido
+    - _Requirements: 3.1, 3.3_
+  - [ ] 3.2 Integrar controle de uso em chamadas de API
+    - Adicionar middleware de uso em procedures críticas (messages, code generation)
+    - Implementar tracking de uso de apiCalls
+    - Criar sistema de bloqueio quando limites são excedidos
+    - _Requirements: 3.2, 3.3_
+  - [ ] 3.3 Implementar controle de storage
+    - Adicionar tracking de uso de storage em uploads de arquivos
+    - Implementar verificação de limites antes de operações de arquivo
+    - Criar limpeza automática quando limites são excedidos
+    - _Requirements: 3.1, 3.4_
+
+- [ ] 4. Melhorar tratamento de erros
+  - [ ] 4.1 Implementar error handling robusto para Stripe API
+    - Criar BillingErrorHandler class
+    - Implementar retry logic com exponential backoff
+    - Adicionar logging estruturado para erros de billing
+    - _Requirements: 7.1, 7.4_
+  - [ ] 4.2 Melhorar tratamento de erros de webhook
+    - Implementar retry automático para webhooks falhados
+    - Adicionar dead letter queue para eventos críticos
+    - Criar alertas para falhas repetidas de webhook
+    - _Requirements: 7.2, 7.3_
+
+- [ ] 5. Implementar funcionalidade para usuários sem assinatura
+  - [ ] 5.1 Criar plano gratuito padrão
+    - Implementar lógica para usuários sem assinatura ativa
+    - Definir limites gratuitos para recursos básicos
+    - Criar sistema de upgrade suggestions
+    - _Requirements: 8.1, 8.2_
+  - [ ] 5.2 Implementar graceful degradation
+    - Permitir acesso limitado quando assinatura expira
+    - Manter dados do usuário durante período de graça
+    - Implementar reativação automática quando pagamento é restaurado
+    - _Requirements: 8.3, 8.4_
+
+- [ ] 6. Criar scripts de setup e validação
+  - [ ] 6.1 Implementar SetupManager class
+    - Criar script de setup inicial completo
+    - Implementar validação de configuração de ambiente
+    - Adicionar verificação de conectividade com serviços externos
+    - _Requirements: 10.1, 10.4_
+  - [ ] 6.2 Criar comandos CLI para manutenção
+    - Implementar comando para sincronizar planos
+    - Criar script de migração de dados de billing
+    - Adicionar comando de validação de integridade do sistema
+    - _Requirements: 10.2, 10.3_
+
+- [ ] 7. Implementar integração completa de checkout
+  - [ ] 7.1 Melhorar fluxo de checkout
+    - Adicionar validação de usuário antes de criar checkout session
+    - Implementar handling de customer creation/retrieval
+    - Melhorar tratamento de erros durante checkout
+    - _Requirements: 4.1, 4.4_
+  - [ ] 7.2 Implementar confirmação pós-checkout
+    - Melhorar webhook handler para checkout.session.completed
+    - Adicionar confirmação de assinatura criada
+    - Implementar redirecionamento pós-checkout com status
+    - _Requirements: 4.2, 4.3_
+
+- [ ] 8. Melhorar sincronização de assinaturas
+  - [ ] 8.1 Implementar processamento robusto de webhooks
+    - Melhorar handlers para todos os eventos críticos de assinatura
+    - Adicionar idempotency para evitar processamento duplicado
+    - Implementar logging detalhado de eventos processados
+    - _Requirements: 5.1, 5.4_
+  - [ ] 8.2 Implementar sincronização de status
+    - Melhorar mapeamento de status Stripe para status local
+    - Adicionar verificação periódica de consistência
+    - Implementar correção automática de inconsistências
+    - _Requirements: 5.2, 5.3_
+
+- [ ] 9. Implementar portal de gerenciamento
+  - [ ] 9.1 Melhorar integração com Stripe Customer Portal
+    - Adicionar validação antes de criar portal session
+    - Implementar handling de retorno do portal
+    - Melhorar sincronização após mudanças no portal
+    - _Requirements: 6.1, 6.2_
+  - [ ] 9.2 Implementar sincronização pós-portal
+    - Adicionar webhook handling para mudanças feitas no portal
+    - Implementar atualização automática de dados locais
+    - Criar notificações para usuário sobre mudanças processadas
+    - _Requirements: 6.3, 6.4_
+
+- [ ] 10. Adicionar monitoramento e logging
+  - [ ] 10.1 Implementar logging estruturado
+    - Adicionar logs detalhados para todas as operações de billing
+    - Implementar métricas de performance para APIs Stripe
+    - Criar dashboard de monitoramento de webhooks
+    - _Requirements: 7.1, 7.2_
+  - [ ] 10.2 Implementar alertas e monitoramento
+    - Criar alertas para falhas críticas de pagamento
+    - Implementar monitoramento de rate limits da Stripe
+    - Adicionar métricas de uso e padrões de assinatura
+    - _Requirements: 7.3, 7.4_
+
+- [ ] 11. Implementar testes de integração
+  - [ ] 11.1 Criar testes para fluxo completo de checkout
+    - Implementar testes end-to-end para processo de assinatura
+    - Criar mocks para APIs da Stripe em ambiente de teste
+    - Adicionar testes para cenários de erro e recuperação
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [ ] 11.2 Criar testes para processamento de webhooks
+    - Implementar testes para todos os tipos de webhook críticos
+    - Criar cenários de teste para falhas e retries
+    - Adicionar validação de integridade de dados após processamento
+    - _Requirements: 5.1, 5.2, 5.3, 5.4_
+
+- [ ] 12. Implementar validação e configuração de produção
+  - [ ] 12.1 Configurar webhooks em produção
+    - Registrar endpoints de webhook na conta Stripe de produção
+    - Configurar URLs corretas para checkout e portal
+    - Testar conectividade e autenticação em ambiente de produção
+    - _Requirements: 1.1, 1.2_
+  - [ ] 12.2 Implementar validação de deploy
+    - Criar checklist de validação pré-deploy
+    - Implementar testes de smoke para funcionalidades críticas
+    - Adicionar rollback automático em caso de falhas críticas
+    - _Requirements: 10.4_
