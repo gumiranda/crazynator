@@ -57,12 +57,12 @@ export const projectsRouter = createTRPCRouter({
         if (fragment.sandboxUrl) {
           try {
             // Extrair sandboxId da URL do E2B
-            // Formato esperado: https://sandboxId.e2b.dev ou https://sandboxId-port.e2b.dev
+            // Formato real: https://3000-sandboxId.e2b.app
             const url = new URL(fragment.sandboxUrl);
             const hostname = url.hostname;
             
-            // Extrair sandboxId do hostname (parte antes do primeiro ponto ou hífen)
-            const sandboxId = hostname.split('.')[0].split('-')[0];
+            // Extrair sandboxId do hostname (parte após o primeiro hífen)
+            const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
             
             if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
               const sandbox = await getSandbox(sandboxId);
