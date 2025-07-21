@@ -10,7 +10,7 @@ npm run dev
 yarn dev
 # orf
 pnpm devF
-# ordd
+# orddvv
 bun devdd
 ```
 
