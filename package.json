@@ -14,7 +14,12 @@
     "test:watch": "jest --watch",
     "plans:setup": "bunx tsx scripts/setup-plans.ts",
     "plans:check": "bunx tsx scripts/check-plans.ts",
-    "plans:reset": "bunx tsx scripts/reset-plans.ts"
+    "plans:reset": "bunx tsx scripts/reset-plans.ts",
+    "plans:test": "bunx tsx scripts/test-usage-limits.ts",
+    "plans:debug-users": "bunx tsx scripts/debug-user-subscription.ts",
+    "plans:update-subs": "bunx tsx scripts/update-existing-subscriptions.ts",
+    "plans:test-blocking": "bunx tsx scripts/test-usage-blocking.ts",
+    "plans:reset-usage": "bunx tsx scripts/reset-user-usage.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.25.4",

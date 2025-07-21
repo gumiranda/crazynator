@@ -21,18 +21,18 @@ export const DEFAULT_PLANS: PlanConfig[] = [
     interval: 'month',
     features: {
       projects: 3,
-      apiCalls: 50,
+      apiCalls: 5, // Limite correto: 5 chamadas
       storage: 100,
     },
   },
   {
     name: 'Pro',
     description: 'Perfect for professionals and small teams',
-    price: 3900, // $19.00
+    price: 3900, // $39.00
     interval: 'month',
     features: {
       projects: 25,
-      apiCalls: 1000,
+      apiCalls: 100, // Limite correto: 100 chamadas
       storage: 1000,
     },
   },
