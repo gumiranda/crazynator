@@ -81,7 +81,9 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
             <TextareaAutosize
               {...field}
               disabled={isPending}
-              className={cn('pt-3 sm:pt-4 resize-none border-none w-full outline-none bg-transparent text-sm sm:text-base')}
+              className={cn(
+                'pt-3 sm:pt-4 resize-none border-none w-full outline-none bg-transparent text-sm sm:text-base',
+              )}
               minRows={2}
               maxRows={6}
               onFocus={() => setIsFocused(true)}

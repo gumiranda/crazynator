@@ -82,7 +82,7 @@ export default function FragmentPreview({ fragment, onRefresh }: FragmentPreview
             <ExternalLinkIcon className="size-4" />
           </Button>
         </Hint>
-        
+
         <div className="text-xs text-muted-foreground hidden sm:block">
           Updated: {lastUpdated.toLocaleTimeString()}
         </div>

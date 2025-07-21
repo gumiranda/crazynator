@@ -5,7 +5,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { Fragment } from '@/generated/prisma';
 import { ProjectHeader } from '../components/project-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CrownIcon, EyeIcon, XIcon, CodeIcon } from 'lucide-react';
+import { CrownIcon, EyeIcon, CodeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import FragmentPreview from '../components/fragment-preview';
@@ -37,7 +37,7 @@ export const ProjectView = ({ projectId }: Props) => {
 
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
-    
+
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
@@ -46,14 +46,6 @@ export const ProjectView = ({ projectId }: Props) => {
     setActiveFragment(fragment);
     if (fragment && isMobile) {
       setIsMobileSheetOpen(true);
-    }
-  };
-
-  // Close sheet and optionally clear fragment
-  const handleMobileSheetClose = (clearFragment = false) => {
-    setIsMobileSheetOpen(false);
-    if (clearFragment) {
-      setActiveFragment(null);
     }
   };
 
@@ -67,7 +59,7 @@ export const ProjectView = ({ projectId }: Props) => {
               <ProjectHeader projectId={projectId} />
             </ErrorBoundary>
           </Suspense>
-          
+
           {/* Full-screen chat on mobile */}
           <div className="flex-1 min-h-0">
             <Suspense fallback={<div>Loading messages...</div>}>
@@ -96,21 +88,13 @@ export const ProjectView = ({ projectId }: Props) => {
 
           {/* Mobile Sheet for Preview/Code */}
           <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
-            <SheetContent side="bottom" className="h-[85vh] p-0">
+            <SheetContent side="top" className="h-[85vh] p-0">
               <div className="flex flex-col h-full">
                 <SheetHeader className="px-4 py-3 border-b">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-base font-medium">
                       {activeFragment?.title || 'Fragment Preview'}
                     </SheetTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleMobileSheetClose(false)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <XIcon className="h-4 w-4" />
-                    </Button>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <Tabs
@@ -144,7 +128,7 @@ export const ProjectView = ({ projectId }: Props) => {
                     </Tabs>
                   </div>
                 </SheetHeader>
-                
+
                 <div className="flex-1 overflow-hidden">
                   {activeFragment && (
                     <Tabs value={activeTab} className="h-full">
@@ -152,8 +136,8 @@ export const ProjectView = ({ projectId }: Props) => {
                         <FragmentPreview fragment={activeFragment} />
                       </TabsContent>
                       <TabsContent value="code" className="h-full m-0">
-                        <FileExplore 
-                          files={activeFragment.files as FileCollection} 
+                        <FileExplore
+                          files={activeFragment.files as FileCollection}
                           fragmentId={activeFragment.id}
                           readOnly={false}
                         />
@@ -223,11 +207,13 @@ export const ProjectView = ({ projectId }: Props) => {
                 {!!activeFragment && <FragmentPreview fragment={activeFragment} />}
               </TabsContent>
               <TabsContent value="code" className="min-h-0">
-                {!!activeFragment && <FileExplore 
-                  files={activeFragment.files as FileCollection} 
-                  fragmentId={activeFragment.id}
-                  readOnly={false}
-                />}
+                {!!activeFragment && (
+                  <FileExplore
+                    files={activeFragment.files as FileCollection}
+                    fragmentId={activeFragment.id}
+                    readOnly={false}
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </ResizablePanel>

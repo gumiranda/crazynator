@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Start development server with Turbopack
 npm run dev
 
-# Build for production  
+# Build for production
 npm run build
 
 # Start production server
@@ -38,9 +38,11 @@ bunx prisma migrate reset
 This is a Next.js 15 application with App Router that provides a code generation and sandbox environment. Key architectural components:
 
 ### Core Technologies
+
 - **Next.js 15** with App Router and React 19
 - **TypeScript** with strict configuration
 - **Tailwind CSS 4** for styling with Radix UI components
+- **CodeMirror 6** for code editing with Dracula theme support
 - **Prisma** with PostgreSQL for data persistence
 - **tRPC** for type-safe API layer
 - **Clerk** for authentication with plan-based access control
@@ -48,8 +50,9 @@ This is a Next.js 15 application with App Router that provides a code generation
 - **E2B** for sandboxed code execution
 
 ### Database Schema
+
 - `Project`: User projects with generated names
-- `Message`: Chat messages with USER/ASSISTANT roles and RESULT/ERROR types  
+- `Message`: Chat messages with USER/ASSISTANT roles and RESULT/ERROR types
 - `Fragment`: Code fragments with sandbox URLs and file collections
 - `Usage`: Credit/points tracking with expiration
 
@@ -71,22 +74,26 @@ This is a Next.js 15 application with App Router that provides a code generation
 4. **File Editing**: Users can edit Fragment files with automatic sandbox sync
 
 ### Prisma Configuration
-- Client generated to `src/generated/prisma/` 
+
+- Client generated to `src/generated/prisma/`
 - Migrations in `prisma/migrations/`
 - Custom output path configured in schema
 
 ### Authentication & Authorization
+
 - Clerk handles authentication with plan-based access (`pro` plan)
 - User ownership enforced in tRPC procedures
 - Usage/credit system with rate limiting
 
 ### Code Execution
+
 - E2B sandboxes for isolated code execution
 - Sandbox URLs format: `https://3000-{sandboxId}.e2b.app`
 - Automatic file synchronization between database and sandbox
 - 15-minute sandbox timeout configured
 
 ### Responsive Design
+
 - Mobile-first approach with responsive layouts
 - Desktop: Split panels with resizable sections
 - Mobile: Full-screen chat with slide-up sheets for previews

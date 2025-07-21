@@ -48,8 +48,16 @@ export const ProjectHeader = ({ projectId }: Props) => {
             size="sm"
             className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-1 sm:pl-2!"
           >
-            <Image src="/logo.svg" alt="Crazy Code" width={16} height={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
-            <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-none truncate">{project.name}</span>
+            <Image
+              src="/logo.svg"
+              alt="Crazy Code"
+              width={16}
+              height={16}
+              className="shrink-0 sm:w-[18px] sm:h-[18px]"
+            />
+            <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-none truncate">
+              {project.name}
+            </span>
             <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
           </Button>
         </DropdownMenuTrigger>

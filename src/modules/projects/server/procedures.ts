@@ -60,13 +60,13 @@ export const projectsRouter = createTRPCRouter({
             // Formato real: https://3000-sandboxId.e2b.app
             const url = new URL(fragment.sandboxUrl);
             const hostname = url.hostname;
-            
+
             // Extrair sandboxId do hostname (parte após o primeiro hífen)
             const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
-            
+
             if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
               const sandbox = await getSandbox(sandboxId);
-              
+
               // Atualizar cada arquivo no sandbox
               for (const [filePath, content] of Object.entries(input.files)) {
                 await sandbox.files.write(filePath, content);
@@ -87,7 +87,7 @@ export const projectsRouter = createTRPCRouter({
         });
       }
     }),
-  
+
   generateSubscriptionToken: protectedProcedure
     .input(
       z.object({

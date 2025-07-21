@@ -12,12 +12,14 @@ await sandbox.filesystem.write(filePath, content);
 ## ✅ **Solução Implementada**
 
 ### **1. API Correta do E2B**
+
 ```typescript
 // ✅ CORRETO - usar files.write()
 await sandbox.files.write(filePath, content);
 ```
 
 ### **2. Extração Robusta do SandboxId**
+
 ```typescript
 // Melhorada para funcionar com diferentes formatos de URL
 const url = new URL(fragment.sandboxUrl);
@@ -26,6 +28,7 @@ const sandboxId = hostname.split('.')[0].split('-')[0];
 ```
 
 ### **3. Tratamento de Erros Melhorado**
+
 ```typescript
 try {
   // Tentativa de sincronização
@@ -42,7 +45,7 @@ try {
 ## 🎯 **Fluxo de Sincronização**
 
 1. **Usuário edita** código no Monaco Editor
-2. **Debounce** de 500ms otimiza performance  
+2. **Debounce** de 500ms otimiza performance
 3. **Salvar** → Updates local state + Toast "Syncing..."
 4. **Database** → Persiste arquivos no PostgreSQL
 5. **E2B Sync** → Atualiza arquivos no sandbox ativo
@@ -51,12 +54,14 @@ try {
 ## 🔧 **APIs E2B Utilizadas**
 
 ### **Métodos Corretos:**
+
 - `sandbox.files.write(path, content)` - Escrever arquivos
-- `sandbox.files.read(path)` - Ler arquivos  
+- `sandbox.files.read(path)` - Ler arquivos
 - `Sandbox.connect(sandboxId)` - Conectar a sandbox existente
 - `sandbox.getHost(port)` - Obter URL do host
 
 ### **Formatos de URL Suportados:**
+
 - `https://sandboxId.e2b.dev`
 - `https://sandboxId-3000.e2b.dev`
 - Extração automática do sandboxId
@@ -65,13 +70,14 @@ try {
 
 - ✅ **Build funciona** - Sem erros de compilação
 - ✅ **Sync em tempo real** - Arquivos atualizados no sandbox
-- ✅ **Feedback claro** - "Syncing..." → "Files saved and synced"  
+- ✅ **Feedback claro** - "Syncing..." → "Files saved and synced"
 - ✅ **Fallback graceful** - Continua funcionando se sandbox expirar
 - ✅ **Performance otimizada** - Debounce + async operations
 
 ## 🎉 **Resultado**
 
 Agora você pode:
+
 1. **Editar código** no Monaco Editor
 2. **Ver mudanças** sendo sincronizadas automaticamente
 3. **Testar imediatamente** no preview iframe

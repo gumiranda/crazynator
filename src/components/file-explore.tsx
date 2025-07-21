@@ -84,7 +84,11 @@ const FileBreadcrumb = ({ filePath }: FileBreadcrumbProps) => {
   );
 };
 
-export default function FileExplore({ files = {}, fragmentId, readOnly = false }: FileExploreProps) {
+export default function FileExplore({
+  files = {},
+  fragmentId,
+  readOnly = false,
+}: FileExploreProps) {
   const [activeFile, setActiveFile] = useState<string | null>(() => {
     const fileKeys = Object.keys(files);
     return fileKeys.length > 0 ? fileKeys[0] : null;
@@ -103,13 +107,11 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
       onSuccess: () => {
         toast.success('Files saved and synced with sandbox');
         setHasUnsavedChanges(false);
-        // Update the local files state
-        setEditedFiles({ ...editedFiles });
       },
       onError: (error) => {
         toast.error(error.message || 'Failed to save files');
       },
-    })
+    }),
   );
 
   const handleCopyToClipboard = () => {
@@ -131,13 +133,13 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
     (filePath: string, newContent: string) => {
       if (readOnly) return;
 
-      setEditedFiles(prev => ({
+      setEditedFiles((prev) => ({
         ...prev,
         [filePath]: newContent,
       }));
       setHasUnsavedChanges(true);
     },
-    [readOnly]
+    [readOnly],
   );
 
   const handleSaveFiles = useCallback(() => {
@@ -151,7 +153,7 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
 
   const toggleEditMode = useCallback(() => {
     if (readOnly) return;
-    setIsEditMode(prev => !prev);
+    setIsEditMode((prev) => !prev);
   }, [readOnly]);
 
   const treeItems = useMemo(() => {
@@ -181,16 +183,19 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
               <div className="flex items-center gap-2">
                 {fragmentId && !readOnly && (
                   <>
-                    <Hint text={isEditMode ? "Switch to read-only" : "Switch to edit mode"} side="bottom">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={toggleEditMode}
-                      >
-                        {isEditMode ? <EyeIcon className="h-4 w-4" /> : <EditIcon className="h-4 w-4" />}
+                    <Hint
+                      text={isEditMode ? 'Switch to read-only' : 'Switch to edit mode'}
+                      side="bottom"
+                    >
+                      <Button variant="outline" size="sm" onClick={toggleEditMode}>
+                        {isEditMode ? (
+                          <EyeIcon className="h-4 w-4" />
+                        ) : (
+                          <EditIcon className="h-4 w-4" />
+                        )}
                       </Button>
                     </Hint>
-                    
+
                     {hasUnsavedChanges && (
                       <Hint text="Save changes" side="bottom">
                         <Button
@@ -206,14 +211,14 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
                     )}
                   </>
                 )}
-                
+
                 {hasUnsavedChanges && (
                   <div className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
                     <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
                     Unsaved changes
                   </div>
                 )}
-                
+
                 <Hint text="Copy to clipboard" side="bottom">
                   <Button
                     variant="outline"
@@ -226,7 +231,7 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
                 </Hint>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-hidden">
               {isEditMode && !readOnly ? (
                 <CodeEditor
@@ -236,9 +241,9 @@ export default function FileExplore({ files = {}, fragmentId, readOnly = false }
                   readOnly={false}
                 />
               ) : (
-                <CodeView 
-                  code={editedFiles[activeFile]} 
-                  language={getLanguageFromExtension(activeFile)} 
+                <CodeView
+                  code={editedFiles[activeFile]}
+                  language={getLanguageFromExtension(activeFile)}
                 />
               )}
             </div>
