@@ -1,10 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from './db';
-import type { 
-  Subscription, 
-  Plan, 
-  UsageRecord, 
-  SubscriptionStatus 
-} from '../generated/prisma';
+import type { Subscription, Plan, UsageRecord, SubscriptionStatus } from '../generated/prisma';
 import { Prisma } from '../generated/prisma';
 import { PlanLimits } from './stripe-service';
 
@@ -26,7 +22,11 @@ export interface UsageInfo {
 }
 
 export class SubscriptionService {
-  async getUserSubscription(userId: string): Promise<(Subscription & { plan: Plan; usageRecords: UsageRecord[]; billingEvents: any[] }) | null> {
+  async getUserSubscription(
+    userId: string,
+  ): Promise<
+    (Subscription & { plan: Plan; usageRecords: UsageRecord[]; billingEvents: any[] }) | null
+  > {
     try {
       const subscription = await prisma.subscription.findUnique({
         where: { userId },
@@ -83,13 +83,13 @@ export class SubscriptionService {
   }
 
   async updateSubscriptionStatus(
-    subscriptionId: string, 
+    subscriptionId: string,
     status: SubscriptionStatus,
     additionalData?: {
       currentPeriodStart?: Date;
       currentPeriodEnd?: Date;
       cancelAtPeriodEnd?: boolean;
-    }
+    },
   ): Promise<void> {
     try {
       await prisma.subscription.update({
@@ -114,7 +114,7 @@ export class SubscriptionService {
       currentPeriodEnd: Date;
       cancelAtPeriodEnd: boolean;
       planId: string;
-    }>
+    }>,
   ): Promise<void> {
     try {
       await prisma.subscription.update({
@@ -131,14 +131,14 @@ export class SubscriptionService {
   }
 
   async recordUsage(
-    userId: string, 
-    resourceType: string, 
+    userId: string,
+    resourceType: string,
     amount: number = 1,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<void> {
     try {
       const subscription = await this.getUserSubscription(userId);
-      
+
       if (!subscription) {
         throw new Error('No subscription found for user');
       }
@@ -153,7 +153,10 @@ export class SubscriptionService {
         },
       });
     } catch (error) {
-      console.error('Error recording usage:', error);
+      // Log error in production, but don't pollute test output
+      if (process.env.NODE_ENV !== 'test') {
+        console.error('Error recording usage:', error);
+      }
       throw error;
     }
   }
@@ -161,7 +164,7 @@ export class SubscriptionService {
   async checkUsageLimit(userId: string, resourceType: string): Promise<boolean> {
     try {
       const subscription = await this.getUserSubscription(userId);
-      
+
       if (!subscription) {
         return false; // No subscription means no access
       }
@@ -172,13 +175,13 @@ export class SubscriptionService {
 
       const planLimits = subscription.plan.features as PlanLimits;
       const limit = planLimits[resourceType];
-      
+
       if (!limit) {
         return true; // No limit defined for this resource
       }
 
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-      
+
       const usageCount = await prisma.usageRecord.aggregate({
         where: {
           subscriptionId: subscription.id,
@@ -203,7 +206,7 @@ export class SubscriptionService {
   async getUsageInfo(userId: string): Promise<UsageInfo[]> {
     try {
       const subscription = await this.getUserSubscription(userId);
-      
+
       if (!subscription) {
         return [];
       }
@@ -250,7 +253,7 @@ export class SubscriptionService {
       // Usually called when subscription renews
       // We don't delete old records for analytics, just mark them as archived
       const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-      
+
       // Update metadata to indicate this usage period has been reset
       await prisma.usageRecord.updateMany({
         where: {
@@ -344,7 +347,7 @@ export class SubscriptionService {
     subscriptionId: string,
     eventType: string,
     stripeEventId: string,
-    data: any
+    data: any,
   ): Promise<void> {
     try {
       await prisma.billingEvent.create({
