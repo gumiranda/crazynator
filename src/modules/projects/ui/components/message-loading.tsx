@@ -33,12 +33,12 @@ export const MessageLoading = () => {
       <div className="flex items-center gap-2 pl-2 mb-2">
         <Image
           src="/logo.svg"
-          alt="Crazy Code"
+          alt="Dev Crazy"
           width={16}
           height={16}
           className="shrink-0 sm:w-[18px] sm:h-[18px]"
         />
-        <span className="text-xs sm:text-sm font-medium">Crazy Code</span>
+        <span className="text-xs sm:text-sm font-medium">Dev Crazy</span>
       </div>
       <div className="pl-6 sm:pl-8.5 flex flex-col gap-y-3 sm:gap-y-4">
         <ShimmerMessages />

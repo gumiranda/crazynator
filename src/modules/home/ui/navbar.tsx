@@ -19,8 +19,8 @@ export default function Navbar() {
     >
       <div className="flex justify-between items-center max-w-5xl mx-auto w-full">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="Crazy Code" width={24} height={24} />
-          <span className="text-lg font-semibold">Crazy Code</span>
+          <Image src="/logo.svg" alt="Dev Crazy" width={24} height={24} />
+          <span className="text-lg font-semibold">Dev Crazy</span>
         </Link>
         <SignedOut>
           <div className="flex gap-2">
