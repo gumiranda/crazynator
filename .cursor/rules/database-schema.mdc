@@ -1,0 +1,38 @@
+# Schema do Banco de Dados e Prisma
+
+## Modelos Principais
+
+- **Project**: Projetos dos usuários
+- **Message**: Mensagens do chat com roles (USER/ASSISTANT) e tipos (RESULT/ERROR)
+- **Fragment**: Fragmentos de código com sandbox URL
+- **Usage**: Controle de uso/rate limiting
+
+## Configuração Prisma
+
+- **Schema**: [prisma/schema.prisma](mdc:prisma/schema.prisma)
+- **Client Gerado**: [src/generated/prisma/](mdc:src/generated/prisma/)
+- **Provider**: PostgreSQL
+- **Output**: Customizado para `../src/generated/prisma`
+
+## Relacionamentos
+
+- `Project` → `Message` (1:N)
+- `Message` → `Fragment` (1:1)
+- `Usage` (standalone para rate limiting)
+
+## Enums
+
+- **MessageRole**: USER, ASSISTANT
+- **MessageType**: RESULT, ERROR
+
+## Convenções
+
+- Sempre usar UUIDs como IDs
+- Timestamps automáticos (createdAt, updatedAt)
+- Cascade deletes apropriados
+- Relacionamentos bem definidos com onDelete
+  description:
+  globs:
+  alwaysApply: false
+
+---

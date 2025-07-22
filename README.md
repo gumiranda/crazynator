@@ -7,11 +7,11 @@ First, run the development server:
 ```bashf
 npm run dev
 # ord
-yarn dev
-# or
+yarn devff
+# orfcc
 pnpm devF
-# or
-bun dev
+# orddvvhh
+bun devdd
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

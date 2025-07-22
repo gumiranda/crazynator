@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExternalLinkIcon, RefreshCcwIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -7,14 +7,24 @@ import Hint from '@/components/hint';
 
 type FragmentPreviewProps = {
   fragment: Fragment;
+  onRefresh?: () => void;
 };
 
-export default function FragmentPreview({ fragment }: FragmentPreviewProps) {
+export default function FragmentPreview({ fragment, onRefresh }: FragmentPreviewProps) {
   const [iframeKey, setIframeKey] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  const onRefresh = () => {
+  // Auto-refresh when fragment is updated (in case files change)
+  useEffect(() => {
+    setLastUpdated(new Date());
+  }, [fragment.files]);
+
+  const handleRefresh = () => {
     setIframeKey((prev) => prev + 1);
+    setLastUpdated(new Date());
+    onRefresh?.();
+    toast.success('Preview refreshed');
   };
 
   const onCopy = () => {
@@ -44,8 +54,8 @@ export default function FragmentPreview({ fragment }: FragmentPreviewProps) {
   return (
     <div className="flex h-full w-full flex-col">
       <div className="bg-sidebar flex items-center gap-2 border-b p-2">
-        <Hint text="Refresh" side="bottom" align="start">
-          <Button size="sm" variant="outline" onClick={onRefresh}>
+        <Hint text="Refresh preview" side="bottom" align="start">
+          <Button size="sm" variant="outline" onClick={handleRefresh}>
             <RefreshCcwIcon className="size-4" />
           </Button>
         </Hint>
@@ -72,6 +82,10 @@ export default function FragmentPreview({ fragment }: FragmentPreviewProps) {
             <ExternalLinkIcon className="size-4" />
           </Button>
         </Hint>
+
+        <div className="text-xs text-muted-foreground hidden sm:block">
+          Updated: {lastUpdated.toLocaleTimeString()}
+        </div>
       </div>
       <iframe
         key={iframeKey}

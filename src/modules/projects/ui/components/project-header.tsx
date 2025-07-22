@@ -46,11 +46,19 @@ export const ProjectHeader = ({ projectId }: Props) => {
           <Button
             variant="ghost"
             size="sm"
-            className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2!"
+            className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-1 sm:pl-2!"
           >
-            <Image src="/logo.svg" alt="Crazy Code" width={18} height={18} className="shrink-0" />
-            <span className="text-sm font-medium">{project.name}</span>
-            <ChevronDownIcon className="w-4 h-4" />
+            <Image
+              src="/logo.svg"
+              alt="CrazyNator"
+              width={16}
+              height={16}
+              className="shrink-0 sm:w-[18px] sm:h-[18px]"
+            />
+            <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-none truncate">
+              {project.name}
+            </span>
+            <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="start">
@@ -84,7 +92,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
           </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="px-3 pl-2">
+      <div className="px-2 sm:px-3 pl-1 sm:pl-2">
         <InngestConnectionStatus
           status={
             realtimeConnectionState === InngestSubscriptionState.Connecting ||
@@ -96,7 +104,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
           }
         >
           <InngestConnectionStatusIndicator />
-          <InngestConnectionStatusLabel />
+          <InngestConnectionStatusLabel className="hidden sm:inline" />
         </InngestConnectionStatus>
       </div>
     </header>

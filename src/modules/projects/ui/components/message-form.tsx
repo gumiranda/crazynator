@@ -69,7 +69,7 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
-          'relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all',
+          'relative border p-2 sm:p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all',
           isFocused && 'shadow-xs',
           showUsage && 'rounded-t-none',
         )}
@@ -81,9 +81,11 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
             <TextareaAutosize
               {...field}
               disabled={isPending}
-              className={cn('pt-4 resize-none border-none w-full outline-none bg-transparent')}
+              className={cn(
+                'pt-3 sm:pt-4 resize-none border-none w-full outline-none bg-transparent text-sm sm:text-base',
+              )}
               minRows={2}
-              maxRows={8}
+              maxRows={6}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Type your message here..."
@@ -97,8 +99,8 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
           )}
         />
         <div className="flex gap-x-2 items-end justify-between pt-2">
-          <div className="text-[10px] text-muted-foreground font-mono">
-            <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+          <div className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
+            <kbd className="ml-auto pointer-events-none inline-flex h-4 sm:h-5 select-none items-center gap-1 rounded border bg-muted px-1 sm:px-1.5 font-mono text-[9px] sm:text-[10px] font-medium text-muted-foreground">
               <span>&#8984;</span>Enter
             </kbd>
             &nbsp;to send
@@ -107,15 +109,15 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
             type="submit"
             size="icon"
             className={cn(
-              'size-8 rounded-full cursor-pointer',
+              'size-7 sm:size-8 rounded-full cursor-pointer',
               isButtonDisabled && 'bg-muted-foreground border',
             )}
             disabled={isButtonDisabled}
           >
             {isPending ? (
-              <Loader2Icon className="w-4 h-4 animate-spin" />
+              <Loader2Icon className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
             ) : (
-              <ArrowUpIcon className="w-4 h-4" />
+              <ArrowUpIcon className="w-3 h-3 sm:w-4 sm:h-4" />
             )}
           </Button>
         </div>

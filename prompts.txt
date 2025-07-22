@@ -1,0 +1,2 @@
+1. criar um roadmap detalhado de implementaçao de assinaturas usando o gateway de pagamento polar.sh . atualmente ja existe o plano gratuito que dá direito a 5 creditos mensais. teremos o plano pro de 
+ 39.90 que da direito a 100 creditos mensais  

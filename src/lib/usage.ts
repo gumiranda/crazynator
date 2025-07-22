@@ -5,18 +5,14 @@ import { RateLimiterPrisma } from 'rate-limiter-flexible';
 import { prisma } from '@/lib/db';
 
 const FREE_POINTS = 5;
-const PRO_POINTS = 100;
 const FREE_DURATION = 30 * 24 * 60 * 60; // 30 days
 const POINTS_PER_REQUEST = 1;
 
 export async function getUsageTracker() {
-  const { has } = await auth();
-  const hasProAccess = has({ plan: 'pro' });
-
   const usageTracker = new RateLimiterPrisma({
     storeClient: prisma,
     tableName: 'Usage',
-    points: hasProAccess ? PRO_POINTS : FREE_POINTS,
+    points: FREE_POINTS,
     duration: FREE_DURATION,
   });
 

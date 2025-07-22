@@ -1,0 +1,38 @@
+# Padrões tRPC e API
+
+## Estrutura tRPC
+
+- **Router Principal**: [src/trpc/routers/\_app.ts](mdc:src/trpc/routers/_app.ts) - Agrega todos os routers
+- **Configuração**: [src/trpc/init.ts](mdc:src/trpc/init.ts) - Setup do tRPC
+- **Cliente**: [src/trpc/client.tsx](mdc:src/trpc/client.tsx) - Cliente React
+
+## Padrões de Módulos
+
+Cada módulo segue a estrutura:
+
+```
+modules/[nome]/
+├── server/
+│   └── procedures.ts  # Routers tRPC
+├── ui/
+│   ├── components/    # Componentes React
+│   └── views/         # Páginas/views
+```
+
+## Exemplos de Módulos
+
+- **Messages**: [src/modules/messages/server/procedures.ts](mdc:src/modules/messages/server/procedures.ts)
+- **Projects**: [src/modules/projects/server/procedures.ts](mdc:src/modules/projects/server/procedures.ts)
+- **Usage**: [src/modules/usage/server/procedures.ts](mdc:src/modules/usage/server/procedures.ts)
+
+## Convenções
+
+- Sempre usar `createTRPCRouter` para criar routers
+- Procedures devem ser tipadas com Zod schemas
+- Usar `@/` alias para imports absolutos
+- Separar lógica de negócio em procedures modulares
+  description:
+  globs:
+  alwaysApply: false
+
+---
