@@ -33,6 +33,21 @@ export type Fragment = $Result.DefaultSelection<Prisma.$FragmentPayload>
  * 
  */
 export type Usage = $Result.DefaultSelection<Prisma.$UsagePayload>
+/**
+ * Model CodeSuggestion
+ * 
+ */
+export type CodeSuggestion = $Result.DefaultSelection<Prisma.$CodeSuggestionPayload>
+/**
+ * Model PatternRule
+ * 
+ */
+export type PatternRule = $Result.DefaultSelection<Prisma.$PatternRulePayload>
+/**
+ * Model UserPreference
+ * 
+ */
+export type UserPreference = $Result.DefaultSelection<Prisma.$UserPreferencePayload>
 
 /**
  * Enums
@@ -53,6 +68,63 @@ export const MessageType: {
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]
 
+
+export const SuggestionType: {
+  ARCHITECTURE: 'ARCHITECTURE',
+  COMPONENT_STRUCTURE: 'COMPONENT_STRUCTURE',
+  STATE_MANAGEMENT: 'STATE_MANAGEMENT',
+  DATA_FETCHING: 'DATA_FETCHING',
+  PERFORMANCE: 'PERFORMANCE',
+  ACCESSIBILITY: 'ACCESSIBILITY',
+  TESTING: 'TESTING',
+  TYPESCRIPT: 'TYPESCRIPT'
+};
+
+export type SuggestionType = (typeof SuggestionType)[keyof typeof SuggestionType]
+
+
+export const SuggestionCategory: {
+  ATOMIC_DESIGN: 'ATOMIC_DESIGN',
+  FEATURE_SLICED_DESIGN: 'FEATURE_SLICED_DESIGN',
+  REACT_QUERY: 'REACT_QUERY',
+  ZUSTAND: 'ZUSTAND',
+  REACT_PATTERNS: 'REACT_PATTERNS',
+  TYPESCRIPT_PATTERNS: 'TYPESCRIPT_PATTERNS',
+  PERFORMANCE_OPTIMIZATION: 'PERFORMANCE_OPTIMIZATION',
+  ACCESSIBILITY_IMPROVEMENT: 'ACCESSIBILITY_IMPROVEMENT',
+  TESTING_STRATEGY: 'TESTING_STRATEGY'
+};
+
+export type SuggestionCategory = (typeof SuggestionCategory)[keyof typeof SuggestionCategory]
+
+
+export const SuggestionSeverity: {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+};
+
+export type SuggestionSeverity = (typeof SuggestionSeverity)[keyof typeof SuggestionSeverity]
+
+
+export const SuggestionStatus: {
+  PENDING: 'PENDING',
+  DISMISSED: 'DISMISSED',
+  APPLIED: 'APPLIED',
+  EXPIRED: 'EXPIRED'
+};
+
+export type SuggestionStatus = (typeof SuggestionStatus)[keyof typeof SuggestionStatus]
+
+
+export const PreferenceFrequency: {
+  MINIMAL: 'MINIMAL',
+  NORMAL: 'NORMAL',
+  AGGRESSIVE: 'AGGRESSIVE'
+};
+
+export type PreferenceFrequency = (typeof PreferenceFrequency)[keyof typeof PreferenceFrequency]
+
 }
 
 export type MessageRole = $Enums.MessageRole
@@ -62,6 +134,26 @@ export const MessageRole: typeof $Enums.MessageRole
 export type MessageType = $Enums.MessageType
 
 export const MessageType: typeof $Enums.MessageType
+
+export type SuggestionType = $Enums.SuggestionType
+
+export const SuggestionType: typeof $Enums.SuggestionType
+
+export type SuggestionCategory = $Enums.SuggestionCategory
+
+export const SuggestionCategory: typeof $Enums.SuggestionCategory
+
+export type SuggestionSeverity = $Enums.SuggestionSeverity
+
+export const SuggestionSeverity: typeof $Enums.SuggestionSeverity
+
+export type SuggestionStatus = $Enums.SuggestionStatus
+
+export const SuggestionStatus: typeof $Enums.SuggestionStatus
+
+export type PreferenceFrequency = $Enums.PreferenceFrequency
+
+export const PreferenceFrequency: typeof $Enums.PreferenceFrequency
 
 /**
  * ##  Prisma Client ʲˢ
@@ -227,6 +319,36 @@ export class PrismaClient<
     * ```
     */
   get usage(): Prisma.UsageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codeSuggestion`: Exposes CRUD operations for the **CodeSuggestion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodeSuggestions
+    * const codeSuggestions = await prisma.codeSuggestion.findMany()
+    * ```
+    */
+  get codeSuggestion(): Prisma.CodeSuggestionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.patternRule`: Exposes CRUD operations for the **PatternRule** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PatternRules
+    * const patternRules = await prisma.patternRule.findMany()
+    * ```
+    */
+  get patternRule(): Prisma.PatternRuleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userPreference`: Exposes CRUD operations for the **UserPreference** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserPreferences
+    * const userPreferences = await prisma.userPreference.findMany()
+    * ```
+    */
+  get userPreference(): Prisma.UserPreferenceDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -670,7 +792,10 @@ export namespace Prisma {
     Project: 'Project',
     Message: 'Message',
     Fragment: 'Fragment',
-    Usage: 'Usage'
+    Usage: 'Usage',
+    CodeSuggestion: 'CodeSuggestion',
+    PatternRule: 'PatternRule',
+    UserPreference: 'UserPreference'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -689,7 +814,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "project" | "message" | "fragment" | "usage"
+      modelProps: "project" | "message" | "fragment" | "usage" | "codeSuggestion" | "patternRule" | "userPreference"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -989,6 +1114,228 @@ export namespace Prisma {
           }
         }
       }
+      CodeSuggestion: {
+        payload: Prisma.$CodeSuggestionPayload<ExtArgs>
+        fields: Prisma.CodeSuggestionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodeSuggestionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodeSuggestionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          findFirst: {
+            args: Prisma.CodeSuggestionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodeSuggestionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          findMany: {
+            args: Prisma.CodeSuggestionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>[]
+          }
+          create: {
+            args: Prisma.CodeSuggestionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          createMany: {
+            args: Prisma.CodeSuggestionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodeSuggestionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>[]
+          }
+          delete: {
+            args: Prisma.CodeSuggestionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          update: {
+            args: Prisma.CodeSuggestionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          deleteMany: {
+            args: Prisma.CodeSuggestionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodeSuggestionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodeSuggestionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>[]
+          }
+          upsert: {
+            args: Prisma.CodeSuggestionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodeSuggestionPayload>
+          }
+          aggregate: {
+            args: Prisma.CodeSuggestionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodeSuggestion>
+          }
+          groupBy: {
+            args: Prisma.CodeSuggestionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodeSuggestionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodeSuggestionCountArgs<ExtArgs>
+            result: $Utils.Optional<CodeSuggestionCountAggregateOutputType> | number
+          }
+        }
+      }
+      PatternRule: {
+        payload: Prisma.$PatternRulePayload<ExtArgs>
+        fields: Prisma.PatternRuleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PatternRuleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PatternRuleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          findFirst: {
+            args: Prisma.PatternRuleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PatternRuleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          findMany: {
+            args: Prisma.PatternRuleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>[]
+          }
+          create: {
+            args: Prisma.PatternRuleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          createMany: {
+            args: Prisma.PatternRuleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PatternRuleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>[]
+          }
+          delete: {
+            args: Prisma.PatternRuleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          update: {
+            args: Prisma.PatternRuleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          deleteMany: {
+            args: Prisma.PatternRuleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PatternRuleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PatternRuleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>[]
+          }
+          upsert: {
+            args: Prisma.PatternRuleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PatternRulePayload>
+          }
+          aggregate: {
+            args: Prisma.PatternRuleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePatternRule>
+          }
+          groupBy: {
+            args: Prisma.PatternRuleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PatternRuleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PatternRuleCountArgs<ExtArgs>
+            result: $Utils.Optional<PatternRuleCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserPreference: {
+        payload: Prisma.$UserPreferencePayload<ExtArgs>
+        fields: Prisma.UserPreferenceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserPreferenceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserPreferenceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          findFirst: {
+            args: Prisma.UserPreferenceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserPreferenceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          findMany: {
+            args: Prisma.UserPreferenceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>[]
+          }
+          create: {
+            args: Prisma.UserPreferenceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          createMany: {
+            args: Prisma.UserPreferenceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserPreferenceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>[]
+          }
+          delete: {
+            args: Prisma.UserPreferenceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          update: {
+            args: Prisma.UserPreferenceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          deleteMany: {
+            args: Prisma.UserPreferenceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserPreferenceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserPreferenceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>[]
+          }
+          upsert: {
+            args: Prisma.UserPreferenceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPreferencePayload>
+          }
+          aggregate: {
+            args: Prisma.UserPreferenceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserPreference>
+          }
+          groupBy: {
+            args: Prisma.UserPreferenceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserPreferenceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserPreferenceCountArgs<ExtArgs>
+            result: $Utils.Optional<UserPreferenceCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1077,6 +1424,9 @@ export namespace Prisma {
     message?: MessageOmit
     fragment?: FragmentOmit
     usage?: UsageOmit
+    codeSuggestion?: CodeSuggestionOmit
+    patternRule?: PatternRuleOmit
+    userPreference?: UserPreferenceOmit
   }
 
   /* Types for Logging */
@@ -1172,10 +1522,12 @@ export namespace Prisma {
 
   export type ProjectCountOutputType = {
     messages: number
+    codeSuggestions: number
   }
 
   export type ProjectCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     messages?: boolean | ProjectCountOutputTypeCountMessagesArgs
+    codeSuggestions?: boolean | ProjectCountOutputTypeCountCodeSuggestionsArgs
   }
 
   // Custom InputTypes
@@ -1194,6 +1546,13 @@ export namespace Prisma {
    */
   export type ProjectCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MessageWhereInput
+  }
+
+  /**
+   * ProjectCountOutputType without action
+   */
+  export type ProjectCountOutputTypeCountCodeSuggestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodeSuggestionWhereInput
   }
 
 
@@ -1366,6 +1725,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     messages?: boolean | Project$messagesArgs<ExtArgs>
+    codeSuggestions?: boolean | Project$codeSuggestionsArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
 
@@ -1396,6 +1756,7 @@ export namespace Prisma {
   export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
   export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     messages?: boolean | Project$messagesArgs<ExtArgs>
+    codeSuggestions?: boolean | Project$codeSuggestionsArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProjectIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1405,6 +1766,7 @@ export namespace Prisma {
     name: "Project"
     objects: {
       messages: Prisma.$MessagePayload<ExtArgs>[]
+      codeSuggestions: Prisma.$CodeSuggestionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1807,6 +2169,7 @@ export namespace Prisma {
   export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     messages<T extends Project$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Project$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    codeSuggestions<T extends Project$codeSuggestionsArgs<ExtArgs> = {}>(args?: Subset<T, Project$codeSuggestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2250,6 +2613,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
+  }
+
+  /**
+   * Project.codeSuggestions
+   */
+  export type Project$codeSuggestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    where?: CodeSuggestionWhereInput
+    orderBy?: CodeSuggestionOrderByWithRelationInput | CodeSuggestionOrderByWithRelationInput[]
+    cursor?: CodeSuggestionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CodeSuggestionScalarFieldEnum | CodeSuggestionScalarFieldEnum[]
   }
 
   /**
@@ -5462,6 +5849,3391 @@ export namespace Prisma {
 
 
   /**
+   * Model CodeSuggestion
+   */
+
+  export type AggregateCodeSuggestion = {
+    _count: CodeSuggestionCountAggregateOutputType | null
+    _avg: CodeSuggestionAvgAggregateOutputType | null
+    _sum: CodeSuggestionSumAggregateOutputType | null
+    _min: CodeSuggestionMinAggregateOutputType | null
+    _max: CodeSuggestionMaxAggregateOutputType | null
+  }
+
+  export type CodeSuggestionAvgAggregateOutputType = {
+    lineNumber: number | null
+  }
+
+  export type CodeSuggestionSumAggregateOutputType = {
+    lineNumber: number | null
+  }
+
+  export type CodeSuggestionMinAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    type: $Enums.SuggestionType | null
+    category: $Enums.SuggestionCategory | null
+    title: string | null
+    description: string | null
+    codeExample: string | null
+    filePath: string | null
+    lineNumber: number | null
+    severity: $Enums.SuggestionSeverity | null
+    status: $Enums.SuggestionStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    dismissedAt: Date | null
+    appliedAt: Date | null
+  }
+
+  export type CodeSuggestionMaxAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    type: $Enums.SuggestionType | null
+    category: $Enums.SuggestionCategory | null
+    title: string | null
+    description: string | null
+    codeExample: string | null
+    filePath: string | null
+    lineNumber: number | null
+    severity: $Enums.SuggestionSeverity | null
+    status: $Enums.SuggestionStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    dismissedAt: Date | null
+    appliedAt: Date | null
+  }
+
+  export type CodeSuggestionCountAggregateOutputType = {
+    id: number
+    projectId: number
+    type: number
+    category: number
+    title: number
+    description: number
+    codeExample: number
+    filePath: number
+    lineNumber: number
+    severity: number
+    status: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    dismissedAt: number
+    appliedAt: number
+    _all: number
+  }
+
+
+  export type CodeSuggestionAvgAggregateInputType = {
+    lineNumber?: true
+  }
+
+  export type CodeSuggestionSumAggregateInputType = {
+    lineNumber?: true
+  }
+
+  export type CodeSuggestionMinAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    category?: true
+    title?: true
+    description?: true
+    codeExample?: true
+    filePath?: true
+    lineNumber?: true
+    severity?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+    dismissedAt?: true
+    appliedAt?: true
+  }
+
+  export type CodeSuggestionMaxAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    category?: true
+    title?: true
+    description?: true
+    codeExample?: true
+    filePath?: true
+    lineNumber?: true
+    severity?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+    dismissedAt?: true
+    appliedAt?: true
+  }
+
+  export type CodeSuggestionCountAggregateInputType = {
+    id?: true
+    projectId?: true
+    type?: true
+    category?: true
+    title?: true
+    description?: true
+    codeExample?: true
+    filePath?: true
+    lineNumber?: true
+    severity?: true
+    status?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    dismissedAt?: true
+    appliedAt?: true
+    _all?: true
+  }
+
+  export type CodeSuggestionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodeSuggestion to aggregate.
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodeSuggestions to fetch.
+     */
+    orderBy?: CodeSuggestionOrderByWithRelationInput | CodeSuggestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodeSuggestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodeSuggestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodeSuggestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodeSuggestions
+    **/
+    _count?: true | CodeSuggestionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodeSuggestionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodeSuggestionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodeSuggestionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodeSuggestionMaxAggregateInputType
+  }
+
+  export type GetCodeSuggestionAggregateType<T extends CodeSuggestionAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodeSuggestion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodeSuggestion[P]>
+      : GetScalarType<T[P], AggregateCodeSuggestion[P]>
+  }
+
+
+
+
+  export type CodeSuggestionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodeSuggestionWhereInput
+    orderBy?: CodeSuggestionOrderByWithAggregationInput | CodeSuggestionOrderByWithAggregationInput[]
+    by: CodeSuggestionScalarFieldEnum[] | CodeSuggestionScalarFieldEnum
+    having?: CodeSuggestionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodeSuggestionCountAggregateInputType | true
+    _avg?: CodeSuggestionAvgAggregateInputType
+    _sum?: CodeSuggestionSumAggregateInputType
+    _min?: CodeSuggestionMinAggregateInputType
+    _max?: CodeSuggestionMaxAggregateInputType
+  }
+
+  export type CodeSuggestionGroupByOutputType = {
+    id: string
+    projectId: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample: string | null
+    filePath: string | null
+    lineNumber: number | null
+    severity: $Enums.SuggestionSeverity
+    status: $Enums.SuggestionStatus
+    metadata: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    dismissedAt: Date | null
+    appliedAt: Date | null
+    _count: CodeSuggestionCountAggregateOutputType | null
+    _avg: CodeSuggestionAvgAggregateOutputType | null
+    _sum: CodeSuggestionSumAggregateOutputType | null
+    _min: CodeSuggestionMinAggregateOutputType | null
+    _max: CodeSuggestionMaxAggregateOutputType | null
+  }
+
+  type GetCodeSuggestionGroupByPayload<T extends CodeSuggestionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodeSuggestionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodeSuggestionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodeSuggestionGroupByOutputType[P]>
+            : GetScalarType<T[P], CodeSuggestionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodeSuggestionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    category?: boolean
+    title?: boolean
+    description?: boolean
+    codeExample?: boolean
+    filePath?: boolean
+    lineNumber?: boolean
+    severity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    dismissedAt?: boolean
+    appliedAt?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codeSuggestion"]>
+
+  export type CodeSuggestionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    category?: boolean
+    title?: boolean
+    description?: boolean
+    codeExample?: boolean
+    filePath?: boolean
+    lineNumber?: boolean
+    severity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    dismissedAt?: boolean
+    appliedAt?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codeSuggestion"]>
+
+  export type CodeSuggestionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    category?: boolean
+    title?: boolean
+    description?: boolean
+    codeExample?: boolean
+    filePath?: boolean
+    lineNumber?: boolean
+    severity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    dismissedAt?: boolean
+    appliedAt?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codeSuggestion"]>
+
+  export type CodeSuggestionSelectScalar = {
+    id?: boolean
+    projectId?: boolean
+    type?: boolean
+    category?: boolean
+    title?: boolean
+    description?: boolean
+    codeExample?: boolean
+    filePath?: boolean
+    lineNumber?: boolean
+    severity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    dismissedAt?: boolean
+    appliedAt?: boolean
+  }
+
+  export type CodeSuggestionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "type" | "category" | "title" | "description" | "codeExample" | "filePath" | "lineNumber" | "severity" | "status" | "metadata" | "createdAt" | "updatedAt" | "dismissedAt" | "appliedAt", ExtArgs["result"]["codeSuggestion"]>
+  export type CodeSuggestionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+  export type CodeSuggestionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+  export type CodeSuggestionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+  }
+
+  export type $CodeSuggestionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodeSuggestion"
+    objects: {
+      project: Prisma.$ProjectPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      projectId: string
+      type: $Enums.SuggestionType
+      category: $Enums.SuggestionCategory
+      title: string
+      description: string
+      codeExample: string | null
+      filePath: string | null
+      lineNumber: number | null
+      severity: $Enums.SuggestionSeverity
+      status: $Enums.SuggestionStatus
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+      dismissedAt: Date | null
+      appliedAt: Date | null
+    }, ExtArgs["result"]["codeSuggestion"]>
+    composites: {}
+  }
+
+  type CodeSuggestionGetPayload<S extends boolean | null | undefined | CodeSuggestionDefaultArgs> = $Result.GetResult<Prisma.$CodeSuggestionPayload, S>
+
+  type CodeSuggestionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodeSuggestionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodeSuggestionCountAggregateInputType | true
+    }
+
+  export interface CodeSuggestionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodeSuggestion'], meta: { name: 'CodeSuggestion' } }
+    /**
+     * Find zero or one CodeSuggestion that matches the filter.
+     * @param {CodeSuggestionFindUniqueArgs} args - Arguments to find a CodeSuggestion
+     * @example
+     * // Get one CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodeSuggestionFindUniqueArgs>(args: SelectSubset<T, CodeSuggestionFindUniqueArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodeSuggestion that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodeSuggestionFindUniqueOrThrowArgs} args - Arguments to find a CodeSuggestion
+     * @example
+     * // Get one CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodeSuggestionFindUniqueOrThrowArgs>(args: SelectSubset<T, CodeSuggestionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodeSuggestion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionFindFirstArgs} args - Arguments to find a CodeSuggestion
+     * @example
+     * // Get one CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodeSuggestionFindFirstArgs>(args?: SelectSubset<T, CodeSuggestionFindFirstArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodeSuggestion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionFindFirstOrThrowArgs} args - Arguments to find a CodeSuggestion
+     * @example
+     * // Get one CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodeSuggestionFindFirstOrThrowArgs>(args?: SelectSubset<T, CodeSuggestionFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodeSuggestions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodeSuggestions
+     * const codeSuggestions = await prisma.codeSuggestion.findMany()
+     * 
+     * // Get first 10 CodeSuggestions
+     * const codeSuggestions = await prisma.codeSuggestion.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codeSuggestionWithIdOnly = await prisma.codeSuggestion.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodeSuggestionFindManyArgs>(args?: SelectSubset<T, CodeSuggestionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodeSuggestion.
+     * @param {CodeSuggestionCreateArgs} args - Arguments to create a CodeSuggestion.
+     * @example
+     * // Create one CodeSuggestion
+     * const CodeSuggestion = await prisma.codeSuggestion.create({
+     *   data: {
+     *     // ... data to create a CodeSuggestion
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodeSuggestionCreateArgs>(args: SelectSubset<T, CodeSuggestionCreateArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodeSuggestions.
+     * @param {CodeSuggestionCreateManyArgs} args - Arguments to create many CodeSuggestions.
+     * @example
+     * // Create many CodeSuggestions
+     * const codeSuggestion = await prisma.codeSuggestion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodeSuggestionCreateManyArgs>(args?: SelectSubset<T, CodeSuggestionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodeSuggestions and returns the data saved in the database.
+     * @param {CodeSuggestionCreateManyAndReturnArgs} args - Arguments to create many CodeSuggestions.
+     * @example
+     * // Create many CodeSuggestions
+     * const codeSuggestion = await prisma.codeSuggestion.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodeSuggestions and only return the `id`
+     * const codeSuggestionWithIdOnly = await prisma.codeSuggestion.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodeSuggestionCreateManyAndReturnArgs>(args?: SelectSubset<T, CodeSuggestionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodeSuggestion.
+     * @param {CodeSuggestionDeleteArgs} args - Arguments to delete one CodeSuggestion.
+     * @example
+     * // Delete one CodeSuggestion
+     * const CodeSuggestion = await prisma.codeSuggestion.delete({
+     *   where: {
+     *     // ... filter to delete one CodeSuggestion
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodeSuggestionDeleteArgs>(args: SelectSubset<T, CodeSuggestionDeleteArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodeSuggestion.
+     * @param {CodeSuggestionUpdateArgs} args - Arguments to update one CodeSuggestion.
+     * @example
+     * // Update one CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodeSuggestionUpdateArgs>(args: SelectSubset<T, CodeSuggestionUpdateArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodeSuggestions.
+     * @param {CodeSuggestionDeleteManyArgs} args - Arguments to filter CodeSuggestions to delete.
+     * @example
+     * // Delete a few CodeSuggestions
+     * const { count } = await prisma.codeSuggestion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodeSuggestionDeleteManyArgs>(args?: SelectSubset<T, CodeSuggestionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodeSuggestions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodeSuggestions
+     * const codeSuggestion = await prisma.codeSuggestion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodeSuggestionUpdateManyArgs>(args: SelectSubset<T, CodeSuggestionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodeSuggestions and returns the data updated in the database.
+     * @param {CodeSuggestionUpdateManyAndReturnArgs} args - Arguments to update many CodeSuggestions.
+     * @example
+     * // Update many CodeSuggestions
+     * const codeSuggestion = await prisma.codeSuggestion.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodeSuggestions and only return the `id`
+     * const codeSuggestionWithIdOnly = await prisma.codeSuggestion.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodeSuggestionUpdateManyAndReturnArgs>(args: SelectSubset<T, CodeSuggestionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodeSuggestion.
+     * @param {CodeSuggestionUpsertArgs} args - Arguments to update or create a CodeSuggestion.
+     * @example
+     * // Update or create a CodeSuggestion
+     * const codeSuggestion = await prisma.codeSuggestion.upsert({
+     *   create: {
+     *     // ... data to create a CodeSuggestion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodeSuggestion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodeSuggestionUpsertArgs>(args: SelectSubset<T, CodeSuggestionUpsertArgs<ExtArgs>>): Prisma__CodeSuggestionClient<$Result.GetResult<Prisma.$CodeSuggestionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodeSuggestions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionCountArgs} args - Arguments to filter CodeSuggestions to count.
+     * @example
+     * // Count the number of CodeSuggestions
+     * const count = await prisma.codeSuggestion.count({
+     *   where: {
+     *     // ... the filter for the CodeSuggestions we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodeSuggestionCountArgs>(
+      args?: Subset<T, CodeSuggestionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodeSuggestionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodeSuggestion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodeSuggestionAggregateArgs>(args: Subset<T, CodeSuggestionAggregateArgs>): Prisma.PrismaPromise<GetCodeSuggestionAggregateType<T>>
+
+    /**
+     * Group by CodeSuggestion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodeSuggestionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodeSuggestionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodeSuggestionGroupByArgs['orderBy'] }
+        : { orderBy?: CodeSuggestionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodeSuggestionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodeSuggestionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodeSuggestion model
+   */
+  readonly fields: CodeSuggestionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodeSuggestion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodeSuggestionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodeSuggestion model
+   */
+  interface CodeSuggestionFieldRefs {
+    readonly id: FieldRef<"CodeSuggestion", 'String'>
+    readonly projectId: FieldRef<"CodeSuggestion", 'String'>
+    readonly type: FieldRef<"CodeSuggestion", 'SuggestionType'>
+    readonly category: FieldRef<"CodeSuggestion", 'SuggestionCategory'>
+    readonly title: FieldRef<"CodeSuggestion", 'String'>
+    readonly description: FieldRef<"CodeSuggestion", 'String'>
+    readonly codeExample: FieldRef<"CodeSuggestion", 'String'>
+    readonly filePath: FieldRef<"CodeSuggestion", 'String'>
+    readonly lineNumber: FieldRef<"CodeSuggestion", 'Int'>
+    readonly severity: FieldRef<"CodeSuggestion", 'SuggestionSeverity'>
+    readonly status: FieldRef<"CodeSuggestion", 'SuggestionStatus'>
+    readonly metadata: FieldRef<"CodeSuggestion", 'Json'>
+    readonly createdAt: FieldRef<"CodeSuggestion", 'DateTime'>
+    readonly updatedAt: FieldRef<"CodeSuggestion", 'DateTime'>
+    readonly dismissedAt: FieldRef<"CodeSuggestion", 'DateTime'>
+    readonly appliedAt: FieldRef<"CodeSuggestion", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodeSuggestion findUnique
+   */
+  export type CodeSuggestionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter, which CodeSuggestion to fetch.
+     */
+    where: CodeSuggestionWhereUniqueInput
+  }
+
+  /**
+   * CodeSuggestion findUniqueOrThrow
+   */
+  export type CodeSuggestionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter, which CodeSuggestion to fetch.
+     */
+    where: CodeSuggestionWhereUniqueInput
+  }
+
+  /**
+   * CodeSuggestion findFirst
+   */
+  export type CodeSuggestionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter, which CodeSuggestion to fetch.
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodeSuggestions to fetch.
+     */
+    orderBy?: CodeSuggestionOrderByWithRelationInput | CodeSuggestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodeSuggestions.
+     */
+    cursor?: CodeSuggestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodeSuggestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodeSuggestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodeSuggestions.
+     */
+    distinct?: CodeSuggestionScalarFieldEnum | CodeSuggestionScalarFieldEnum[]
+  }
+
+  /**
+   * CodeSuggestion findFirstOrThrow
+   */
+  export type CodeSuggestionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter, which CodeSuggestion to fetch.
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodeSuggestions to fetch.
+     */
+    orderBy?: CodeSuggestionOrderByWithRelationInput | CodeSuggestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodeSuggestions.
+     */
+    cursor?: CodeSuggestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodeSuggestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodeSuggestions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodeSuggestions.
+     */
+    distinct?: CodeSuggestionScalarFieldEnum | CodeSuggestionScalarFieldEnum[]
+  }
+
+  /**
+   * CodeSuggestion findMany
+   */
+  export type CodeSuggestionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter, which CodeSuggestions to fetch.
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodeSuggestions to fetch.
+     */
+    orderBy?: CodeSuggestionOrderByWithRelationInput | CodeSuggestionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodeSuggestions.
+     */
+    cursor?: CodeSuggestionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodeSuggestions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodeSuggestions.
+     */
+    skip?: number
+    distinct?: CodeSuggestionScalarFieldEnum | CodeSuggestionScalarFieldEnum[]
+  }
+
+  /**
+   * CodeSuggestion create
+   */
+  export type CodeSuggestionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodeSuggestion.
+     */
+    data: XOR<CodeSuggestionCreateInput, CodeSuggestionUncheckedCreateInput>
+  }
+
+  /**
+   * CodeSuggestion createMany
+   */
+  export type CodeSuggestionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodeSuggestions.
+     */
+    data: CodeSuggestionCreateManyInput | CodeSuggestionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CodeSuggestion createManyAndReturn
+   */
+  export type CodeSuggestionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodeSuggestions.
+     */
+    data: CodeSuggestionCreateManyInput | CodeSuggestionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodeSuggestion update
+   */
+  export type CodeSuggestionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodeSuggestion.
+     */
+    data: XOR<CodeSuggestionUpdateInput, CodeSuggestionUncheckedUpdateInput>
+    /**
+     * Choose, which CodeSuggestion to update.
+     */
+    where: CodeSuggestionWhereUniqueInput
+  }
+
+  /**
+   * CodeSuggestion updateMany
+   */
+  export type CodeSuggestionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodeSuggestions.
+     */
+    data: XOR<CodeSuggestionUpdateManyMutationInput, CodeSuggestionUncheckedUpdateManyInput>
+    /**
+     * Filter which CodeSuggestions to update
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * Limit how many CodeSuggestions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodeSuggestion updateManyAndReturn
+   */
+  export type CodeSuggestionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * The data used to update CodeSuggestions.
+     */
+    data: XOR<CodeSuggestionUpdateManyMutationInput, CodeSuggestionUncheckedUpdateManyInput>
+    /**
+     * Filter which CodeSuggestions to update
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * Limit how many CodeSuggestions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodeSuggestion upsert
+   */
+  export type CodeSuggestionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodeSuggestion to update in case it exists.
+     */
+    where: CodeSuggestionWhereUniqueInput
+    /**
+     * In case the CodeSuggestion found by the `where` argument doesn't exist, create a new CodeSuggestion with this data.
+     */
+    create: XOR<CodeSuggestionCreateInput, CodeSuggestionUncheckedCreateInput>
+    /**
+     * In case the CodeSuggestion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodeSuggestionUpdateInput, CodeSuggestionUncheckedUpdateInput>
+  }
+
+  /**
+   * CodeSuggestion delete
+   */
+  export type CodeSuggestionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+    /**
+     * Filter which CodeSuggestion to delete.
+     */
+    where: CodeSuggestionWhereUniqueInput
+  }
+
+  /**
+   * CodeSuggestion deleteMany
+   */
+  export type CodeSuggestionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodeSuggestions to delete
+     */
+    where?: CodeSuggestionWhereInput
+    /**
+     * Limit how many CodeSuggestions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodeSuggestion without action
+   */
+  export type CodeSuggestionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodeSuggestion
+     */
+    select?: CodeSuggestionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodeSuggestion
+     */
+    omit?: CodeSuggestionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodeSuggestionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PatternRule
+   */
+
+  export type AggregatePatternRule = {
+    _count: PatternRuleCountAggregateOutputType | null
+    _avg: PatternRuleAvgAggregateOutputType | null
+    _sum: PatternRuleSumAggregateOutputType | null
+    _min: PatternRuleMinAggregateOutputType | null
+    _max: PatternRuleMaxAggregateOutputType | null
+  }
+
+  export type PatternRuleAvgAggregateOutputType = {
+    priority: number | null
+  }
+
+  export type PatternRuleSumAggregateOutputType = {
+    priority: number | null
+  }
+
+  export type PatternRuleMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    category: $Enums.SuggestionCategory | null
+    type: $Enums.SuggestionType | null
+    description: string | null
+    pattern: string | null
+    suggestion: string | null
+    codeExample: string | null
+    severity: $Enums.SuggestionSeverity | null
+    enabled: boolean | null
+    priority: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PatternRuleMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    category: $Enums.SuggestionCategory | null
+    type: $Enums.SuggestionType | null
+    description: string | null
+    pattern: string | null
+    suggestion: string | null
+    codeExample: string | null
+    severity: $Enums.SuggestionSeverity | null
+    enabled: boolean | null
+    priority: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PatternRuleCountAggregateOutputType = {
+    id: number
+    name: number
+    category: number
+    type: number
+    description: number
+    pattern: number
+    suggestion: number
+    codeExample: number
+    severity: number
+    enabled: number
+    priority: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PatternRuleAvgAggregateInputType = {
+    priority?: true
+  }
+
+  export type PatternRuleSumAggregateInputType = {
+    priority?: true
+  }
+
+  export type PatternRuleMinAggregateInputType = {
+    id?: true
+    name?: true
+    category?: true
+    type?: true
+    description?: true
+    pattern?: true
+    suggestion?: true
+    codeExample?: true
+    severity?: true
+    enabled?: true
+    priority?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PatternRuleMaxAggregateInputType = {
+    id?: true
+    name?: true
+    category?: true
+    type?: true
+    description?: true
+    pattern?: true
+    suggestion?: true
+    codeExample?: true
+    severity?: true
+    enabled?: true
+    priority?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PatternRuleCountAggregateInputType = {
+    id?: true
+    name?: true
+    category?: true
+    type?: true
+    description?: true
+    pattern?: true
+    suggestion?: true
+    codeExample?: true
+    severity?: true
+    enabled?: true
+    priority?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PatternRuleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PatternRule to aggregate.
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PatternRules to fetch.
+     */
+    orderBy?: PatternRuleOrderByWithRelationInput | PatternRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PatternRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PatternRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PatternRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PatternRules
+    **/
+    _count?: true | PatternRuleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PatternRuleAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PatternRuleSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PatternRuleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PatternRuleMaxAggregateInputType
+  }
+
+  export type GetPatternRuleAggregateType<T extends PatternRuleAggregateArgs> = {
+        [P in keyof T & keyof AggregatePatternRule]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePatternRule[P]>
+      : GetScalarType<T[P], AggregatePatternRule[P]>
+  }
+
+
+
+
+  export type PatternRuleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PatternRuleWhereInput
+    orderBy?: PatternRuleOrderByWithAggregationInput | PatternRuleOrderByWithAggregationInput[]
+    by: PatternRuleScalarFieldEnum[] | PatternRuleScalarFieldEnum
+    having?: PatternRuleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PatternRuleCountAggregateInputType | true
+    _avg?: PatternRuleAvgAggregateInputType
+    _sum?: PatternRuleSumAggregateInputType
+    _min?: PatternRuleMinAggregateInputType
+    _max?: PatternRuleMaxAggregateInputType
+  }
+
+  export type PatternRuleGroupByOutputType = {
+    id: string
+    name: string
+    category: $Enums.SuggestionCategory
+    type: $Enums.SuggestionType
+    description: string
+    pattern: string
+    suggestion: string
+    codeExample: string | null
+    severity: $Enums.SuggestionSeverity
+    enabled: boolean
+    priority: number
+    createdAt: Date
+    updatedAt: Date
+    _count: PatternRuleCountAggregateOutputType | null
+    _avg: PatternRuleAvgAggregateOutputType | null
+    _sum: PatternRuleSumAggregateOutputType | null
+    _min: PatternRuleMinAggregateOutputType | null
+    _max: PatternRuleMaxAggregateOutputType | null
+  }
+
+  type GetPatternRuleGroupByPayload<T extends PatternRuleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PatternRuleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PatternRuleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PatternRuleGroupByOutputType[P]>
+            : GetScalarType<T[P], PatternRuleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PatternRuleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    category?: boolean
+    type?: boolean
+    description?: boolean
+    pattern?: boolean
+    suggestion?: boolean
+    codeExample?: boolean
+    severity?: boolean
+    enabled?: boolean
+    priority?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["patternRule"]>
+
+  export type PatternRuleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    category?: boolean
+    type?: boolean
+    description?: boolean
+    pattern?: boolean
+    suggestion?: boolean
+    codeExample?: boolean
+    severity?: boolean
+    enabled?: boolean
+    priority?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["patternRule"]>
+
+  export type PatternRuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    category?: boolean
+    type?: boolean
+    description?: boolean
+    pattern?: boolean
+    suggestion?: boolean
+    codeExample?: boolean
+    severity?: boolean
+    enabled?: boolean
+    priority?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["patternRule"]>
+
+  export type PatternRuleSelectScalar = {
+    id?: boolean
+    name?: boolean
+    category?: boolean
+    type?: boolean
+    description?: boolean
+    pattern?: boolean
+    suggestion?: boolean
+    codeExample?: boolean
+    severity?: boolean
+    enabled?: boolean
+    priority?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PatternRuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "category" | "type" | "description" | "pattern" | "suggestion" | "codeExample" | "severity" | "enabled" | "priority" | "createdAt" | "updatedAt", ExtArgs["result"]["patternRule"]>
+
+  export type $PatternRulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PatternRule"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      category: $Enums.SuggestionCategory
+      type: $Enums.SuggestionType
+      description: string
+      pattern: string
+      suggestion: string
+      codeExample: string | null
+      severity: $Enums.SuggestionSeverity
+      enabled: boolean
+      priority: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["patternRule"]>
+    composites: {}
+  }
+
+  type PatternRuleGetPayload<S extends boolean | null | undefined | PatternRuleDefaultArgs> = $Result.GetResult<Prisma.$PatternRulePayload, S>
+
+  type PatternRuleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PatternRuleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PatternRuleCountAggregateInputType | true
+    }
+
+  export interface PatternRuleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PatternRule'], meta: { name: 'PatternRule' } }
+    /**
+     * Find zero or one PatternRule that matches the filter.
+     * @param {PatternRuleFindUniqueArgs} args - Arguments to find a PatternRule
+     * @example
+     * // Get one PatternRule
+     * const patternRule = await prisma.patternRule.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PatternRuleFindUniqueArgs>(args: SelectSubset<T, PatternRuleFindUniqueArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PatternRule that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PatternRuleFindUniqueOrThrowArgs} args - Arguments to find a PatternRule
+     * @example
+     * // Get one PatternRule
+     * const patternRule = await prisma.patternRule.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PatternRuleFindUniqueOrThrowArgs>(args: SelectSubset<T, PatternRuleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PatternRule that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleFindFirstArgs} args - Arguments to find a PatternRule
+     * @example
+     * // Get one PatternRule
+     * const patternRule = await prisma.patternRule.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PatternRuleFindFirstArgs>(args?: SelectSubset<T, PatternRuleFindFirstArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PatternRule that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleFindFirstOrThrowArgs} args - Arguments to find a PatternRule
+     * @example
+     * // Get one PatternRule
+     * const patternRule = await prisma.patternRule.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PatternRuleFindFirstOrThrowArgs>(args?: SelectSubset<T, PatternRuleFindFirstOrThrowArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PatternRules that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PatternRules
+     * const patternRules = await prisma.patternRule.findMany()
+     * 
+     * // Get first 10 PatternRules
+     * const patternRules = await prisma.patternRule.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const patternRuleWithIdOnly = await prisma.patternRule.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PatternRuleFindManyArgs>(args?: SelectSubset<T, PatternRuleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PatternRule.
+     * @param {PatternRuleCreateArgs} args - Arguments to create a PatternRule.
+     * @example
+     * // Create one PatternRule
+     * const PatternRule = await prisma.patternRule.create({
+     *   data: {
+     *     // ... data to create a PatternRule
+     *   }
+     * })
+     * 
+     */
+    create<T extends PatternRuleCreateArgs>(args: SelectSubset<T, PatternRuleCreateArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PatternRules.
+     * @param {PatternRuleCreateManyArgs} args - Arguments to create many PatternRules.
+     * @example
+     * // Create many PatternRules
+     * const patternRule = await prisma.patternRule.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PatternRuleCreateManyArgs>(args?: SelectSubset<T, PatternRuleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PatternRules and returns the data saved in the database.
+     * @param {PatternRuleCreateManyAndReturnArgs} args - Arguments to create many PatternRules.
+     * @example
+     * // Create many PatternRules
+     * const patternRule = await prisma.patternRule.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PatternRules and only return the `id`
+     * const patternRuleWithIdOnly = await prisma.patternRule.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PatternRuleCreateManyAndReturnArgs>(args?: SelectSubset<T, PatternRuleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PatternRule.
+     * @param {PatternRuleDeleteArgs} args - Arguments to delete one PatternRule.
+     * @example
+     * // Delete one PatternRule
+     * const PatternRule = await prisma.patternRule.delete({
+     *   where: {
+     *     // ... filter to delete one PatternRule
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PatternRuleDeleteArgs>(args: SelectSubset<T, PatternRuleDeleteArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PatternRule.
+     * @param {PatternRuleUpdateArgs} args - Arguments to update one PatternRule.
+     * @example
+     * // Update one PatternRule
+     * const patternRule = await prisma.patternRule.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PatternRuleUpdateArgs>(args: SelectSubset<T, PatternRuleUpdateArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PatternRules.
+     * @param {PatternRuleDeleteManyArgs} args - Arguments to filter PatternRules to delete.
+     * @example
+     * // Delete a few PatternRules
+     * const { count } = await prisma.patternRule.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PatternRuleDeleteManyArgs>(args?: SelectSubset<T, PatternRuleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PatternRules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PatternRules
+     * const patternRule = await prisma.patternRule.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PatternRuleUpdateManyArgs>(args: SelectSubset<T, PatternRuleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PatternRules and returns the data updated in the database.
+     * @param {PatternRuleUpdateManyAndReturnArgs} args - Arguments to update many PatternRules.
+     * @example
+     * // Update many PatternRules
+     * const patternRule = await prisma.patternRule.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PatternRules and only return the `id`
+     * const patternRuleWithIdOnly = await prisma.patternRule.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PatternRuleUpdateManyAndReturnArgs>(args: SelectSubset<T, PatternRuleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PatternRule.
+     * @param {PatternRuleUpsertArgs} args - Arguments to update or create a PatternRule.
+     * @example
+     * // Update or create a PatternRule
+     * const patternRule = await prisma.patternRule.upsert({
+     *   create: {
+     *     // ... data to create a PatternRule
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PatternRule we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PatternRuleUpsertArgs>(args: SelectSubset<T, PatternRuleUpsertArgs<ExtArgs>>): Prisma__PatternRuleClient<$Result.GetResult<Prisma.$PatternRulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PatternRules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleCountArgs} args - Arguments to filter PatternRules to count.
+     * @example
+     * // Count the number of PatternRules
+     * const count = await prisma.patternRule.count({
+     *   where: {
+     *     // ... the filter for the PatternRules we want to count
+     *   }
+     * })
+    **/
+    count<T extends PatternRuleCountArgs>(
+      args?: Subset<T, PatternRuleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PatternRuleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PatternRule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PatternRuleAggregateArgs>(args: Subset<T, PatternRuleAggregateArgs>): Prisma.PrismaPromise<GetPatternRuleAggregateType<T>>
+
+    /**
+     * Group by PatternRule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PatternRuleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PatternRuleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PatternRuleGroupByArgs['orderBy'] }
+        : { orderBy?: PatternRuleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PatternRuleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPatternRuleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PatternRule model
+   */
+  readonly fields: PatternRuleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PatternRule.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PatternRuleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PatternRule model
+   */
+  interface PatternRuleFieldRefs {
+    readonly id: FieldRef<"PatternRule", 'String'>
+    readonly name: FieldRef<"PatternRule", 'String'>
+    readonly category: FieldRef<"PatternRule", 'SuggestionCategory'>
+    readonly type: FieldRef<"PatternRule", 'SuggestionType'>
+    readonly description: FieldRef<"PatternRule", 'String'>
+    readonly pattern: FieldRef<"PatternRule", 'String'>
+    readonly suggestion: FieldRef<"PatternRule", 'String'>
+    readonly codeExample: FieldRef<"PatternRule", 'String'>
+    readonly severity: FieldRef<"PatternRule", 'SuggestionSeverity'>
+    readonly enabled: FieldRef<"PatternRule", 'Boolean'>
+    readonly priority: FieldRef<"PatternRule", 'Int'>
+    readonly createdAt: FieldRef<"PatternRule", 'DateTime'>
+    readonly updatedAt: FieldRef<"PatternRule", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PatternRule findUnique
+   */
+  export type PatternRuleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter, which PatternRule to fetch.
+     */
+    where: PatternRuleWhereUniqueInput
+  }
+
+  /**
+   * PatternRule findUniqueOrThrow
+   */
+  export type PatternRuleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter, which PatternRule to fetch.
+     */
+    where: PatternRuleWhereUniqueInput
+  }
+
+  /**
+   * PatternRule findFirst
+   */
+  export type PatternRuleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter, which PatternRule to fetch.
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PatternRules to fetch.
+     */
+    orderBy?: PatternRuleOrderByWithRelationInput | PatternRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PatternRules.
+     */
+    cursor?: PatternRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PatternRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PatternRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PatternRules.
+     */
+    distinct?: PatternRuleScalarFieldEnum | PatternRuleScalarFieldEnum[]
+  }
+
+  /**
+   * PatternRule findFirstOrThrow
+   */
+  export type PatternRuleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter, which PatternRule to fetch.
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PatternRules to fetch.
+     */
+    orderBy?: PatternRuleOrderByWithRelationInput | PatternRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PatternRules.
+     */
+    cursor?: PatternRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PatternRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PatternRules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PatternRules.
+     */
+    distinct?: PatternRuleScalarFieldEnum | PatternRuleScalarFieldEnum[]
+  }
+
+  /**
+   * PatternRule findMany
+   */
+  export type PatternRuleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter, which PatternRules to fetch.
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PatternRules to fetch.
+     */
+    orderBy?: PatternRuleOrderByWithRelationInput | PatternRuleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PatternRules.
+     */
+    cursor?: PatternRuleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PatternRules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PatternRules.
+     */
+    skip?: number
+    distinct?: PatternRuleScalarFieldEnum | PatternRuleScalarFieldEnum[]
+  }
+
+  /**
+   * PatternRule create
+   */
+  export type PatternRuleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PatternRule.
+     */
+    data: XOR<PatternRuleCreateInput, PatternRuleUncheckedCreateInput>
+  }
+
+  /**
+   * PatternRule createMany
+   */
+  export type PatternRuleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PatternRules.
+     */
+    data: PatternRuleCreateManyInput | PatternRuleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PatternRule createManyAndReturn
+   */
+  export type PatternRuleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * The data used to create many PatternRules.
+     */
+    data: PatternRuleCreateManyInput | PatternRuleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PatternRule update
+   */
+  export type PatternRuleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PatternRule.
+     */
+    data: XOR<PatternRuleUpdateInput, PatternRuleUncheckedUpdateInput>
+    /**
+     * Choose, which PatternRule to update.
+     */
+    where: PatternRuleWhereUniqueInput
+  }
+
+  /**
+   * PatternRule updateMany
+   */
+  export type PatternRuleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PatternRules.
+     */
+    data: XOR<PatternRuleUpdateManyMutationInput, PatternRuleUncheckedUpdateManyInput>
+    /**
+     * Filter which PatternRules to update
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * Limit how many PatternRules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PatternRule updateManyAndReturn
+   */
+  export type PatternRuleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * The data used to update PatternRules.
+     */
+    data: XOR<PatternRuleUpdateManyMutationInput, PatternRuleUncheckedUpdateManyInput>
+    /**
+     * Filter which PatternRules to update
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * Limit how many PatternRules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PatternRule upsert
+   */
+  export type PatternRuleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PatternRule to update in case it exists.
+     */
+    where: PatternRuleWhereUniqueInput
+    /**
+     * In case the PatternRule found by the `where` argument doesn't exist, create a new PatternRule with this data.
+     */
+    create: XOR<PatternRuleCreateInput, PatternRuleUncheckedCreateInput>
+    /**
+     * In case the PatternRule was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PatternRuleUpdateInput, PatternRuleUncheckedUpdateInput>
+  }
+
+  /**
+   * PatternRule delete
+   */
+  export type PatternRuleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+    /**
+     * Filter which PatternRule to delete.
+     */
+    where: PatternRuleWhereUniqueInput
+  }
+
+  /**
+   * PatternRule deleteMany
+   */
+  export type PatternRuleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PatternRules to delete
+     */
+    where?: PatternRuleWhereInput
+    /**
+     * Limit how many PatternRules to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PatternRule without action
+   */
+  export type PatternRuleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PatternRule
+     */
+    select?: PatternRuleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PatternRule
+     */
+    omit?: PatternRuleOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserPreference
+   */
+
+  export type AggregateUserPreference = {
+    _count: UserPreferenceCountAggregateOutputType | null
+    _min: UserPreferenceMinAggregateOutputType | null
+    _max: UserPreferenceMaxAggregateOutputType | null
+  }
+
+  export type UserPreferenceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    category: $Enums.SuggestionCategory | null
+    enabled: boolean | null
+    frequency: $Enums.PreferenceFrequency | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserPreferenceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    category: $Enums.SuggestionCategory | null
+    enabled: boolean | null
+    frequency: $Enums.PreferenceFrequency | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserPreferenceCountAggregateOutputType = {
+    id: number
+    userId: number
+    category: number
+    enabled: number
+    frequency: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type UserPreferenceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    category?: true
+    enabled?: true
+    frequency?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserPreferenceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    category?: true
+    enabled?: true
+    frequency?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserPreferenceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    category?: true
+    enabled?: true
+    frequency?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type UserPreferenceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserPreference to aggregate.
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPreferences to fetch.
+     */
+    orderBy?: UserPreferenceOrderByWithRelationInput | UserPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserPreferences
+    **/
+    _count?: true | UserPreferenceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserPreferenceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserPreferenceMaxAggregateInputType
+  }
+
+  export type GetUserPreferenceAggregateType<T extends UserPreferenceAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserPreference]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserPreference[P]>
+      : GetScalarType<T[P], AggregateUserPreference[P]>
+  }
+
+
+
+
+  export type UserPreferenceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserPreferenceWhereInput
+    orderBy?: UserPreferenceOrderByWithAggregationInput | UserPreferenceOrderByWithAggregationInput[]
+    by: UserPreferenceScalarFieldEnum[] | UserPreferenceScalarFieldEnum
+    having?: UserPreferenceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserPreferenceCountAggregateInputType | true
+    _min?: UserPreferenceMinAggregateInputType
+    _max?: UserPreferenceMaxAggregateInputType
+  }
+
+  export type UserPreferenceGroupByOutputType = {
+    id: string
+    userId: string
+    category: $Enums.SuggestionCategory
+    enabled: boolean
+    frequency: $Enums.PreferenceFrequency
+    createdAt: Date
+    updatedAt: Date
+    _count: UserPreferenceCountAggregateOutputType | null
+    _min: UserPreferenceMinAggregateOutputType | null
+    _max: UserPreferenceMaxAggregateOutputType | null
+  }
+
+  type GetUserPreferenceGroupByPayload<T extends UserPreferenceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserPreferenceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserPreferenceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserPreferenceGroupByOutputType[P]>
+            : GetScalarType<T[P], UserPreferenceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserPreferenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    category?: boolean
+    enabled?: boolean
+    frequency?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userPreference"]>
+
+  export type UserPreferenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    category?: boolean
+    enabled?: boolean
+    frequency?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userPreference"]>
+
+  export type UserPreferenceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    category?: boolean
+    enabled?: boolean
+    frequency?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userPreference"]>
+
+  export type UserPreferenceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    category?: boolean
+    enabled?: boolean
+    frequency?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type UserPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "category" | "enabled" | "frequency" | "createdAt" | "updatedAt", ExtArgs["result"]["userPreference"]>
+
+  export type $UserPreferencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserPreference"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      category: $Enums.SuggestionCategory
+      enabled: boolean
+      frequency: $Enums.PreferenceFrequency
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["userPreference"]>
+    composites: {}
+  }
+
+  type UserPreferenceGetPayload<S extends boolean | null | undefined | UserPreferenceDefaultArgs> = $Result.GetResult<Prisma.$UserPreferencePayload, S>
+
+  type UserPreferenceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserPreferenceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserPreferenceCountAggregateInputType | true
+    }
+
+  export interface UserPreferenceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserPreference'], meta: { name: 'UserPreference' } }
+    /**
+     * Find zero or one UserPreference that matches the filter.
+     * @param {UserPreferenceFindUniqueArgs} args - Arguments to find a UserPreference
+     * @example
+     * // Get one UserPreference
+     * const userPreference = await prisma.userPreference.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserPreferenceFindUniqueArgs>(args: SelectSubset<T, UserPreferenceFindUniqueArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserPreference that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserPreferenceFindUniqueOrThrowArgs} args - Arguments to find a UserPreference
+     * @example
+     * // Get one UserPreference
+     * const userPreference = await prisma.userPreference.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserPreferenceFindUniqueOrThrowArgs>(args: SelectSubset<T, UserPreferenceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserPreference that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceFindFirstArgs} args - Arguments to find a UserPreference
+     * @example
+     * // Get one UserPreference
+     * const userPreference = await prisma.userPreference.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserPreferenceFindFirstArgs>(args?: SelectSubset<T, UserPreferenceFindFirstArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserPreference that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceFindFirstOrThrowArgs} args - Arguments to find a UserPreference
+     * @example
+     * // Get one UserPreference
+     * const userPreference = await prisma.userPreference.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserPreferenceFindFirstOrThrowArgs>(args?: SelectSubset<T, UserPreferenceFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserPreferences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserPreferences
+     * const userPreferences = await prisma.userPreference.findMany()
+     * 
+     * // Get first 10 UserPreferences
+     * const userPreferences = await prisma.userPreference.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userPreferenceWithIdOnly = await prisma.userPreference.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserPreferenceFindManyArgs>(args?: SelectSubset<T, UserPreferenceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserPreference.
+     * @param {UserPreferenceCreateArgs} args - Arguments to create a UserPreference.
+     * @example
+     * // Create one UserPreference
+     * const UserPreference = await prisma.userPreference.create({
+     *   data: {
+     *     // ... data to create a UserPreference
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserPreferenceCreateArgs>(args: SelectSubset<T, UserPreferenceCreateArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserPreferences.
+     * @param {UserPreferenceCreateManyArgs} args - Arguments to create many UserPreferences.
+     * @example
+     * // Create many UserPreferences
+     * const userPreference = await prisma.userPreference.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserPreferenceCreateManyArgs>(args?: SelectSubset<T, UserPreferenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserPreferences and returns the data saved in the database.
+     * @param {UserPreferenceCreateManyAndReturnArgs} args - Arguments to create many UserPreferences.
+     * @example
+     * // Create many UserPreferences
+     * const userPreference = await prisma.userPreference.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserPreferences and only return the `id`
+     * const userPreferenceWithIdOnly = await prisma.userPreference.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserPreferenceCreateManyAndReturnArgs>(args?: SelectSubset<T, UserPreferenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserPreference.
+     * @param {UserPreferenceDeleteArgs} args - Arguments to delete one UserPreference.
+     * @example
+     * // Delete one UserPreference
+     * const UserPreference = await prisma.userPreference.delete({
+     *   where: {
+     *     // ... filter to delete one UserPreference
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserPreferenceDeleteArgs>(args: SelectSubset<T, UserPreferenceDeleteArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserPreference.
+     * @param {UserPreferenceUpdateArgs} args - Arguments to update one UserPreference.
+     * @example
+     * // Update one UserPreference
+     * const userPreference = await prisma.userPreference.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserPreferenceUpdateArgs>(args: SelectSubset<T, UserPreferenceUpdateArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserPreferences.
+     * @param {UserPreferenceDeleteManyArgs} args - Arguments to filter UserPreferences to delete.
+     * @example
+     * // Delete a few UserPreferences
+     * const { count } = await prisma.userPreference.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserPreferenceDeleteManyArgs>(args?: SelectSubset<T, UserPreferenceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserPreferences
+     * const userPreference = await prisma.userPreference.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserPreferenceUpdateManyArgs>(args: SelectSubset<T, UserPreferenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserPreferences and returns the data updated in the database.
+     * @param {UserPreferenceUpdateManyAndReturnArgs} args - Arguments to update many UserPreferences.
+     * @example
+     * // Update many UserPreferences
+     * const userPreference = await prisma.userPreference.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserPreferences and only return the `id`
+     * const userPreferenceWithIdOnly = await prisma.userPreference.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserPreferenceUpdateManyAndReturnArgs>(args: SelectSubset<T, UserPreferenceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserPreference.
+     * @param {UserPreferenceUpsertArgs} args - Arguments to update or create a UserPreference.
+     * @example
+     * // Update or create a UserPreference
+     * const userPreference = await prisma.userPreference.upsert({
+     *   create: {
+     *     // ... data to create a UserPreference
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserPreference we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserPreferenceUpsertArgs>(args: SelectSubset<T, UserPreferenceUpsertArgs<ExtArgs>>): Prisma__UserPreferenceClient<$Result.GetResult<Prisma.$UserPreferencePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceCountArgs} args - Arguments to filter UserPreferences to count.
+     * @example
+     * // Count the number of UserPreferences
+     * const count = await prisma.userPreference.count({
+     *   where: {
+     *     // ... the filter for the UserPreferences we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserPreferenceCountArgs>(
+      args?: Subset<T, UserPreferenceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserPreferenceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserPreferenceAggregateArgs>(args: Subset<T, UserPreferenceAggregateArgs>): Prisma.PrismaPromise<GetUserPreferenceAggregateType<T>>
+
+    /**
+     * Group by UserPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPreferenceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserPreferenceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserPreferenceGroupByArgs['orderBy'] }
+        : { orderBy?: UserPreferenceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserPreferenceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserPreferenceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserPreference model
+   */
+  readonly fields: UserPreferenceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserPreference.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserPreferenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserPreference model
+   */
+  interface UserPreferenceFieldRefs {
+    readonly id: FieldRef<"UserPreference", 'String'>
+    readonly userId: FieldRef<"UserPreference", 'String'>
+    readonly category: FieldRef<"UserPreference", 'SuggestionCategory'>
+    readonly enabled: FieldRef<"UserPreference", 'Boolean'>
+    readonly frequency: FieldRef<"UserPreference", 'PreferenceFrequency'>
+    readonly createdAt: FieldRef<"UserPreference", 'DateTime'>
+    readonly updatedAt: FieldRef<"UserPreference", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserPreference findUnique
+   */
+  export type UserPreferenceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter, which UserPreference to fetch.
+     */
+    where: UserPreferenceWhereUniqueInput
+  }
+
+  /**
+   * UserPreference findUniqueOrThrow
+   */
+  export type UserPreferenceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter, which UserPreference to fetch.
+     */
+    where: UserPreferenceWhereUniqueInput
+  }
+
+  /**
+   * UserPreference findFirst
+   */
+  export type UserPreferenceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter, which UserPreference to fetch.
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPreferences to fetch.
+     */
+    orderBy?: UserPreferenceOrderByWithRelationInput | UserPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserPreferences.
+     */
+    cursor?: UserPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserPreferences.
+     */
+    distinct?: UserPreferenceScalarFieldEnum | UserPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * UserPreference findFirstOrThrow
+   */
+  export type UserPreferenceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter, which UserPreference to fetch.
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPreferences to fetch.
+     */
+    orderBy?: UserPreferenceOrderByWithRelationInput | UserPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserPreferences.
+     */
+    cursor?: UserPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserPreferences.
+     */
+    distinct?: UserPreferenceScalarFieldEnum | UserPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * UserPreference findMany
+   */
+  export type UserPreferenceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter, which UserPreferences to fetch.
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPreferences to fetch.
+     */
+    orderBy?: UserPreferenceOrderByWithRelationInput | UserPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserPreferences.
+     */
+    cursor?: UserPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPreferences.
+     */
+    skip?: number
+    distinct?: UserPreferenceScalarFieldEnum | UserPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * UserPreference create
+   */
+  export type UserPreferenceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * The data needed to create a UserPreference.
+     */
+    data: XOR<UserPreferenceCreateInput, UserPreferenceUncheckedCreateInput>
+  }
+
+  /**
+   * UserPreference createMany
+   */
+  export type UserPreferenceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserPreferences.
+     */
+    data: UserPreferenceCreateManyInput | UserPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserPreference createManyAndReturn
+   */
+  export type UserPreferenceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserPreferences.
+     */
+    data: UserPreferenceCreateManyInput | UserPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserPreference update
+   */
+  export type UserPreferenceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * The data needed to update a UserPreference.
+     */
+    data: XOR<UserPreferenceUpdateInput, UserPreferenceUncheckedUpdateInput>
+    /**
+     * Choose, which UserPreference to update.
+     */
+    where: UserPreferenceWhereUniqueInput
+  }
+
+  /**
+   * UserPreference updateMany
+   */
+  export type UserPreferenceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserPreferences.
+     */
+    data: XOR<UserPreferenceUpdateManyMutationInput, UserPreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which UserPreferences to update
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * Limit how many UserPreferences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserPreference updateManyAndReturn
+   */
+  export type UserPreferenceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to update UserPreferences.
+     */
+    data: XOR<UserPreferenceUpdateManyMutationInput, UserPreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which UserPreferences to update
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * Limit how many UserPreferences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserPreference upsert
+   */
+  export type UserPreferenceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * The filter to search for the UserPreference to update in case it exists.
+     */
+    where: UserPreferenceWhereUniqueInput
+    /**
+     * In case the UserPreference found by the `where` argument doesn't exist, create a new UserPreference with this data.
+     */
+    create: XOR<UserPreferenceCreateInput, UserPreferenceUncheckedCreateInput>
+    /**
+     * In case the UserPreference was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserPreferenceUpdateInput, UserPreferenceUncheckedUpdateInput>
+  }
+
+  /**
+   * UserPreference delete
+   */
+  export type UserPreferenceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+    /**
+     * Filter which UserPreference to delete.
+     */
+    where: UserPreferenceWhereUniqueInput
+  }
+
+  /**
+   * UserPreference deleteMany
+   */
+  export type UserPreferenceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserPreferences to delete
+     */
+    where?: UserPreferenceWhereInput
+    /**
+     * Limit how many UserPreferences to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserPreference without action
+   */
+  export type UserPreferenceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPreference
+     */
+    select?: UserPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPreference
+     */
+    omit?: UserPreferenceOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5521,6 +9293,60 @@ export namespace Prisma {
   export type UsageScalarFieldEnum = (typeof UsageScalarFieldEnum)[keyof typeof UsageScalarFieldEnum]
 
 
+  export const CodeSuggestionScalarFieldEnum: {
+    id: 'id',
+    projectId: 'projectId',
+    type: 'type',
+    category: 'category',
+    title: 'title',
+    description: 'description',
+    codeExample: 'codeExample',
+    filePath: 'filePath',
+    lineNumber: 'lineNumber',
+    severity: 'severity',
+    status: 'status',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    dismissedAt: 'dismissedAt',
+    appliedAt: 'appliedAt'
+  };
+
+  export type CodeSuggestionScalarFieldEnum = (typeof CodeSuggestionScalarFieldEnum)[keyof typeof CodeSuggestionScalarFieldEnum]
+
+
+  export const PatternRuleScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    category: 'category',
+    type: 'type',
+    description: 'description',
+    pattern: 'pattern',
+    suggestion: 'suggestion',
+    codeExample: 'codeExample',
+    severity: 'severity',
+    enabled: 'enabled',
+    priority: 'priority',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PatternRuleScalarFieldEnum = (typeof PatternRuleScalarFieldEnum)[keyof typeof PatternRuleScalarFieldEnum]
+
+
+  export const UserPreferenceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    category: 'category',
+    enabled: 'enabled',
+    frequency: 'frequency',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type UserPreferenceScalarFieldEnum = (typeof UserPreferenceScalarFieldEnum)[keyof typeof UserPreferenceScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -5534,6 +9360,14 @@ export namespace Prisma {
   };
 
   export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -5651,6 +9485,83 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'SuggestionType'
+   */
+  export type EnumSuggestionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionType'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionType[]'
+   */
+  export type ListEnumSuggestionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionCategory'
+   */
+  export type EnumSuggestionCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionCategory'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionCategory[]'
+   */
+  export type ListEnumSuggestionCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionCategory[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionSeverity'
+   */
+  export type EnumSuggestionSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionSeverity'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionSeverity[]'
+   */
+  export type ListEnumSuggestionSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionSeverity[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionStatus'
+   */
+  export type EnumSuggestionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'SuggestionStatus[]'
+   */
+  export type ListEnumSuggestionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SuggestionStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'PreferenceFrequency'
+   */
+  export type EnumPreferenceFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreferenceFrequency'>
+    
+
+
+  /**
+   * Reference to a field of type 'PreferenceFrequency[]'
+   */
+  export type ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreferenceFrequency[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -5677,6 +9588,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     messages?: MessageListRelationFilter
+    codeSuggestions?: CodeSuggestionListRelationFilter
   }
 
   export type ProjectOrderByWithRelationInput = {
@@ -5686,6 +9598,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     messages?: MessageOrderByRelationAggregateInput
+    codeSuggestions?: CodeSuggestionOrderByRelationAggregateInput
   }
 
   export type ProjectWhereUniqueInput = Prisma.AtLeast<{
@@ -5698,6 +9611,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     messages?: MessageListRelationFilter
+    codeSuggestions?: CodeSuggestionListRelationFilter
   }, "id">
 
   export type ProjectOrderByWithAggregationInput = {
@@ -5899,6 +9813,275 @@ export namespace Prisma {
     expire?: DateTimeNullableWithAggregatesFilter<"Usage"> | Date | string | null
   }
 
+  export type CodeSuggestionWhereInput = {
+    AND?: CodeSuggestionWhereInput | CodeSuggestionWhereInput[]
+    OR?: CodeSuggestionWhereInput[]
+    NOT?: CodeSuggestionWhereInput | CodeSuggestionWhereInput[]
+    id?: StringFilter<"CodeSuggestion"> | string
+    projectId?: StringFilter<"CodeSuggestion"> | string
+    type?: EnumSuggestionTypeFilter<"CodeSuggestion"> | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFilter<"CodeSuggestion"> | $Enums.SuggestionCategory
+    title?: StringFilter<"CodeSuggestion"> | string
+    description?: StringFilter<"CodeSuggestion"> | string
+    codeExample?: StringNullableFilter<"CodeSuggestion"> | string | null
+    filePath?: StringNullableFilter<"CodeSuggestion"> | string | null
+    lineNumber?: IntNullableFilter<"CodeSuggestion"> | number | null
+    severity?: EnumSuggestionSeverityFilter<"CodeSuggestion"> | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFilter<"CodeSuggestion"> | $Enums.SuggestionStatus
+    metadata?: JsonNullableFilter<"CodeSuggestion">
+    createdAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    updatedAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    dismissedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+    appliedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+  }
+
+  export type CodeSuggestionOrderByWithRelationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    category?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    codeExample?: SortOrderInput | SortOrder
+    filePath?: SortOrderInput | SortOrder
+    lineNumber?: SortOrderInput | SortOrder
+    severity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    dismissedAt?: SortOrderInput | SortOrder
+    appliedAt?: SortOrderInput | SortOrder
+    project?: ProjectOrderByWithRelationInput
+  }
+
+  export type CodeSuggestionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CodeSuggestionWhereInput | CodeSuggestionWhereInput[]
+    OR?: CodeSuggestionWhereInput[]
+    NOT?: CodeSuggestionWhereInput | CodeSuggestionWhereInput[]
+    projectId?: StringFilter<"CodeSuggestion"> | string
+    type?: EnumSuggestionTypeFilter<"CodeSuggestion"> | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFilter<"CodeSuggestion"> | $Enums.SuggestionCategory
+    title?: StringFilter<"CodeSuggestion"> | string
+    description?: StringFilter<"CodeSuggestion"> | string
+    codeExample?: StringNullableFilter<"CodeSuggestion"> | string | null
+    filePath?: StringNullableFilter<"CodeSuggestion"> | string | null
+    lineNumber?: IntNullableFilter<"CodeSuggestion"> | number | null
+    severity?: EnumSuggestionSeverityFilter<"CodeSuggestion"> | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFilter<"CodeSuggestion"> | $Enums.SuggestionStatus
+    metadata?: JsonNullableFilter<"CodeSuggestion">
+    createdAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    updatedAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    dismissedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+    appliedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+  }, "id">
+
+  export type CodeSuggestionOrderByWithAggregationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    category?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    codeExample?: SortOrderInput | SortOrder
+    filePath?: SortOrderInput | SortOrder
+    lineNumber?: SortOrderInput | SortOrder
+    severity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    dismissedAt?: SortOrderInput | SortOrder
+    appliedAt?: SortOrderInput | SortOrder
+    _count?: CodeSuggestionCountOrderByAggregateInput
+    _avg?: CodeSuggestionAvgOrderByAggregateInput
+    _max?: CodeSuggestionMaxOrderByAggregateInput
+    _min?: CodeSuggestionMinOrderByAggregateInput
+    _sum?: CodeSuggestionSumOrderByAggregateInput
+  }
+
+  export type CodeSuggestionScalarWhereWithAggregatesInput = {
+    AND?: CodeSuggestionScalarWhereWithAggregatesInput | CodeSuggestionScalarWhereWithAggregatesInput[]
+    OR?: CodeSuggestionScalarWhereWithAggregatesInput[]
+    NOT?: CodeSuggestionScalarWhereWithAggregatesInput | CodeSuggestionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CodeSuggestion"> | string
+    projectId?: StringWithAggregatesFilter<"CodeSuggestion"> | string
+    type?: EnumSuggestionTypeWithAggregatesFilter<"CodeSuggestion"> | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryWithAggregatesFilter<"CodeSuggestion"> | $Enums.SuggestionCategory
+    title?: StringWithAggregatesFilter<"CodeSuggestion"> | string
+    description?: StringWithAggregatesFilter<"CodeSuggestion"> | string
+    codeExample?: StringNullableWithAggregatesFilter<"CodeSuggestion"> | string | null
+    filePath?: StringNullableWithAggregatesFilter<"CodeSuggestion"> | string | null
+    lineNumber?: IntNullableWithAggregatesFilter<"CodeSuggestion"> | number | null
+    severity?: EnumSuggestionSeverityWithAggregatesFilter<"CodeSuggestion"> | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusWithAggregatesFilter<"CodeSuggestion"> | $Enums.SuggestionStatus
+    metadata?: JsonNullableWithAggregatesFilter<"CodeSuggestion">
+    createdAt?: DateTimeWithAggregatesFilter<"CodeSuggestion"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CodeSuggestion"> | Date | string
+    dismissedAt?: DateTimeNullableWithAggregatesFilter<"CodeSuggestion"> | Date | string | null
+    appliedAt?: DateTimeNullableWithAggregatesFilter<"CodeSuggestion"> | Date | string | null
+  }
+
+  export type PatternRuleWhereInput = {
+    AND?: PatternRuleWhereInput | PatternRuleWhereInput[]
+    OR?: PatternRuleWhereInput[]
+    NOT?: PatternRuleWhereInput | PatternRuleWhereInput[]
+    id?: StringFilter<"PatternRule"> | string
+    name?: StringFilter<"PatternRule"> | string
+    category?: EnumSuggestionCategoryFilter<"PatternRule"> | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFilter<"PatternRule"> | $Enums.SuggestionType
+    description?: StringFilter<"PatternRule"> | string
+    pattern?: StringFilter<"PatternRule"> | string
+    suggestion?: StringFilter<"PatternRule"> | string
+    codeExample?: StringNullableFilter<"PatternRule"> | string | null
+    severity?: EnumSuggestionSeverityFilter<"PatternRule"> | $Enums.SuggestionSeverity
+    enabled?: BoolFilter<"PatternRule"> | boolean
+    priority?: IntFilter<"PatternRule"> | number
+    createdAt?: DateTimeFilter<"PatternRule"> | Date | string
+    updatedAt?: DateTimeFilter<"PatternRule"> | Date | string
+  }
+
+  export type PatternRuleOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    category?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
+    pattern?: SortOrder
+    suggestion?: SortOrder
+    codeExample?: SortOrderInput | SortOrder
+    severity?: SortOrder
+    enabled?: SortOrder
+    priority?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PatternRuleWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: PatternRuleWhereInput | PatternRuleWhereInput[]
+    OR?: PatternRuleWhereInput[]
+    NOT?: PatternRuleWhereInput | PatternRuleWhereInput[]
+    category?: EnumSuggestionCategoryFilter<"PatternRule"> | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFilter<"PatternRule"> | $Enums.SuggestionType
+    description?: StringFilter<"PatternRule"> | string
+    pattern?: StringFilter<"PatternRule"> | string
+    suggestion?: StringFilter<"PatternRule"> | string
+    codeExample?: StringNullableFilter<"PatternRule"> | string | null
+    severity?: EnumSuggestionSeverityFilter<"PatternRule"> | $Enums.SuggestionSeverity
+    enabled?: BoolFilter<"PatternRule"> | boolean
+    priority?: IntFilter<"PatternRule"> | number
+    createdAt?: DateTimeFilter<"PatternRule"> | Date | string
+    updatedAt?: DateTimeFilter<"PatternRule"> | Date | string
+  }, "id" | "name">
+
+  export type PatternRuleOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    category?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
+    pattern?: SortOrder
+    suggestion?: SortOrder
+    codeExample?: SortOrderInput | SortOrder
+    severity?: SortOrder
+    enabled?: SortOrder
+    priority?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PatternRuleCountOrderByAggregateInput
+    _avg?: PatternRuleAvgOrderByAggregateInput
+    _max?: PatternRuleMaxOrderByAggregateInput
+    _min?: PatternRuleMinOrderByAggregateInput
+    _sum?: PatternRuleSumOrderByAggregateInput
+  }
+
+  export type PatternRuleScalarWhereWithAggregatesInput = {
+    AND?: PatternRuleScalarWhereWithAggregatesInput | PatternRuleScalarWhereWithAggregatesInput[]
+    OR?: PatternRuleScalarWhereWithAggregatesInput[]
+    NOT?: PatternRuleScalarWhereWithAggregatesInput | PatternRuleScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PatternRule"> | string
+    name?: StringWithAggregatesFilter<"PatternRule"> | string
+    category?: EnumSuggestionCategoryWithAggregatesFilter<"PatternRule"> | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeWithAggregatesFilter<"PatternRule"> | $Enums.SuggestionType
+    description?: StringWithAggregatesFilter<"PatternRule"> | string
+    pattern?: StringWithAggregatesFilter<"PatternRule"> | string
+    suggestion?: StringWithAggregatesFilter<"PatternRule"> | string
+    codeExample?: StringNullableWithAggregatesFilter<"PatternRule"> | string | null
+    severity?: EnumSuggestionSeverityWithAggregatesFilter<"PatternRule"> | $Enums.SuggestionSeverity
+    enabled?: BoolWithAggregatesFilter<"PatternRule"> | boolean
+    priority?: IntWithAggregatesFilter<"PatternRule"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PatternRule"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PatternRule"> | Date | string
+  }
+
+  export type UserPreferenceWhereInput = {
+    AND?: UserPreferenceWhereInput | UserPreferenceWhereInput[]
+    OR?: UserPreferenceWhereInput[]
+    NOT?: UserPreferenceWhereInput | UserPreferenceWhereInput[]
+    id?: StringFilter<"UserPreference"> | string
+    userId?: StringFilter<"UserPreference"> | string
+    category?: EnumSuggestionCategoryFilter<"UserPreference"> | $Enums.SuggestionCategory
+    enabled?: BoolFilter<"UserPreference"> | boolean
+    frequency?: EnumPreferenceFrequencyFilter<"UserPreference"> | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFilter<"UserPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"UserPreference"> | Date | string
+  }
+
+  export type UserPreferenceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    category?: SortOrder
+    enabled?: SortOrder
+    frequency?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserPreferenceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_category?: UserPreferenceUserIdCategoryCompoundUniqueInput
+    AND?: UserPreferenceWhereInput | UserPreferenceWhereInput[]
+    OR?: UserPreferenceWhereInput[]
+    NOT?: UserPreferenceWhereInput | UserPreferenceWhereInput[]
+    userId?: StringFilter<"UserPreference"> | string
+    category?: EnumSuggestionCategoryFilter<"UserPreference"> | $Enums.SuggestionCategory
+    enabled?: BoolFilter<"UserPreference"> | boolean
+    frequency?: EnumPreferenceFrequencyFilter<"UserPreference"> | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFilter<"UserPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"UserPreference"> | Date | string
+  }, "id" | "userId_category">
+
+  export type UserPreferenceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    category?: SortOrder
+    enabled?: SortOrder
+    frequency?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: UserPreferenceCountOrderByAggregateInput
+    _max?: UserPreferenceMaxOrderByAggregateInput
+    _min?: UserPreferenceMinOrderByAggregateInput
+  }
+
+  export type UserPreferenceScalarWhereWithAggregatesInput = {
+    AND?: UserPreferenceScalarWhereWithAggregatesInput | UserPreferenceScalarWhereWithAggregatesInput[]
+    OR?: UserPreferenceScalarWhereWithAggregatesInput[]
+    NOT?: UserPreferenceScalarWhereWithAggregatesInput | UserPreferenceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UserPreference"> | string
+    userId?: StringWithAggregatesFilter<"UserPreference"> | string
+    category?: EnumSuggestionCategoryWithAggregatesFilter<"UserPreference"> | $Enums.SuggestionCategory
+    enabled?: BoolWithAggregatesFilter<"UserPreference"> | boolean
+    frequency?: EnumPreferenceFrequencyWithAggregatesFilter<"UserPreference"> | $Enums.PreferenceFrequency
+    createdAt?: DateTimeWithAggregatesFilter<"UserPreference"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"UserPreference"> | Date | string
+  }
+
   export type ProjectCreateInput = {
     id?: string
     name: string
@@ -5906,6 +10089,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: MessageCreateNestedManyWithoutProjectInput
+    codeSuggestions?: CodeSuggestionCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateInput = {
@@ -5915,6 +10099,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     messages?: MessageUncheckedCreateNestedManyWithoutProjectInput
+    codeSuggestions?: CodeSuggestionUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUpdateInput = {
@@ -5924,6 +10109,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: MessageUpdateManyWithoutProjectNestedInput
+    codeSuggestions?: CodeSuggestionUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateInput = {
@@ -5933,6 +10119,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     messages?: MessageUncheckedUpdateManyWithoutProjectNestedInput
+    codeSuggestions?: CodeSuggestionUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectCreateManyInput = {
@@ -6143,6 +10330,320 @@ export namespace Prisma {
     expire?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type CodeSuggestionCreateInput = {
+    id?: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
+    project: ProjectCreateNestedOneWithoutCodeSuggestionsInput
+  }
+
+  export type CodeSuggestionUncheckedCreateInput = {
+    id?: string
+    projectId: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
+  }
+
+  export type CodeSuggestionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    project?: ProjectUpdateOneRequiredWithoutCodeSuggestionsNestedInput
+  }
+
+  export type CodeSuggestionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodeSuggestionCreateManyInput = {
+    id?: string
+    projectId: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
+  }
+
+  export type CodeSuggestionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodeSuggestionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PatternRuleCreateInput = {
+    id?: string
+    name: string
+    category: $Enums.SuggestionCategory
+    type: $Enums.SuggestionType
+    description: string
+    pattern: string
+    suggestion: string
+    codeExample?: string | null
+    severity?: $Enums.SuggestionSeverity
+    enabled?: boolean
+    priority?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PatternRuleUncheckedCreateInput = {
+    id?: string
+    name: string
+    category: $Enums.SuggestionCategory
+    type: $Enums.SuggestionType
+    description: string
+    pattern: string
+    suggestion: string
+    codeExample?: string | null
+    severity?: $Enums.SuggestionSeverity
+    enabled?: boolean
+    priority?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PatternRuleUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    description?: StringFieldUpdateOperationsInput | string
+    pattern?: StringFieldUpdateOperationsInput | string
+    suggestion?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PatternRuleUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    description?: StringFieldUpdateOperationsInput | string
+    pattern?: StringFieldUpdateOperationsInput | string
+    suggestion?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PatternRuleCreateManyInput = {
+    id?: string
+    name: string
+    category: $Enums.SuggestionCategory
+    type: $Enums.SuggestionType
+    description: string
+    pattern: string
+    suggestion: string
+    codeExample?: string | null
+    severity?: $Enums.SuggestionSeverity
+    enabled?: boolean
+    priority?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PatternRuleUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    description?: StringFieldUpdateOperationsInput | string
+    pattern?: StringFieldUpdateOperationsInput | string
+    suggestion?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PatternRuleUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    description?: StringFieldUpdateOperationsInput | string
+    pattern?: StringFieldUpdateOperationsInput | string
+    suggestion?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPreferenceCreateInput = {
+    id?: string
+    userId: string
+    category: $Enums.SuggestionCategory
+    enabled?: boolean
+    frequency?: $Enums.PreferenceFrequency
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserPreferenceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    category: $Enums.SuggestionCategory
+    enabled?: boolean
+    frequency?: $Enums.PreferenceFrequency
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserPreferenceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    frequency?: EnumPreferenceFrequencyFieldUpdateOperationsInput | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPreferenceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    frequency?: EnumPreferenceFrequencyFieldUpdateOperationsInput | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPreferenceCreateManyInput = {
+    id?: string
+    userId: string
+    category: $Enums.SuggestionCategory
+    enabled?: boolean
+    frequency?: $Enums.PreferenceFrequency
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserPreferenceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    frequency?: EnumPreferenceFrequencyFieldUpdateOperationsInput | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPreferenceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    frequency?: EnumPreferenceFrequencyFieldUpdateOperationsInput | $Enums.PreferenceFrequency
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -6175,7 +10676,17 @@ export namespace Prisma {
     none?: MessageWhereInput
   }
 
+  export type CodeSuggestionListRelationFilter = {
+    every?: CodeSuggestionWhereInput
+    some?: CodeSuggestionWhereInput
+    none?: CodeSuggestionWhereInput
+  }
+
   export type MessageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CodeSuggestionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6474,6 +10985,367 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type EnumSuggestionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionType | EnumSuggestionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionTypeFilter<$PrismaModel> | $Enums.SuggestionType
+  }
+
+  export type EnumSuggestionCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionCategory | EnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionCategoryFilter<$PrismaModel> | $Enums.SuggestionCategory
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type EnumSuggestionSeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionSeverity | EnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionSeverityFilter<$PrismaModel> | $Enums.SuggestionSeverity
+  }
+
+  export type EnumSuggestionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionStatus | EnumSuggestionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionStatusFilter<$PrismaModel> | $Enums.SuggestionStatus
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type CodeSuggestionCountOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    category?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    codeExample?: SortOrder
+    filePath?: SortOrder
+    lineNumber?: SortOrder
+    severity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    dismissedAt?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type CodeSuggestionAvgOrderByAggregateInput = {
+    lineNumber?: SortOrder
+  }
+
+  export type CodeSuggestionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    category?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    codeExample?: SortOrder
+    filePath?: SortOrder
+    lineNumber?: SortOrder
+    severity?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    dismissedAt?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type CodeSuggestionMinOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    type?: SortOrder
+    category?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    codeExample?: SortOrder
+    filePath?: SortOrder
+    lineNumber?: SortOrder
+    severity?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    dismissedAt?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type CodeSuggestionSumOrderByAggregateInput = {
+    lineNumber?: SortOrder
+  }
+
+  export type EnumSuggestionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionType | EnumSuggestionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionTypeWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionTypeFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionTypeFilter<$PrismaModel>
+  }
+
+  export type EnumSuggestionCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionCategory | EnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionCategoryWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionCategoryFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionCategoryFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumSuggestionSeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionSeverity | EnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionSeverityWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionSeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionSeverityFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionSeverityFilter<$PrismaModel>
+  }
+
+  export type EnumSuggestionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionStatus | EnumSuggestionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionStatusWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionStatusFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionStatusFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type PatternRuleCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    category?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
+    pattern?: SortOrder
+    suggestion?: SortOrder
+    codeExample?: SortOrder
+    severity?: SortOrder
+    enabled?: SortOrder
+    priority?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PatternRuleAvgOrderByAggregateInput = {
+    priority?: SortOrder
+  }
+
+  export type PatternRuleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    category?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
+    pattern?: SortOrder
+    suggestion?: SortOrder
+    codeExample?: SortOrder
+    severity?: SortOrder
+    enabled?: SortOrder
+    priority?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PatternRuleMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    category?: SortOrder
+    type?: SortOrder
+    description?: SortOrder
+    pattern?: SortOrder
+    suggestion?: SortOrder
+    codeExample?: SortOrder
+    severity?: SortOrder
+    enabled?: SortOrder
+    priority?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PatternRuleSumOrderByAggregateInput = {
+    priority?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type EnumPreferenceFrequencyFilter<$PrismaModel = never> = {
+    equals?: $Enums.PreferenceFrequency | EnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumPreferenceFrequencyFilter<$PrismaModel> | $Enums.PreferenceFrequency
+  }
+
+  export type UserPreferenceUserIdCategoryCompoundUniqueInput = {
+    userId: string
+    category: $Enums.SuggestionCategory
+  }
+
+  export type UserPreferenceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    category?: SortOrder
+    enabled?: SortOrder
+    frequency?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserPreferenceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    category?: SortOrder
+    enabled?: SortOrder
+    frequency?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserPreferenceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    category?: SortOrder
+    enabled?: SortOrder
+    frequency?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumPreferenceFrequencyWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PreferenceFrequency | EnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumPreferenceFrequencyWithAggregatesFilter<$PrismaModel> | $Enums.PreferenceFrequency
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPreferenceFrequencyFilter<$PrismaModel>
+    _max?: NestedEnumPreferenceFrequencyFilter<$PrismaModel>
+  }
+
   export type MessageCreateNestedManyWithoutProjectInput = {
     create?: XOR<MessageCreateWithoutProjectInput, MessageUncheckedCreateWithoutProjectInput> | MessageCreateWithoutProjectInput[] | MessageUncheckedCreateWithoutProjectInput[]
     connectOrCreate?: MessageCreateOrConnectWithoutProjectInput | MessageCreateOrConnectWithoutProjectInput[]
@@ -6481,11 +11353,25 @@ export namespace Prisma {
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
   }
 
+  export type CodeSuggestionCreateNestedManyWithoutProjectInput = {
+    create?: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput> | CodeSuggestionCreateWithoutProjectInput[] | CodeSuggestionUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: CodeSuggestionCreateOrConnectWithoutProjectInput | CodeSuggestionCreateOrConnectWithoutProjectInput[]
+    createMany?: CodeSuggestionCreateManyProjectInputEnvelope
+    connect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+  }
+
   export type MessageUncheckedCreateNestedManyWithoutProjectInput = {
     create?: XOR<MessageCreateWithoutProjectInput, MessageUncheckedCreateWithoutProjectInput> | MessageCreateWithoutProjectInput[] | MessageUncheckedCreateWithoutProjectInput[]
     connectOrCreate?: MessageCreateOrConnectWithoutProjectInput | MessageCreateOrConnectWithoutProjectInput[]
     createMany?: MessageCreateManyProjectInputEnvelope
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+  }
+
+  export type CodeSuggestionUncheckedCreateNestedManyWithoutProjectInput = {
+    create?: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput> | CodeSuggestionCreateWithoutProjectInput[] | CodeSuggestionUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: CodeSuggestionCreateOrConnectWithoutProjectInput | CodeSuggestionCreateOrConnectWithoutProjectInput[]
+    createMany?: CodeSuggestionCreateManyProjectInputEnvelope
+    connect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6510,6 +11396,20 @@ export namespace Prisma {
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
+  export type CodeSuggestionUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput> | CodeSuggestionCreateWithoutProjectInput[] | CodeSuggestionUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: CodeSuggestionCreateOrConnectWithoutProjectInput | CodeSuggestionCreateOrConnectWithoutProjectInput[]
+    upsert?: CodeSuggestionUpsertWithWhereUniqueWithoutProjectInput | CodeSuggestionUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: CodeSuggestionCreateManyProjectInputEnvelope
+    set?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    disconnect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    delete?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    connect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    update?: CodeSuggestionUpdateWithWhereUniqueWithoutProjectInput | CodeSuggestionUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: CodeSuggestionUpdateManyWithWhereWithoutProjectInput | CodeSuggestionUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: CodeSuggestionScalarWhereInput | CodeSuggestionScalarWhereInput[]
+  }
+
   export type MessageUncheckedUpdateManyWithoutProjectNestedInput = {
     create?: XOR<MessageCreateWithoutProjectInput, MessageUncheckedCreateWithoutProjectInput> | MessageCreateWithoutProjectInput[] | MessageUncheckedCreateWithoutProjectInput[]
     connectOrCreate?: MessageCreateOrConnectWithoutProjectInput | MessageCreateOrConnectWithoutProjectInput[]
@@ -6522,6 +11422,20 @@ export namespace Prisma {
     update?: MessageUpdateWithWhereUniqueWithoutProjectInput | MessageUpdateWithWhereUniqueWithoutProjectInput[]
     updateMany?: MessageUpdateManyWithWhereWithoutProjectInput | MessageUpdateManyWithWhereWithoutProjectInput[]
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
+  }
+
+  export type CodeSuggestionUncheckedUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput> | CodeSuggestionCreateWithoutProjectInput[] | CodeSuggestionUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: CodeSuggestionCreateOrConnectWithoutProjectInput | CodeSuggestionCreateOrConnectWithoutProjectInput[]
+    upsert?: CodeSuggestionUpsertWithWhereUniqueWithoutProjectInput | CodeSuggestionUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: CodeSuggestionCreateManyProjectInputEnvelope
+    set?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    disconnect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    delete?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    connect?: CodeSuggestionWhereUniqueInput | CodeSuggestionWhereUniqueInput[]
+    update?: CodeSuggestionUpdateWithWhereUniqueWithoutProjectInput | CodeSuggestionUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: CodeSuggestionUpdateManyWithWhereWithoutProjectInput | CodeSuggestionUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: CodeSuggestionScalarWhereInput | CodeSuggestionScalarWhereInput[]
   }
 
   export type FragmentCreateNestedOneWithoutMessageInput = {
@@ -6602,6 +11516,56 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type ProjectCreateNestedOneWithoutCodeSuggestionsInput = {
+    create?: XOR<ProjectCreateWithoutCodeSuggestionsInput, ProjectUncheckedCreateWithoutCodeSuggestionsInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutCodeSuggestionsInput
+    connect?: ProjectWhereUniqueInput
+  }
+
+  export type EnumSuggestionTypeFieldUpdateOperationsInput = {
+    set?: $Enums.SuggestionType
+  }
+
+  export type EnumSuggestionCategoryFieldUpdateOperationsInput = {
+    set?: $Enums.SuggestionCategory
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type EnumSuggestionSeverityFieldUpdateOperationsInput = {
+    set?: $Enums.SuggestionSeverity
+  }
+
+  export type EnumSuggestionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.SuggestionStatus
+  }
+
+  export type ProjectUpdateOneRequiredWithoutCodeSuggestionsNestedInput = {
+    create?: XOR<ProjectCreateWithoutCodeSuggestionsInput, ProjectUncheckedCreateWithoutCodeSuggestionsInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutCodeSuggestionsInput
+    upsert?: ProjectUpsertWithoutCodeSuggestionsInput
+    connect?: ProjectWhereUniqueInput
+    update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutCodeSuggestionsInput, ProjectUpdateWithoutCodeSuggestionsInput>, ProjectUncheckedUpdateWithoutCodeSuggestionsInput>
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type EnumPreferenceFrequencyFieldUpdateOperationsInput = {
+    set?: $Enums.PreferenceFrequency
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -6791,6 +11755,185 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumSuggestionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionType | EnumSuggestionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionTypeFilter<$PrismaModel> | $Enums.SuggestionType
+  }
+
+  export type NestedEnumSuggestionCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionCategory | EnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionCategoryFilter<$PrismaModel> | $Enums.SuggestionCategory
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedEnumSuggestionSeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionSeverity | EnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionSeverityFilter<$PrismaModel> | $Enums.SuggestionSeverity
+  }
+
+  export type NestedEnumSuggestionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionStatus | EnumSuggestionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionStatusFilter<$PrismaModel> | $Enums.SuggestionStatus
+  }
+
+  export type NestedEnumSuggestionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionType | EnumSuggestionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionType[] | ListEnumSuggestionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionTypeWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionTypeFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSuggestionCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionCategory | EnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionCategory[] | ListEnumSuggestionCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionCategoryWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionCategoryFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionCategoryFilter<$PrismaModel>
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumSuggestionSeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionSeverity | EnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionSeverity[] | ListEnumSuggestionSeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionSeverityWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionSeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionSeverityFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionSeverityFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSuggestionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SuggestionStatus | EnumSuggestionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SuggestionStatus[] | ListEnumSuggestionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSuggestionStatusWithAggregatesFilter<$PrismaModel> | $Enums.SuggestionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSuggestionStatusFilter<$PrismaModel>
+    _max?: NestedEnumSuggestionStatusFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPreferenceFrequencyFilter<$PrismaModel = never> = {
+    equals?: $Enums.PreferenceFrequency | EnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumPreferenceFrequencyFilter<$PrismaModel> | $Enums.PreferenceFrequency
+  }
+
+  export type NestedEnumPreferenceFrequencyWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PreferenceFrequency | EnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PreferenceFrequency[] | ListEnumPreferenceFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumPreferenceFrequencyWithAggregatesFilter<$PrismaModel> | $Enums.PreferenceFrequency
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPreferenceFrequencyFilter<$PrismaModel>
+    _max?: NestedEnumPreferenceFrequencyFilter<$PrismaModel>
+  }
+
   export type MessageCreateWithoutProjectInput = {
     id?: string
     content: string
@@ -6818,6 +11961,52 @@ export namespace Prisma {
 
   export type MessageCreateManyProjectInputEnvelope = {
     data: MessageCreateManyProjectInput | MessageCreateManyProjectInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CodeSuggestionCreateWithoutProjectInput = {
+    id?: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
+  }
+
+  export type CodeSuggestionUncheckedCreateWithoutProjectInput = {
+    id?: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
+  }
+
+  export type CodeSuggestionCreateOrConnectWithoutProjectInput = {
+    where: CodeSuggestionWhereUniqueInput
+    create: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput>
+  }
+
+  export type CodeSuggestionCreateManyProjectInputEnvelope = {
+    data: CodeSuggestionCreateManyProjectInput | CodeSuggestionCreateManyProjectInput[]
     skipDuplicates?: boolean
   }
 
@@ -6850,6 +12039,44 @@ export namespace Prisma {
     projectId?: StringFilter<"Message"> | string
   }
 
+  export type CodeSuggestionUpsertWithWhereUniqueWithoutProjectInput = {
+    where: CodeSuggestionWhereUniqueInput
+    update: XOR<CodeSuggestionUpdateWithoutProjectInput, CodeSuggestionUncheckedUpdateWithoutProjectInput>
+    create: XOR<CodeSuggestionCreateWithoutProjectInput, CodeSuggestionUncheckedCreateWithoutProjectInput>
+  }
+
+  export type CodeSuggestionUpdateWithWhereUniqueWithoutProjectInput = {
+    where: CodeSuggestionWhereUniqueInput
+    data: XOR<CodeSuggestionUpdateWithoutProjectInput, CodeSuggestionUncheckedUpdateWithoutProjectInput>
+  }
+
+  export type CodeSuggestionUpdateManyWithWhereWithoutProjectInput = {
+    where: CodeSuggestionScalarWhereInput
+    data: XOR<CodeSuggestionUpdateManyMutationInput, CodeSuggestionUncheckedUpdateManyWithoutProjectInput>
+  }
+
+  export type CodeSuggestionScalarWhereInput = {
+    AND?: CodeSuggestionScalarWhereInput | CodeSuggestionScalarWhereInput[]
+    OR?: CodeSuggestionScalarWhereInput[]
+    NOT?: CodeSuggestionScalarWhereInput | CodeSuggestionScalarWhereInput[]
+    id?: StringFilter<"CodeSuggestion"> | string
+    projectId?: StringFilter<"CodeSuggestion"> | string
+    type?: EnumSuggestionTypeFilter<"CodeSuggestion"> | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFilter<"CodeSuggestion"> | $Enums.SuggestionCategory
+    title?: StringFilter<"CodeSuggestion"> | string
+    description?: StringFilter<"CodeSuggestion"> | string
+    codeExample?: StringNullableFilter<"CodeSuggestion"> | string | null
+    filePath?: StringNullableFilter<"CodeSuggestion"> | string | null
+    lineNumber?: IntNullableFilter<"CodeSuggestion"> | number | null
+    severity?: EnumSuggestionSeverityFilter<"CodeSuggestion"> | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFilter<"CodeSuggestion"> | $Enums.SuggestionStatus
+    metadata?: JsonNullableFilter<"CodeSuggestion">
+    createdAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    updatedAt?: DateTimeFilter<"CodeSuggestion"> | Date | string
+    dismissedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+    appliedAt?: DateTimeNullableFilter<"CodeSuggestion"> | Date | string | null
+  }
+
   export type FragmentCreateWithoutMessageInput = {
     id?: string
     createdAt?: Date | string
@@ -6879,6 +12106,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    codeSuggestions?: CodeSuggestionCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutMessagesInput = {
@@ -6887,6 +12115,7 @@ export namespace Prisma {
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    codeSuggestions?: CodeSuggestionUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutMessagesInput = {
@@ -6940,6 +12169,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    codeSuggestions?: CodeSuggestionUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutMessagesInput = {
@@ -6948,6 +12178,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    codeSuggestions?: CodeSuggestionUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type MessageCreateWithoutFragmentInput = {
@@ -7006,6 +12237,58 @@ export namespace Prisma {
     projectId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type ProjectCreateWithoutCodeSuggestionsInput = {
+    id?: string
+    name: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: MessageCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectUncheckedCreateWithoutCodeSuggestionsInput = {
+    id?: string
+    name: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: MessageUncheckedCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectCreateOrConnectWithoutCodeSuggestionsInput = {
+    where: ProjectWhereUniqueInput
+    create: XOR<ProjectCreateWithoutCodeSuggestionsInput, ProjectUncheckedCreateWithoutCodeSuggestionsInput>
+  }
+
+  export type ProjectUpsertWithoutCodeSuggestionsInput = {
+    update: XOR<ProjectUpdateWithoutCodeSuggestionsInput, ProjectUncheckedUpdateWithoutCodeSuggestionsInput>
+    create: XOR<ProjectCreateWithoutCodeSuggestionsInput, ProjectUncheckedCreateWithoutCodeSuggestionsInput>
+    where?: ProjectWhereInput
+  }
+
+  export type ProjectUpdateToOneWithWhereWithoutCodeSuggestionsInput = {
+    where?: ProjectWhereInput
+    data: XOR<ProjectUpdateWithoutCodeSuggestionsInput, ProjectUncheckedUpdateWithoutCodeSuggestionsInput>
+  }
+
+  export type ProjectUpdateWithoutCodeSuggestionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: MessageUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectUncheckedUpdateWithoutCodeSuggestionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: MessageUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
   export type MessageCreateManyProjectInput = {
     id?: string
     content: string
@@ -7013,6 +12296,24 @@ export namespace Prisma {
     type: $Enums.MessageType
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type CodeSuggestionCreateManyProjectInput = {
+    id?: string
+    type: $Enums.SuggestionType
+    category: $Enums.SuggestionCategory
+    title: string
+    description: string
+    codeExample?: string | null
+    filePath?: string | null
+    lineNumber?: number | null
+    severity?: $Enums.SuggestionSeverity
+    status?: $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dismissedAt?: Date | string | null
+    appliedAt?: Date | string | null
   }
 
   export type MessageUpdateWithoutProjectInput = {
@@ -7042,6 +12343,60 @@ export namespace Prisma {
     type?: EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CodeSuggestionUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodeSuggestionUncheckedUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodeSuggestionUncheckedUpdateManyWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumSuggestionTypeFieldUpdateOperationsInput | $Enums.SuggestionType
+    category?: EnumSuggestionCategoryFieldUpdateOperationsInput | $Enums.SuggestionCategory
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    codeExample?: NullableStringFieldUpdateOperationsInput | string | null
+    filePath?: NullableStringFieldUpdateOperationsInput | string | null
+    lineNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    severity?: EnumSuggestionSeverityFieldUpdateOperationsInput | $Enums.SuggestionSeverity
+    status?: EnumSuggestionStatusFieldUpdateOperationsInput | $Enums.SuggestionStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dismissedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
 

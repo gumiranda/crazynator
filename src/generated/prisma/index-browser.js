@@ -154,12 +154,62 @@ exports.Prisma.UsageScalarFieldEnum = {
   expire: 'expire'
 };
 
+exports.Prisma.CodeSuggestionScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  type: 'type',
+  category: 'category',
+  title: 'title',
+  description: 'description',
+  codeExample: 'codeExample',
+  filePath: 'filePath',
+  lineNumber: 'lineNumber',
+  severity: 'severity',
+  status: 'status',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  dismissedAt: 'dismissedAt',
+  appliedAt: 'appliedAt'
+};
+
+exports.Prisma.PatternRuleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  category: 'category',
+  type: 'type',
+  description: 'description',
+  pattern: 'pattern',
+  suggestion: 'suggestion',
+  codeExample: 'codeExample',
+  severity: 'severity',
+  enabled: 'enabled',
+  priority: 'priority',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserPreferenceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  category: 'category',
+  enabled: 'enabled',
+  frequency: 'frequency',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
 };
 
 exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -188,11 +238,56 @@ exports.MessageType = exports.$Enums.MessageType = {
   ERROR: 'ERROR'
 };
 
+exports.SuggestionType = exports.$Enums.SuggestionType = {
+  ARCHITECTURE: 'ARCHITECTURE',
+  COMPONENT_STRUCTURE: 'COMPONENT_STRUCTURE',
+  STATE_MANAGEMENT: 'STATE_MANAGEMENT',
+  DATA_FETCHING: 'DATA_FETCHING',
+  PERFORMANCE: 'PERFORMANCE',
+  ACCESSIBILITY: 'ACCESSIBILITY',
+  TESTING: 'TESTING',
+  TYPESCRIPT: 'TYPESCRIPT'
+};
+
+exports.SuggestionCategory = exports.$Enums.SuggestionCategory = {
+  ATOMIC_DESIGN: 'ATOMIC_DESIGN',
+  FEATURE_SLICED_DESIGN: 'FEATURE_SLICED_DESIGN',
+  REACT_QUERY: 'REACT_QUERY',
+  ZUSTAND: 'ZUSTAND',
+  REACT_PATTERNS: 'REACT_PATTERNS',
+  TYPESCRIPT_PATTERNS: 'TYPESCRIPT_PATTERNS',
+  PERFORMANCE_OPTIMIZATION: 'PERFORMANCE_OPTIMIZATION',
+  ACCESSIBILITY_IMPROVEMENT: 'ACCESSIBILITY_IMPROVEMENT',
+  TESTING_STRATEGY: 'TESTING_STRATEGY'
+};
+
+exports.SuggestionSeverity = exports.$Enums.SuggestionSeverity = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+};
+
+exports.SuggestionStatus = exports.$Enums.SuggestionStatus = {
+  PENDING: 'PENDING',
+  DISMISSED: 'DISMISSED',
+  APPLIED: 'APPLIED',
+  EXPIRED: 'EXPIRED'
+};
+
+exports.PreferenceFrequency = exports.$Enums.PreferenceFrequency = {
+  MINIMAL: 'MINIMAL',
+  NORMAL: 'NORMAL',
+  AGGRESSIVE: 'AGGRESSIVE'
+};
+
 exports.Prisma.ModelName = {
   Project: 'Project',
   Message: 'Message',
   Fragment: 'Fragment',
-  Usage: 'Usage'
+  Usage: 'Usage',
+  CodeSuggestion: 'CodeSuggestion',
+  PatternRule: 'PatternRule',
+  UserPreference: 'UserPreference'
 };
 
 /**

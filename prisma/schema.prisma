@@ -13,6 +13,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Project {
   id        String   @id @default(uuid())
   name      String
@@ -21,6 +22,7 @@ model Project {
   updatedAt DateTime @updatedAt
 
   messages Message[]
+  codeSuggestions CodeSuggestion[]
 }
 
 enum MessageRole {
@@ -52,17 +54,112 @@ model Fragment {
   message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
   sandboxUrl String
   title      String
   files      Json
 }
 
-
-
 model Usage {
   key    String    @id
   points Int
   expire DateTime?
+}
+
+// Code Suggestions System Models
+
+model CodeSuggestion {
+  id          String            @id @default(uuid())
+  projectId   String
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type        SuggestionType
+  category    SuggestionCategory
+  title       String
+  description String
+  codeExample String?
+  filePath    String?
+  lineNumber  Int?
+  severity    SuggestionSeverity @default(INFO)
+  status      SuggestionStatus   @default(PENDING)
+  metadata    Json?             // Additional context data
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  dismissedAt DateTime?
+  appliedAt   DateTime?
+
+  @@index([projectId, status])
+  @@index([type, category])
+}
+
+enum SuggestionType {
+  ARCHITECTURE
+  COMPONENT_STRUCTURE
+  STATE_MANAGEMENT
+  DATA_FETCHING
+  PERFORMANCE
+  ACCESSIBILITY
+  TESTING
+  TYPESCRIPT
+}
+
+enum SuggestionCategory {
+  ATOMIC_DESIGN
+  FEATURE_SLICED_DESIGN
+  REACT_QUERY
+  ZUSTAND
+  REACT_PATTERNS
+  TYPESCRIPT_PATTERNS
+  PERFORMANCE_OPTIMIZATION
+  ACCESSIBILITY_IMPROVEMENT
+  TESTING_STRATEGY
+}
+
+enum SuggestionSeverity {
+  INFO
+  WARNING
+  ERROR
+}
+
+enum SuggestionStatus {
+  PENDING
+  DISMISSED
+  APPLIED
+  EXPIRED
+}
+
+model PatternRule {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    SuggestionCategory
+  type        SuggestionType
+  description String
+  pattern     String   // Regex or AST pattern to match
+  suggestion  String   // Template for suggestion text
+  codeExample String?  // Example code to show
+  severity    SuggestionSeverity @default(INFO)
+  enabled     Boolean  @default(true)
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, enabled])
+  @@index([type, enabled])
+}
+
+model UserPreference {
+  id         String             @id @default(uuid())
+  userId     String
+  category   SuggestionCategory
+  enabled    Boolean            @default(true)
+  frequency  PreferenceFrequency @default(NORMAL)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@unique([userId, category])
+}
+
+enum PreferenceFrequency {
+  MINIMAL
+  NORMAL
+  AGGRESSIVE
 }
