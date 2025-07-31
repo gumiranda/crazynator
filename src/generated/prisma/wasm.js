@@ -154,6 +154,18 @@ exports.Prisma.UsageScalarFieldEnum = {
   expire: 'expire'
 };
 
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  clerkUserId: 'clerkUserId',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  status: 'status',
+  priceId: 'priceId',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -192,7 +204,8 @@ exports.Prisma.ModelName = {
   Project: 'Project',
   Message: 'Message',
   Fragment: 'Fragment',
-  Usage: 'Usage'
+  Usage: 'Usage',
+  Subscription: 'Subscription'
 };
 
 /**
