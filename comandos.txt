@@ -66,3 +66,11 @@ npx inngest-cli@latest dev
 
 bun add stripe @stripe/stripe-js 
 
+eventos webhook
+
+checkout.session.completed
+customer.subscription.created
+customer.subscription.deleted
+customer.subscription.updated
+invoice.payment_failed
+invoice.payment_succeeded
