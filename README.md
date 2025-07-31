@@ -9,7 +9,7 @@ npm run dev
 # orddd
 yarn devff
 # orfccd
-pnpm devF
+pnpm devFff
 # orddvvhh
 bun devdd
 ```fff
