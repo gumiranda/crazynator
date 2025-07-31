@@ -2,7 +2,7 @@
 
 ## Overview
 
-Este documento descreve o design da suíte de testes para os fluxos de pagamento da aplicação CrazyNator. O sistema de testes será construído usando Jest/Vitest como framework principal, com mocks para APIs externas (Polar.sh) e testes de integração usando banco de dados em memória. A arquitetura de testes seguirá o padrão AAA (Arrange, Act, Assert) e incluirá testes unitários, de integração e end-to-end simulados.
+Este documento descreve o design da suíte de testes para os fluxos de pagamento da aplicação CrazyNator. O sistema de testes será construído usando Jest/Vitest como framework principal, com mocks para APIs externas (Stripe.sh) e testes de integração usando banco de dados em memória. A arquitetura de testes seguirá o padrão AAA (Arrange, Act, Assert) e incluirá testes unitários, de integração e end-to-end simulados.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ tests/
 │   │   ├── procedures.test.ts
 │   │   └── subscription.test.ts
 │   └── webhooks/
-│       └── polar.test.ts
+│       └── stripe.test.ts
 ├── integration/
 │   ├── checkout-flow.test.ts
 │   ├── webhook-processing.test.ts
@@ -23,11 +23,11 @@ tests/
 ├── e2e/
 │   └── payment-flows.test.ts
 ├── fixtures/
-│   ├── polar-webhooks.ts
+│   ├── stripe-webhooks.ts
 │   ├── subscription-data.ts
 │   └── user-data.ts
 ├── mocks/
-│   ├── polar-api.ts
+│   ├── stripe-api.ts
 │   ├── inngest.ts
 │   └── clerk-auth.ts
 └── utils/
@@ -45,10 +45,10 @@ tests/
 
 ### Mock Strategy
 
-- **Polar API**: Mock completo da SDK do Polar.sh
+- **Stripe API**: Mock completo da SDK do Stripe.sh
 - **Inngest**: Mock do sistema de jobs para testes síncronos
 - **Clerk Auth**: Mock de autenticação para diferentes cenários de usuário
-- **Webhooks**: Simulação de payloads reais do Polar
+- **Webhooks**: Simulação de payloads reais do Stripe
 
 ## Components and Interfaces
 
@@ -70,11 +70,11 @@ interface TestDatabase {
 ```typescript
 interface WebhookTestHelper {
   createWebhookPayload(
-    type: PolarWebhookEventType,
-    data: Partial<PolarEventData>,
-  ): PolarWebhookEvent;
+    type: StripeWebhookEventType,
+    data: Partial<StripeEventData>,
+  ): StripeWebhookEvent;
   signWebhook(payload: string): string;
-  sendWebhook(payload: PolarWebhookEvent): Promise<Response>;
+  sendWebhook(payload: StripeWebhookEvent): Promise<Response>;
 }
 ```
 
@@ -105,10 +105,10 @@ interface SubscriptionFixture {
 
 ```typescript
 interface WebhookFixture {
-  subscriptionCreated(overrides?: Partial<PolarEventData>): PolarWebhookEvent;
-  subscriptionActive(overrides?: Partial<PolarEventData>): PolarWebhookEvent;
-  subscriptionCanceled(overrides?: Partial<PolarEventData>): PolarWebhookEvent;
-  checkoutCreated(overrides?: Partial<PolarEventData>): PolarWebhookEvent;
+  subscriptionCreated(overrides?: Partial<StripeEventData>): StripeWebhookEvent;
+  subscriptionActive(overrides?: Partial<StripeEventData>): StripeWebhookEvent;
+  subscriptionCanceled(overrides?: Partial<StripeEventData>): StripeWebhookEvent;
+  checkoutCreated(overrides?: Partial<StripeEventData>): StripeWebhookEvent;
 }
 ```
 
@@ -133,7 +133,7 @@ interface UserTestData {
 ```typescript
 interface SubscriptionTestData {
   id: string;
-  polarId: string;
+  stripeId: string;
   plan: SubscriptionPlan;
   status: SubscriptionStatus;
   currentPeriodStart?: Date;
@@ -149,8 +149,8 @@ interface SubscriptionTestData {
 ```typescript
 interface WebhookTestData {
   eventId: string;
-  eventType: PolarWebhookEventType;
-  data: PolarEventData;
+  eventType: StripeWebhookEventType;
+  data: StripeEventData;
   signature?: string;
   processed?: boolean;
 }
@@ -163,9 +163,9 @@ interface WebhookTestData {
 #### API Error Simulation
 
 - **Network Timeouts**: Simular timeouts de API
-- **Rate Limiting**: Simular limites de taxa do Polar
+- **Rate Limiting**: Simular limites de taxa do Stripe
 - **Invalid Responses**: Respostas malformadas ou inválidas
-- **Authentication Failures**: Falhas de autenticação com Polar
+- **Authentication Failures**: Falhas de autenticação com Stripe
 
 #### Database Error Simulation
 
@@ -195,14 +195,14 @@ interface WebhookTestData {
 
 #### Subscription Library Tests
 
-- **validatePolarWebhook**: Testa validação de webhooks
+- **validateStripeWebhook**: Testa validação de webhooks
 - **getUserSubscription**: Testa recuperação de assinatura do usuário
 - **createOrUpdateSubscription**: Testa criação/atualização de assinaturas
 - **getUserCreditsInfo**: Valida cálculo de créditos
 
 #### Webhook Handler Tests
 
-- **POST /api/webhooks/polar**: Testa recebimento de webhooks
+- **POST /api/webhooks/stripe**: Testa recebimento de webhooks
 - **Signature Validation**: Valida assinaturas de webhook
 - **Event Processing**: Testa processamento de diferentes tipos de evento
 - **Error Handling**: Valida tratamento de erros

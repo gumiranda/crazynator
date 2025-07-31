@@ -195,7 +195,7 @@ model Customer {
   id         String   @id @default(uuid())
   tenantId   String   // Add tenant isolation
   userId     String
-  polarId    String   @unique
+  stripeId    String   @unique
   email      String
   name       String?
   createdAt  DateTime @default(now())

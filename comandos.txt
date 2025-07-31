@@ -1,3 +1,5 @@
+npx create-next-app@latest
+
 bunx shadcn@latest add --all
 bun install -D prisma tsx
 bun add @prisma/client
@@ -58,9 +60,9 @@ bun add @clerk/themes
 bun add rate-limiter-flexible @inngest/realtime react-error-boundary
 
 
-
-
-
-
-
+//SEMPRE RODAR
 npx inngest-cli@latest dev
+
+
+bun add stripe @stripe/stripe-js 
+

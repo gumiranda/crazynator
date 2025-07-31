@@ -17,7 +17,7 @@
 
 - [ ] 2.2 Implement webhook test helper
   - Create WebhookTestHelper with payload creation and signing methods
-  - Implement webhook signature generation using Polar's signing algorithm
+  - Implement webhook signature generation using Stripe's signing algorithm
   - Create sendWebhook method for simulating webhook requests
   - Add webhook validation utilities for testing different scenarios
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
@@ -52,8 +52,8 @@
   - _Requirements: 2.1, 2.2, 2.3, 2.7, 6.4_
 
 - [ ] 4. Create API and service mocks
-- [ ] 4.1 Implement Polar API mock
-  - Create comprehensive mock for Polar.sh SDK methods
+- [ ] 4.1 Implement Stripe API mock
+  - Create comprehensive mock for Stripe.sh SDK methods
   - Mock checkout session creation with success and error scenarios
   - Mock subscription management operations (cancel, retrieve)
   - Implement rate limiting and timeout simulation for error testing
@@ -98,9 +98,9 @@
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
 - [ ] 5.4 Test cancelSubscription procedure
-  - Test successful subscription cancellation via Polar API
+  - Test successful subscription cancellation via Stripe API
   - Test NOT_FOUND error for users without subscriptions
-  - Test Polar API error handling during cancellation
+  - Test Stripe API error handling during cancellation
   - Test database update after successful cancellation
   - _Requirements: 3.4, 3.5_
 
@@ -112,7 +112,7 @@
   - _Requirements: 3.6_
 
 - [ ] 6. Implement unit tests for subscription library
-- [ ] 6.1 Test validatePolarWebhook function
+- [ ] 6.1 Test validateStripeWebhook function
   - Test successful webhook signature validation
   - Test rejection of webhooks with invalid signatures
   - Test handling of malformed webhook payloads
@@ -129,7 +129,7 @@
 - [ ] 6.3 Test createOrUpdateSubscription function
   - Test new subscription creation from webhook data
   - Test existing subscription updates from webhook events
-  - Test data conflict resolution prioritizing Polar data
+  - Test data conflict resolution prioritizing Stripe data
   - Test transaction rollback on creation/update failures
   - _Requirements: 2.1, 2.2, 2.3, 6.4, 6.5_
 
@@ -144,7 +144,7 @@
 - [ ] 7.1 Test webhook endpoint authentication
   - Test webhook processing with valid signatures
   - Test 401 error response for invalid signatures
-  - Test signature validation using Polar's signing algorithm
+  - Test signature validation using Stripe's signing algorithm
   - Test handling of missing or malformed signature headers
   - _Requirements: 2.4_
 
@@ -237,7 +237,7 @@
 
 - [ ] 10.2 Test subscription cancellation flow
   - Test user-initiated cancellation through API
-  - Test Polar API integration for cancellation processing
+  - Test Stripe API integration for cancellation processing
   - Test database updates and access revocation timing
   - Test cancellation confirmation and billing history updates
   - _Requirements: 3.4, 3.5_
@@ -309,14 +309,14 @@
 
 - [ ] 13. Implement error scenario and edge case tests
 - [ ] 13.1 Test external service failure scenarios
-  - Test Polar API unavailability during checkout creation
+  - Test Stripe API unavailability during checkout creation
   - Test webhook delivery failures and retry mechanisms
   - Test database connection failures during critical operations
   - Test graceful degradation when external services are down
   - _Requirements: 6.1, 6.2, 6.6_
 
 - [ ] 13.2 Test data consistency and conflict resolution
-  - Test handling of conflicting data between Polar and local database
+  - Test handling of conflicting data between Stripe and local database
   - Test data synchronization after service outages
   - Test duplicate subscription prevention and resolution
   - Test orphaned data cleanup and maintenance procedures

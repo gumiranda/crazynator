@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Esta especificação define os requisitos para implementar testes automatizados abrangentes dos fluxos de pagamento da aplicação CrazyNator. O sistema atual utiliza Polar.sh como provedor de pagamentos, com webhooks para processamento de eventos de assinatura, e possui dois planos: FREE (5 créditos) e PRO (100 créditos por R$ 39,90/mês). Os testes devem cobrir todos os cenários críticos de pagamento, desde a criação de checkout até o processamento de webhooks e gerenciamento de assinaturas.
+Esta especificação define os requisitos para implementar testes automatizados abrangentes dos fluxos de pagamento da aplicação CrazyNator. O sistema atual utiliza Stripe.sh como provedor de pagamentos, com webhooks para processamento de eventos de assinatura, e possui dois planos: FREE (5 créditos) e PRO (100 créditos por R$ 39,90/mês). Os testes devem cobrir todos os cenários críticos de pagamento, desde a criação de checkout até o processamento de webhooks e gerenciamento de assinaturas.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ Esta especificação define os requisitos para implementar testes automatizados 
 
 ### Requirement 2
 
-**User Story:** Como desenvolvedor, eu quero testes para o processamento de webhooks do Polar, para que eu possa garantir que eventos de pagamento são processados corretamente
+**User Story:** Como desenvolvedor, eu quero testes para o processamento de webhooks do Stripe, para que eu possa garantir que eventos de pagamento são processados corretamente
 
 #### Acceptance Criteria
 
@@ -41,7 +41,7 @@ Esta especificação define os requisitos para implementar testes automatizados 
 1. WHEN um usuário consulta sua assinatura THEN o sistema SHALL retornar status, plano e informações de créditos corretos
 2. WHEN um usuário sem assinatura consulta status THEN o sistema SHALL retornar plano FREE com 5 créditos
 3. WHEN um usuário Pro consulta status THEN o sistema SHALL retornar plano PRO com 100 créditos
-4. WHEN um usuário solicita cancelamento de assinatura THEN o sistema SHALL processar o cancelamento via Polar
+4. WHEN um usuário solicita cancelamento de assinatura THEN o sistema SHALL processar o cancelamento via Stripe
 5. WHEN um usuário sem assinatura tenta cancelar THEN o sistema SHALL retornar erro NOT_FOUND
 6. WHEN um usuário consulta histórico de cobrança THEN o sistema SHALL retornar lista de assinaturas passadas
 
@@ -75,11 +75,11 @@ Esta especificação define os requisitos para implementar testes automatizados 
 
 #### Acceptance Criteria
 
-1. WHEN o Polar está indisponível durante checkout THEN o sistema SHALL retornar erro apropriado
+1. WHEN o Stripe está indisponível durante checkout THEN o sistema SHALL retornar erro apropriado
 2. WHEN um webhook é recebido mas o banco está indisponível THEN o sistema SHALL tentar novamente via Inngest
 3. WHEN dados de webhook estão corrompidos THEN o sistema SHALL registrar erro e não processar
 4. WHEN uma assinatura não existe no banco mas webhook é recebido THEN o sistema SHALL criar registro
-5. WHEN há conflito de dados entre Polar e banco THEN o sistema SHALL priorizar dados do Polar
+5. WHEN há conflito de dados entre Stripe e banco THEN o sistema SHALL priorizar dados do Stripe
 6. WHEN processamento de webhook excede timeout THEN o sistema SHALL marcar como falha e permitir retry
 
 ### Requirement 7
