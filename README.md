@@ -6,7 +6,7 @@ First, run the development server:
 
 ```bashf
 npm run dev
-# ord
+# orddd
 yarn devff
 # orfcc
 pnpm devF
