@@ -91,9 +91,9 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-background-900 mx-auto mb-4"></div>
           <p>Carregando...</p>
         </div>
       </div>
@@ -101,7 +101,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-50">
       <div className="container mx-auto px-4 py-8">
         {/* Success Message */}
         {sessionId && (
@@ -115,33 +115,32 @@ function DashboardContent() {
         )}
 
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mt-8">
           <h2 className="text-3xl font-bold mb-2">Bem-vindo de volta!</h2>
-          <p className="text-gray-600">Aqui está o resumo da sua conta</p>
-          <StatusIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-background-600">Aqui está o resumo da sua conta</p>
         </div>
 
         {/* Subscription Details */}
         {subscriptionData?.subscription && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="bg-background rounded-lg shadow p-6 mb-8">
             <h3 className="text-xl font-semibold mb-4">Detalhes da Assinatura</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-background-600">Status</p>
                 <p className="font-medium capitalize">{subscriptionData.subscription.status}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Cancelamento automático</p>
+                <p className="text-sm text-background-600">Cancelamento automático</p>
                 <p className="font-medium">
                   {subscriptionData.subscription.cancelAtPeriodEnd ? 'Sim' : 'Não'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Criada em</p>
+                <p className="text-sm text-background-600">Criada em</p>
                 <p className="font-medium">{formatDate(subscriptionData.subscription.createdAt)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Última atualização</p>
+                <p className="text-sm text-background-600">Última atualização</p>
                 <p className="font-medium">{formatDate(subscriptionData.subscription.updatedAt)}</p>
               </div>
               <CustomerPortalButton customerId={subscriptionData?.subscription?.customerId} />
@@ -151,10 +150,12 @@ function DashboardContent() {
 
         {/* No Subscription Message */}
         {!subscriptionData?.subscription && !loading && (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <div className="bg-background rounded-lg shadow p-6 text-center">
+            <AlertCircle className="h-12 w-12 text-background-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhuma assinatura ativa</h3>
-            <p className="text-gray-600 mb-4">Você não possui uma assinatura ativa no momento.</p>
+            <p className="text-background-600 mb-4">
+              Você não possui uma assinatura ativa no momento.
+            </p>
             <Button asChild>
               <a href="/pricing">Ver Planos</a>
             </Button>
@@ -206,7 +207,7 @@ function CustomerPortalButton({ customerId }: { customerId: string }) {
       onClick={handlePortalAccess}
       disabled={loading}
       variant="outline"
-      className="border-gray-600"
+      className="border-background-600"
     >
       {loading ? 'Carregando...' : '⚙️ Gerenciar Assinatura'}
     </Button>
