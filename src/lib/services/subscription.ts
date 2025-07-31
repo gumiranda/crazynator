@@ -1,5 +1,5 @@
 // lib/services/subscription.ts
-import { Subscription as PrismaSubscription } from '@prisma/client';
+import type { Subscription as PrismaSubscription } from '../../generated/prisma';
 import Stripe from 'stripe';
 import { prisma } from '../db';
 
