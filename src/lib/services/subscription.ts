@@ -1,7 +1,7 @@
 // lib/services/subscription.ts
-import type { Subscription as PrismaSubscription } from '../../generated/prisma';
+import type { Subscription as PrismaSubscription } from '@prisma/client';
 import Stripe from 'stripe';
-import { prisma } from '../db';
+import { prisma } from '@/lib/prisma';
 
 export interface CreateSubscriptionData {
   clerkUserId: string;

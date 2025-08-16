@@ -10,7 +10,7 @@ import {
 } from '@inngest/agent-kit';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
 import { projectChannel } from './channels';

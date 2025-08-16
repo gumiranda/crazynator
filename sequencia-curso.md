@@ -69,7 +69,8 @@ components.json
 
 ```
 prisma/schema.prisma
-src/lib/db.ts
+ '@/lib/prisma';
+
 ```
 
 ### 3. Utilitários e Configurações Core

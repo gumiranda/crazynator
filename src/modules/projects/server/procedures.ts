@@ -1,6 +1,6 @@
 import { protectedProcedure, createTRPCRouter } from '@/trpc/init';
 import { z } from 'zod';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { inngest } from '@/inngest/client';
 import { generateSlug } from 'random-word-slugs';
 import { TRPCError } from '@trpc/server';
