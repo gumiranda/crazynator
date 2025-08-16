@@ -1,7 +1,7 @@
 // lib/services/subscription.ts
-import type { Subscription as PrismaSubscription } from '@prisma/client';
-import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { Subscription as PrismaSubscription } from '@prisma/client';
+import Stripe from 'stripe';
 
 export interface CreateSubscriptionData {
   clerkUserId: string;
@@ -15,57 +15,73 @@ export interface CreateSubscriptionData {
 export async function createSubscription(
   data: CreateSubscriptionData,
 ): Promise<PrismaSubscription> {
-  return await prisma.subscription.create({
-    data,
-  });
+  return await prisma.subscription.create(
+    {
+      data,
+    },
+  );
 }
 
 export async function updateSubscriptionByStripeId(
   stripeSubscriptionId: string,
   data: Partial<CreateSubscriptionData>,
 ): Promise<PrismaSubscription | null> {
-  return await prisma.subscription.update({
-    where: {
-      stripeSubscriptionId,
+  return await prisma.subscription.update(
+    {
+      where: {
+        stripeSubscriptionId,
+      },
+      data,
     },
-    data,
-  });
+  );
 }
 
 export async function getSubscriptionByClerkId(
   clerkUserId: string,
 ): Promise<PrismaSubscription | null> {
-  return await prisma.subscription.findUnique({
-    where: {
-      clerkUserId,
+  return await prisma.subscription.findUnique(
+    {
+      where: {
+        clerkUserId,
+      },
     },
-  });
+  );
 }
 
 export async function getSubscriptionByStripeId(
   stripeSubscriptionId: string,
 ): Promise<PrismaSubscription | null> {
-  return await prisma.subscription.findUnique({
-    where: {
-      stripeSubscriptionId,
+  return await prisma.subscription.findUnique(
+    {
+      where: {
+        stripeSubscriptionId,
+      },
     },
-  });
+  );
 }
 
 export async function cancelSubscription(
   stripeSubscriptionId: string,
 ): Promise<PrismaSubscription | null> {
-  // Initialize Stripe
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-07-30.basil',
-  });
-
   try {
-    // Cancel subscription in Stripe
-    await stripe.subscriptions.cancel(stripeSubscriptionId);
-
-    // Update subscription in database
-    return await prisma.subscription.update({
+    const stripe = new Stripe(
+      process.env.STRIPE_SECRET_KEY!,
+      {
+        apiVersion: '2025-07-30.basil',
+      },
+    );
+    await stripe.subscriptions.cancel(
+      stripeSubscriptionId,
+    );
+  } catch (error) {
+    console.error(
+      'Erro ao cancelar assinatura:',
+      error,
+    );
+    throw error;
+  }
+  return await prisma.subscription.update(
+    {
       where: {
         stripeSubscriptionId,
       },
@@ -73,11 +89,8 @@ export async function cancelSubscription(
         status: 'canceled',
         cancelAtPeriodEnd: true,
       },
-    });
-  } catch (error) {
-    console.error('Error canceling subscription in Stripe:', error);
-    throw error;
-  }
+    },
+  );
 }
 
 export async function createOrUpdateSubscriptionFromStripe(
@@ -86,30 +99,43 @@ export async function createOrUpdateSubscriptionFromStripe(
 ): Promise<PrismaSubscription> {
   // Extract only the essential fields from Stripe.Subscription
   const subscriptionData = {
-    stripeCustomerId: stripeSubscription.customer as string,
-    stripeSubscriptionId: stripeSubscription.id,
+    stripeCustomerId:
+      stripeSubscription.customer as string,
+    stripeSubscriptionId:
+      stripeSubscription.id,
     status: stripeSubscription.status,
-    priceId: stripeSubscription.items.data[0]?.price.id || '',
-    cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+    priceId:
+      stripeSubscription.items.data[0]
+        ?.price.id || '',
+    cancelAtPeriodEnd:
+      stripeSubscription.cancel_at_period_end,
   };
 
   // Try to find existing subscription
-  const existingSubscription = await getSubscriptionByStripeId(stripeSubscription.id);
+  const existingSubscription =
+    await getSubscriptionByStripeId(
+      stripeSubscription.id,
+    );
 
   if (existingSubscription) {
     // Update existing subscription
-    const updatedSubscription = await updateSubscriptionByStripeId(
-      stripeSubscription.id,
-      subscriptionData,
-    );
+    const updatedSubscription =
+      await updateSubscriptionByStripeId(
+        stripeSubscription.id,
+        subscriptionData,
+      );
     if (!updatedSubscription) {
-      throw new Error('Falha ao atualizar assinatura existente');
+      throw new Error(
+        'Falha ao atualizar assinatura existente',
+      );
     }
     return updatedSubscription;
   } else {
     // Create new subscription - clerkUserId is required for new subscriptions
     if (!clerkUserId) {
-      throw new Error('clerkUserId é obrigatório para criar nova assinatura');
+      throw new Error(
+        'clerkUserId é obrigatório para criar nova assinatura',
+      );
     }
 
     return await createSubscription({
