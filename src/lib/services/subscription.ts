@@ -55,15 +55,29 @@ export async function getSubscriptionByStripeId(
 export async function cancelSubscription(
   stripeSubscriptionId: string,
 ): Promise<PrismaSubscription | null> {
-  return await prisma.subscription.update({
-    where: {
-      stripeSubscriptionId,
-    },
-    data: {
-      status: 'canceled',
-      cancelAtPeriodEnd: true,
-    },
+  // Initialize Stripe
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-07-30.basil',
   });
+
+  try {
+    // Cancel subscription in Stripe
+    await stripe.subscriptions.cancel(stripeSubscriptionId);
+
+    // Update subscription in database
+    return await prisma.subscription.update({
+      where: {
+        stripeSubscriptionId,
+      },
+      data: {
+        status: 'canceled',
+        cancelAtPeriodEnd: true,
+      },
+    });
+  } catch (error) {
+    console.error('Error canceling subscription in Stripe:', error);
+    throw error;
+  }
 }
 
 export async function createOrUpdateSubscriptionFromStripe(

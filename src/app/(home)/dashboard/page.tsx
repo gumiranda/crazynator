@@ -1,104 +1,32 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useTRPC } from '@/trpc/client';
+import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface SubscriptionData {
-  subscription: {
-    id: string;
-    status: string;
-    priceId: string;
-    cancelAtPeriodEnd: boolean;
-    createdAt: string;
-    updatedAt: string;
-    customerId: string;
-  } | null;
-  hasActiveSubscription: boolean;
-}
+// Interface não é mais necessária pois usamos o tipo do Prisma diretamente
 
 function DashboardContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const response = await fetch('/api/subscriptions/current');
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription');
-        }
-        const data = await response.json();
-        setSubscriptionData(data);
-      } catch (err) {
-        setError('Erro ao carregar dados da assinatura');
-        console.error('Error fetching subscription:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubscription();
-  }, []);
-
-  const getSubscriptionStatus = () => {
-    if (!subscriptionData?.subscription)
-      return {
-        text: 'Sem assinatura',
-        variant: 'secondary' as const,
-        icon: AlertCircle,
-      };
-
-    const { status, cancelAtPeriodEnd } = subscriptionData.subscription;
-
-    if (status === 'active' && !cancelAtPeriodEnd) {
-      return {
-        text: 'Plano Pro',
-        variant: 'default' as const,
-        icon: CheckCircle,
-      };
-    } else if (status === 'active' && cancelAtPeriodEnd) {
-      return {
-        text: 'Cancelando',
-        variant: 'destructive' as const,
-        icon: Clock,
-      };
-    } else if (status === 'past_due') {
-      return {
-        text: 'Pagamento pendente',
-        variant: 'destructive' as const,
-        icon: AlertCircle,
-      };
-    } else {
-      return {
-        text: 'Inativo',
-        variant: 'secondary' as const,
-        icon: AlertCircle,
-      };
-    }
-  };
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { data: subscriptionData } = useSuspenseQuery(trpc.subscription.getCurrent.queryOptions());
+  
+  const cancelSubscriptionMutation = useMutation({
+    ...trpc.subscription.cancel.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(trpc.subscription.getCurrent.queryOptions());
+    },
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
-
-  const statusInfo = getSubscriptionStatus();
-  const StatusIcon = statusInfo.icon;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-background-900 mx-auto mb-4"></div>
-          <p>Carregando...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background-50">
@@ -121,35 +49,40 @@ function DashboardContent() {
         </div>
 
         {/* Subscription Details */}
-        {subscriptionData?.subscription && (
+        {subscriptionData && (
           <div className="bg-background rounded-lg shadow p-6 mb-8">
             <h3 className="text-xl font-semibold mb-4">Detalhes da Assinatura</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-background-600">Status</p>
-                <p className="font-medium capitalize">{subscriptionData.subscription.status}</p>
+                <p className="font-medium capitalize">{subscriptionData.status}</p>
               </div>
               <div>
                 <p className="text-sm text-background-600">Cancelamento automático</p>
-                <p className="font-medium">
-                  {subscriptionData.subscription.cancelAtPeriodEnd ? 'Sim' : 'Não'}
-                </p>
+                <p className="font-medium">{subscriptionData.cancelAtPeriodEnd ? 'Sim' : 'Não'}</p>
               </div>
               <div>
                 <p className="text-sm text-background-600">Criada em</p>
-                <p className="font-medium">{formatDate(subscriptionData.subscription.createdAt)}</p>
+                <p className="font-medium">{formatDate(subscriptionData.createdAt.toString())}</p>
               </div>
               <div>
                 <p className="text-sm text-background-600">Última atualização</p>
-                <p className="font-medium">{formatDate(subscriptionData.subscription.updatedAt)}</p>
+                <p className="font-medium">{formatDate(subscriptionData.updatedAt.toString())}</p>
               </div>
-              <CustomerPortalButton customerId={subscriptionData?.subscription?.customerId} />
+              <CustomerPortalButton customerId={subscriptionData.stripeCustomerId} />
+              <CancelSubscriptionButton 
+                onCancel={() => cancelSubscriptionMutation.mutate({ 
+                  stripeSubscriptionId: subscriptionData.stripeSubscriptionId 
+                })}
+                isLoading={cancelSubscriptionMutation.isPending}
+                disabled={subscriptionData.cancelAtPeriodEnd}
+              />
             </div>
           </div>
         )}
 
         {/* No Subscription Message */}
-        {!subscriptionData?.subscription && !loading && (
+        {!subscriptionData && (
           <div className="bg-background rounded-lg shadow p-6 text-center">
             <AlertCircle className="h-12 w-12 text-background-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhuma assinatura ativa</h3>
@@ -161,13 +94,6 @@ function DashboardContent() {
             </Button>
           </div>
         )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">{error}</p>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -175,11 +101,84 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Carregando...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-background-900 mx-auto mb-4"></div>
+            <p>Carregando...</p>
+          </div>
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );
 }
+function CancelSubscriptionButton({ 
+  onCancel, 
+  isLoading, 
+  disabled 
+}: { 
+  onCancel: () => void; 
+  isLoading: boolean; 
+  disabled: boolean; 
+}) {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleCancel = () => {
+    onCancel();
+    setShowConfirmation(false);
+  };
+
+  if (disabled) {
+    return (
+      <div className="text-sm text-gray-500">
+        Assinatura já está programada para cancelamento
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {!showConfirmation ? (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowConfirmation(true)}
+          disabled={isLoading}
+        >
+          Cancelar Assinatura
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-sm text-gray-600">
+            Tem certeza que deseja cancelar sua assinatura?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Cancelando...' : 'Sim, cancelar'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowConfirmation(false)}
+              disabled={isLoading}
+            >
+              Não, manter
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CustomerPortalButton({ customerId }: { customerId: string }) {
   const [loading, setLoading] = useState(false);
 
