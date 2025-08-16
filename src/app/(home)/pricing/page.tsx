@@ -73,57 +73,91 @@ export default function PricingPage() {
             height={50}
             className="hidden md:block"
           />
+        </div> 
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4">
+            Escolha seu plano
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Compare os recursos e
+            escolha o plano que melhor
+            atende às suas necessidades.
+          </p>
         </div>
-        <h1 className="text-xl md:text-3xl font-bold text-center">Pricing</h1>
-        <p className="text-muted-foreground text-center text-sm md:text-base">
-          Choose the plan that fits your needs
-        </p>
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={`relative ${plan.popular ? 'border-2 border-primary shadow-lg' : ''}`}
+              className={`relative ${
+                plan.popular
+                  ? 'border-2 border-primary shadow-lg'
+                  : ''
+              }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Mais Popular
+                    Mais popular
                   </span>
                 </div>
               )}
-
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardTitle className="text-2xl">
+                  {plan.name}
+                </CardTitle>
+                <CardDescription>
+                  {plan.description}
+                </CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-gray-600">/mês</span>
+                  <span className="text-4xl font-bold text-muted-foreground">
+                    {plan.price}
+                  </span>
+                  <span className="text-muted-foreground">
+                    /mês
+                  </span>
                 </div>
               </CardHeader>
-
               <CardContent>
                 <ul className="space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-3" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {plan.features.map(
+                    (feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-center"
+                      >
+                        <Check className="h-5 w-5 text-green-500 mr-3" />
+                        <span className="text-muted-foreground">
+                          {feature}
+                        </span>
+                      </li>
+                    ),
+                  )}
                 </ul>
               </CardContent>
-
               <CardFooter>
                 <Button
-                  onClick={() => handleSubscribe(plan.priceId)}
-                  disabled={loading === plan.priceId}
-                  className={`w-full ${plan.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
+                  onClick={() => {
+                    handleSubscribe(
+                      plan.priceId,
+                    );
+                  }}
+                  disabled={
+                    loading ===
+                    plan.priceId
+                  }
+                  className={`w-full cursor-pointer`}
                 >
-                  {loading === plan.priceId ? 'Processando...' : `Assinar ${plan.name}`}
+                  {loading ===
+                  plan.priceId
+                    ? 'Processando...'
+                    : `Assinar ${plan.name}`}
                 </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
+      </div>
       </section>
     </div>
   );

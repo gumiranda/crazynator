@@ -8,10 +8,16 @@ export async function GET() {
     const { userId } = await auth();
 
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return new NextResponse(
+        'Unauthorized',
+        { status: 401 },
+      );
     }
 
-    const subscription = await getSubscriptionByClerkId(userId);
+    const subscription =
+      await getSubscriptionByClerkId(
+        userId,
+      );
 
     if (!subscription) {
       return NextResponse.json({
@@ -21,22 +27,33 @@ export async function GET() {
     }
 
     // Check if subscription is active
-    const isActive = subscription.status === 'active';
+    const isActive =
+      subscription.status === 'active';
 
     return NextResponse.json({
       subscription: {
         id: subscription.id,
         status: subscription.status,
         priceId: subscription.priceId,
-        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-        createdAt: subscription.createdAt,
-        updatedAt: subscription.updatedAt,
-        customerId: subscription.stripeCustomerId,
+        cancelAtPeriodEnd:
+          subscription.cancelAtPeriodEnd,
+        createdAt:
+          subscription.createdAt,
+        updatedAt:
+          subscription.updatedAt,
+        customerId:
+          subscription.stripeCustomerId,
       },
       hasActiveSubscription: isActive,
     });
   } catch (error) {
-    console.error('Error fetching subscription:', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.error(
+      'Error fetching subscription:',
+      error,
+    );
+    return new NextResponse(
+      'Internal error',
+      { status: 500 },
+    );
   }
 }
