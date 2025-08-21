@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { inngest } from '@/inngest/client';
 import { generateSlug } from 'random-word-slugs';
 import { TRPCError } from '@trpc/server';
-import { consumeCredits } from '@/lib/usage';
+import { consumeCredits, validateCreditsBeforeAction } from '@/lib/usage';
 import { projectChannel } from '@/inngest/channels';
 import { getSubscriptionToken } from '@inngest/realtime';
 import { getSandbox } from '@/lib/sandbox';
@@ -145,20 +145,37 @@ export const projectsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      // Validate credits before attempting to consume
       try {
-        await consumeCredits();
+        const status = await validateCreditsBeforeAction();
+        
+        // Show warning if credits are low (but still allow action)
+        if (status.isLowCredits) {
+          console.warn(`User ${ctx.auth.userId} has low credits: ${status.remainingPoints}/${status.plan.credits} (${Math.round(status.creditsPercentage * 100)}%)`);
+        }
       } catch (error) {
         if (error instanceof Error) {
+          // Provide plan-specific error messages
           throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Something went wrong',
+            code: 'TOO_MANY_REQUESTS',
+            message: error.message,
           });
         } else {
           throw new TRPCError({
-            code: 'TOO_MANY_REQUESTS',
-            message: 'You have no credits left',
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Unable to validate credits',
           });
         }
+      }
+      
+      // Actually consume the credits
+      try {
+        await consumeCredits();
+      } catch {
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: 'Failed to consume credits',
+        });
       }
       const createdProject = await prisma.project.create({
         data: {
