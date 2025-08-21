@@ -1,104 +1,104 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This specification defines an advanced project scaffolding platform that goes beyond traditional "starter kits" to become a living part of the project lifecycle. The platform combines battle-tested concepts from tools like Yeoman, Cookiecutter, and Plop.js with innovative features inspired by Copier for dynamic template updates. The system will support both full project generation and micro-generators for ongoing development tasks, creating a closed-loop system that maintains architectural consistency throughout a project's evolution.
+Esta especificação define uma plataforma avançada de scaffolding de projetos que vai além dos tradicionais "starter kits" para se tornar parte viva do ciclo de vida do projeto. A plataforma combina conceitos testados em batalha de ferramentas como Yeoman, Cookiecutter e Plop.js com recursos inovadores inspirados no Copier para atualizações dinâmicas de templates. O sistema suportará tanto a geração completa de projetos quanto microgeradores para tarefas de desenvolvimento contínuas, criando um sistema de ciclo fechado que mantém a consistência arquitetônica ao longo da evolução de um projeto.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a developer, I want to generate complete project structures from curated templates, so that I can quickly start new projects with proven architectures and best practices.
+**História do Usuário:** Como desenvolvedor, quero gerar estruturas de projeto completas a partir de templates selecionados, para que eu possa iniciar rapidamente novos projetos com arquiteturas e melhores práticas comprovadas.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user selects a template from the official library THEN the system SHALL generate a complete project structure with all necessary files and configurations
-2. WHEN a project is generated THEN the system SHALL create a manifest file (.gen-spec.yml) linking the project to the template version
-3. WHEN generating a project THEN the system SHALL support parameterization allowing users to customize project details (name, database type, authentication method, etc.)
-4. IF a template requires additional configuration THEN the system SHALL prompt the user with an interactive questionnaire
-5. WHEN project generation is complete THEN the system SHALL provide a summary of generated files and next steps
+1. QUANDO um usuário seleciona um template da biblioteca oficial, ENTÃO o sistema DEVE gerar uma estrutura de projeto completa com todos os arquivos e configurações necessários
+2. QUANDO um projeto é gerado, ENTÃO o sistema DEVE criar um arquivo de manifesto (.gen-spec.yml) vinculando o projeto à versão do template
+3. AO gerar um projeto, ENTÃO o sistema DEVE suportar parametrização, permitindo que os usuários personalizem detalhes do projeto (nome, tipo de banco de dados, método de autenticação, etc.)
+4. SE um template exigir configuração adicional, ENTÃO o sistema DEVE solicitar ao usuário um questionário interativo
+5. QUANDO a geração do projeto estiver concluída, ENTÃO o sistema DEVE fornecer um resumo dos arquivos gerados e os próximos passos
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a developer, I want to update my generated project when the source template is updated, so that I can receive security fixes and framework updates automatically.
+**História do Usuário:** Como desenvolvedor, quero atualizar meu projeto gerado quando o template de origem for atualizado, para que eu possa receber correções de segurança e atualizações de framework automaticamente.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a template is updated THEN the system SHALL detect projects generated from that template version
-2. WHEN applying template updates THEN the system SHALL perform intelligent merging to preserve user customizations
-3. IF conflicts arise during update THEN the system SHALL present conflict resolution options to the user
-4. WHEN updates are applied THEN the system SHALL update the manifest file with the new template version
-5. WHEN an update is available THEN the system SHALL notify users through the platform interface
-6. IF a user chooses to skip an update THEN the system SHALL track the skipped version to avoid repeated notifications
+1. QUANDO um template é atualizado, ENTÃO o sistema DEVE detectar projetos gerados a partir daquela versão do template
+2. AO aplicar atualizações de template, ENTÃO o sistema DEVE realizar uma fusão inteligente para preservar as personalizações do usuário
+3. SE surgirem conflitos durante a atualização, ENTÃO o sistema DEVE apresentar opções de resolução de conflitos ao usuário
+4. QUANDO as atualizações são aplicadas, ENTÃO o sistema DEVE atualizar o arquivo de manifesto com a nova versão do template
+5. QUANDO uma atualização estiver disponível, ENTÃO o sistema DEVE notificar os usuários através da interface da plataforma
+6. SE um usuário optar por pular uma atualização, ENTÃO o sistema DEVE rastrear a versão pulada para evitar notificações repetidas
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a developer working on an existing project, I want to use micro-generators for repetitive tasks, so that I can maintain consistency and save time on boilerplate code.
+**História do Usuário:** Como desenvolvedor trabalhando em um projeto existente, quero usar microgeradores para tarefas repetitivas, para que eu possa manter a consistência e economizar tempo com código boilerplate.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user runs a micro-generator command THEN the system SHALL execute the generator defined in the project template
-2. WHEN micro-generators are available THEN the system SHALL provide a discoverable list of available generators for the current project
-3. WHEN executing a micro-generator THEN the system SHALL follow the architectural patterns defined in the project template
-4. IF a micro-generator requires parameters THEN the system SHALL prompt for necessary inputs
-5. WHEN a micro-generator completes THEN the system SHALL generate files following the project's established conventions
+1. QUANDO um usuário executa um comando de microgerador, ENTÃO o sistema DEVE executar o gerador definido no template do projeto
+2. QUANDO microgeradores estão disponíveis, ENTÃO o sistema DEVE fornecer uma lista detectável de geradores disponíveis para o projeto atual
+3. AO executar um microgerador, ENTÃO o sistema DEVE seguir os padrões arquitetônicos definidos no template do projeto
+4. SE um microgerador exigir parâmetros, ENTÃO o sistema DEVE solicitar as entradas necessárias
+5. QUANDO um microgerador for concluído, ENTÃO o sistema DEVE gerar arquivos seguindo as convenções estabelecidas do projeto
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a template creator, I want to publish and maintain templates in a marketplace, so that other developers can benefit from my architectural patterns and I can keep them updated.
+**História do Usuário:** Como criador de templates, quero publicar e manter templates em um marketplace, para que outros desenvolvedores possam se beneficiar dos meus padrões arquitetônicos e eu possa mantê-los atualizados.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user creates a template THEN the system SHALL provide tools for template definition and testing
-2. WHEN publishing a template THEN the system SHALL validate template structure and metadata
-3. WHEN a template is published THEN the system SHALL make it discoverable in the marketplace
-4. WHEN updating a published template THEN the system SHALL version the changes and notify dependent projects
-5. IF a template has dependencies THEN the system SHALL manage and validate dependency compatibility
+1. QUANDO um usuário cria um template, ENTÃO o sistema DEVE fornecer ferramentas para definição e teste de templates
+2. AO publicar um template, ENTÃO o sistema DEVE validar a estrutura e os metadados do template
+3. QUANDO um template é publicado, ENTÃO o sistema DEVE torná-lo detectável no marketplace
+4. AO atualizar um template publicado, ENTÃO o sistema DEVE versionar as alterações e notificar os projetos dependentes
+5. SE um template tiver dependências, ENTÃO o sistema DEVE gerenciar e validar a compatibilidade das dependências
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a team lead or architect, I want to create custom templates for my organization, so that all team members follow consistent architectural patterns and coding standards.
+**História do Usuário:** Como líder de equipe ou arquiteto, quero criar templates personalizados para minha organização, para que todos os membros da equipe sigam padrões arquitetônicos e de codificação consistentes.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN creating a custom template THEN the system SHALL support private template repositories
-2. WHEN team members generate projects THEN the system SHALL enforce organizational templates and standards
-3. WHEN defining templates THEN the system SHALL support inheritance from base templates
-4. IF organizational standards change THEN the system SHALL propagate updates to all team projects
-5. WHEN onboarding new team members THEN the system SHALL provide access to organizational templates
+1. AO criar um template personalizado, ENTÃO o sistema DEVE suportar repositórios de templates privados
+2. QUANDO os membros da equipe geram projetos, ENTÃO o sistema DEVE impor templates e padrões organizacionais
+3. AO definir templates, ENTÃO o sistema DEVE suportar herança de templates base
+4. SE os padrões organizacionais mudarem, ENTÃO o sistema DEVE propagar as atualizações para todos os projetos da equipe
+5. AO integrar novos membros da equipe, ENTÃO o sistema DEVE fornecer acesso aos templates organizacionais
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a developer, I want the platform to maintain architectural consistency over time, so that my codebase doesn't drift from established patterns as the project evolves.
+**História do Usuário:** Como desenvolvedor, quero que a plataforma mantenha a consistência arquitetônica ao longo do tempo, para que minha base de código não se desvie dos padrões estabelecidos à medida que o projeto evolui.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN using micro-generators THEN the system SHALL ensure generated code follows the original template's architectural decisions
-2. WHEN template updates include new architectural patterns THEN the system SHALL offer to apply these patterns to existing code
-3. IF architectural drift is detected THEN the system SHALL provide recommendations for realignment
-4. WHEN multiple developers work on a project THEN the system SHALL ensure all generated code follows consistent patterns
-5. WHEN reviewing project health THEN the system SHALL provide metrics on architectural consistency
+1. AO usar microgeradores, ENTÃO o sistema DEVE garantir que o código gerado siga as decisões arquitetônicas do template original
+2. QUANDO as atualizações de template incluem novos padrões arquitetônicos, ENTÃO o sistema DEVE oferecer a aplicação desses padrões ao código existente
+3. SE for detectado desvio arquitetônico, ENTÃO o sistema DEVE fornecer recomendações para realinhamento
+4. QUANDO vários desenvolvedores trabalham em um projeto, ENTÃO o sistema DEVE garantir que todo o código gerado siga padrões consistentes
+5. AO revisar a saúde do projeto, ENTÃO o sistema DEVE fornecer métricas sobre a consistência arquitetônica
 
-### Requirement 7
+### Requisito 7
 
-**User Story:** As a platform user, I want a seamless command-line and web interface experience, so that I can efficiently manage templates and projects across different environments.
+**História do Usuário:** Como usuário da plataforma, quero uma experiência de interface de linha de comando e web perfeita, para que eu possa gerenciar eficientemente templates e projetos em diferentes ambientes.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN using the CLI THEN the system SHALL provide intuitive commands for all major operations
-2. WHEN using the web interface THEN the system SHALL offer visual template browsing and project management
-3. WHEN switching between interfaces THEN the system SHALL maintain consistent state and functionality
-4. IF working offline THEN the system SHALL cache templates and allow basic operations
-5. WHEN collaborating with team members THEN the system SHALL support sharing and synchronization of custom templates
+1. AO usar a CLI, ENTÃO o sistema DEVE fornecer comandos intuitivos para todas as operações principais
+2. AO usar a interface da web, ENTÃO o sistema DEVE oferecer navegação visual de templates e gerenciamento de projetos
+3. AO alternar entre interfaces, ENTÃO o sistema DEVE manter estado e funcionalidade consistentes
+4. SE trabalhar offline, ENTÃO o sistema DEVE armazenar em cache os templates e permitir operações básicas
+5. AO colaborar com membros da equipe, ENTÃO o sistema DEVE suportar o compartilhamento e a sincronização de templates personalizados
 
-### Requirement 8
+### Requisito 8
 
-**User Story:** As a developer, I want comprehensive documentation and examples for templates, so that I can understand and effectively use available scaffolding options.
+**História do Usuário:** Como desenvolvedor, quero documentação e exemplos abrangentes para templates, para que eu possa entender e usar efetivamente as opções de scaffolding disponíveis.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN browsing templates THEN the system SHALL display comprehensive documentation and usage examples
-2. WHEN a template is complex THEN the system SHALL provide step-by-step guides and best practices
-3. WHEN learning to create templates THEN the system SHALL offer tutorials and reference documentation
-4. IF a template has specific requirements THEN the system SHALL clearly document prerequisites and setup steps
-5. WHEN troubleshooting issues THEN the system SHALL provide helpful error messages and debugging information
+1. AO navegar pelos templates, ENTÃO o sistema DEVE exibir documentação abrangente e exemplos de uso
+2. QUANDO um template é complexo, ENTÃO o sistema DEVE fornecer guias passo a passo e melhores práticas
+3. AO aprender a criar templates, ENTÃO o sistema DEVE oferecer tutoriais e documentação de referência
+4. SE um template tiver requisitos específicos, ENTÃO o sistema DEVE documentar claramente os pré-requisitos и as etapas de configuração
+5. AO solucionar problemas, ENTÃO o sistema DEVE fornecer mensagens de erro úteis e informações de depuração

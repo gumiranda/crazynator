@@ -1,103 +1,103 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature provides users with intelligent code pattern suggestions and architectural guidance during project development. The system will analyze the user's code and suggest best practices including Atomic Design, Feature-Sliced Design, proper usage of libraries like React Query and Zustand, and other modern development patterns. This helps users write more maintainable, scalable, and well-structured code.
+Esta funcionalidade fornece aos usuários sugestões inteligentes de padrões de código e orientação de arquitetura durante o desenvolvimento do projeto. O sistema analisará o código do usuário e sugerirá as melhores práticas, incluindo Atomic Design, Feature-Sliced Design, uso adequado de bibliotecas como React Query e Zustand, e outros padrões de desenvolvimento modernos. Isso ajuda os usuários a escreverem código mais manutenível, escalável e bem estruturado.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a user, I want to receive suggestions for code organization patterns like Atomic Design and Feature-Sliced Design, so that I can structure my components and features in a maintainable way.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões de organização de código como Atomic Design e Feature-Sliced Design, para que eu possa estruturar meus componentes e funcionalidades de forma manutenível.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user creates React components THEN the system SHALL suggest Atomic Design categorization (atoms, molecules, organisms, templates, pages)
-2. WHEN a user organizes features THEN the system SHALL recommend Feature-Sliced Design structure (shared, entities, features, widgets, pages, app)
-3. WHEN components become too complex THEN the system SHALL suggest breaking them into smaller, more focused components
-4. IF component hierarchy is deeply nested THEN the system SHALL recommend flattening or restructuring
-5. WHEN a user creates similar components THEN the system SHALL suggest creating reusable abstractions
+1. QUANDO um usuário cria componentes React, ENTÃO o sistema DEVE sugerir a categorização do Atomic Design (átomos, moléculas, organismos, templates, páginas)
+2. QUANDO um usuário organiza funcionalidades, ENTÃO o sistema DEVE recomendar a estrutura do Feature-Sliced Design (shared, entities, features, widgets, pages, app)
+3. QUANDO os componentes se tornam muito complexos, ENTÃO o sistema DEVE sugerir dividi-los em componentes menores e mais focados
+4. SE a hierarquia de componentes estiver profundamente aninhada, ENTÃO o sistema DEVE recomendar o achatamento ou reestruturação
+5. QUANDO um usuário cria componentes semelhantes, ENTÃO o sistema DEVE sugerir a criação de abstrações reutilizáveis
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a user, I want to receive suggestions for proper state management patterns using Zustand, so that I can manage application state effectively.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões adequados de gerenciamento de estado usando Zustand, para que eu possa gerenciar o estado da aplicação de forma eficaz.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user manages local state THEN the system SHALL suggest when to use Zustand for global state
-2. WHEN creating Zustand stores THEN the system SHALL recommend proper store structure and slicing
-3. WHEN state becomes complex THEN the system SHALL suggest separating concerns into multiple stores
-4. IF state mutations are detected THEN the system SHALL recommend immutable update patterns
-5. WHEN using derived state THEN the system SHALL suggest proper selector patterns
+1. QUANDO um usuário gerencia o estado local, ENTÃO o sistema DEVE sugerir quando usar o Zustand para o estado global
+2. AO criar stores do Zustand, ENTÃO o sistema DEVE recomendar a estrutura e o fatiamento adequados do store
+3. QUANDO o estado se torna complexo, ENTÃO o sistema DEVE sugerir a separação de preocupações em múltiplos stores
+4. SE forem detectadas mutações de estado, ENTÃO o sistema DEVE recomendar padrões de atualização imutáveis
+5. AO usar estado derivado, ENTÃO o sistema DEVE sugerir padrões de seletores adequados
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a user, I want to receive suggestions for data fetching patterns using React Query, so that I can handle server state efficiently.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões de busca de dados usando React Query, para que eu possa lidar com o estado do servidor de forma eficiente.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user makes API calls THEN the system SHALL suggest using React Query for server state management
-2. WHEN implementing data fetching THEN the system SHALL recommend proper query key structures
-3. WHEN handling mutations THEN the system SHALL suggest optimistic updates and cache invalidation patterns
-4. IF loading states are missing THEN the system SHALL recommend proper loading and error handling
-5. WHEN data is refetched frequently THEN the system SHALL suggest caching and stale-time configurations
+1. QUANDO um usuário faz chamadas de API, ENTÃO o sistema DEVE sugerir o uso do React Query para o gerenciamento do estado do servidor
+2. AO implementar a busca de dados, ENTÃO o sistema DEVE recomendar estruturas de chaves de consulta adequadas
+3. AO lidar com mutações, ENTÃO o sistema DEVE sugerir atualizações otimistas e padrões de invalidação de cache
+4. SE faltarem estados de carregamento, ENTÃO o sistema DEVE recomendar o tratamento adequado de carregamento e erro
+5. QUANDO os dados são buscados com frequência, ENTÃO o sistema DEVE sugerir configurações de cache e tempo de obsolescência
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a user, I want to receive suggestions for TypeScript best practices, so that I can write type-safe and maintainable code.
+**História do Usuário:** Como usuário, quero receber sugestões de melhores práticas de TypeScript, para que eu possa escrever código seguro e manutenível.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN using TypeScript THEN the system SHALL suggest proper type definitions and interfaces
-2. WHEN creating generic components THEN the system SHALL recommend appropriate generic constraints
-3. IF any types are detected THEN the system SHALL suggest more specific type definitions
-4. WHEN handling API responses THEN the system SHALL recommend proper type validation
-5. WHEN creating utility types THEN the system SHALL suggest built-in TypeScript utilities
+1. AO usar TypeScript, ENTÃO o sistema DEVE sugerir definições de tipo e interfaces adequadas
+2. AO criar componentes genéricos, ENTÃO o sistema DEVE recomendar restrições genéricas apropriadas
+3. SE forem detectados tipos 'any', ENTÃO o sistema DEVE sugerir definições de tipo mais específicas
+4. AO lidar com respostas de API, ENTÃO o sistema DEVE recomendar a validação de tipo adequada
+5. AO criar tipos de utilitário, ENTÃO o sistema DEVE sugerir utilitários TypeScript integrados
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a user, I want to receive suggestions for performance optimization patterns, so that I can build efficient applications.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões de otimização de desempenho, para que eu possa construir aplicações eficientes.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN components re-render frequently THEN the system SHALL suggest React.memo, useMemo, or useCallback optimizations
-2. WHEN handling large lists THEN the system SHALL recommend virtualization techniques
-3. IF bundle size is large THEN the system SHALL suggest code splitting and lazy loading
-4. WHEN images are used THEN the system SHALL recommend optimization and lazy loading patterns
-5. WHEN expensive operations are detected THEN the system SHALL suggest moving them to web workers
+1. QUANDO os componentes são renderizados com frequência, ENTÃO o sistema DEVE sugerir otimizações com React.memo, useMemo ou useCallback
+2. AO lidar com listas grandes, ENTÃO o sistema DEVE recomendar técnicas de virtualização
+3. SE o tamanho do bundle for grande, ENTÃO o sistema DEVE sugerir a divisão de código e o carregamento lento
+4. QUANDO imagens são usadas, ENTÃO o sistema DEVE recomendar padrões de otimização e carregamento lento
+5. QUANDO operações caras são detectadas, ENTÃO o sistema DEVE sugerir movê-las para web workers
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a user, I want to receive suggestions for testing patterns and best practices, so that I can write comprehensive and maintainable tests.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões e melhores práticas de teste, para que eu possa escrever testes abrangentes e manuteníveis.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN components are created THEN the system SHALL suggest appropriate testing strategies
-2. WHEN custom hooks are implemented THEN the system SHALL recommend testing patterns for hooks
-3. IF test coverage is low THEN the system SHALL suggest areas that need testing
-4. WHEN testing async operations THEN the system SHALL recommend proper async testing patterns
-5. WHEN mocking is needed THEN the system SHALL suggest appropriate mocking strategies
+1. QUANDO componentes são criados, ENTÃO o sistema DEVE sugerir estratégias de teste apropriadas
+2. QUANDO hooks personalizados são implementados, ENTÃO o sistema DEVE recomendar padrões de teste para hooks
+3. SE a cobertura de teste for baixa, ENTÃO o sistema DEVE sugerir áreas que precisam de teste
+4. AO testar operações assíncronas, ENTÃO o sistema DEVE recomendar padrões de teste assíncronos adequados
+5. QUANDO for necessário mocking, ENTÃO o sistema DEVE sugerir estratégias de mocking apropriadas
 
-### Requirement 7
+### Requisito 7
 
-**User Story:** As a user, I want to receive suggestions for accessibility patterns, so that I can build inclusive applications.
+**História do Usuário:** Como usuário, quero receber sugestões de padrões de acessibilidade, para que eu possa construir aplicações inclusivas.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN creating interactive elements THEN the system SHALL suggest proper ARIA attributes
-2. WHEN building forms THEN the system SHALL recommend accessibility best practices
-3. IF color contrast is insufficient THEN the system SHALL suggest improvements
-4. WHEN using custom components THEN the system SHALL recommend keyboard navigation support
-5. WHEN images are used THEN the system SHALL suggest proper alt text patterns
+1. AO criar elementos interativos, ENTÃO o sistema DEVE sugerir atributos ARIA adequados
+2. AO construir formulários, ENTÃO o sistema DEVE recomendar as melhores práticas de acessibilidade
+3. SE o contraste de cor for insuficiente, ENTÃO o sistema DEVE sugerir melhorias
+4. AO usar componentes personalizados, ENTÃO o sistema DEVE recomendar suporte à navegação por teclado
+5. QUANDO imagens são usadas, ENTÃO o sistema DEVE sugerir padrões de texto alternativo adequados
 
-### Requirement 8
+### Requisito 8
 
-**User Story:** As a user, I want to receive contextual suggestions based on my current code, so that I can get relevant recommendations while coding.
+**História do Usuário:** Como usuário, quero receber sugestões contextuais com base no meu código atual, para que eu possa obter recomendações relevantes enquanto codifico.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user is actively coding THEN the system SHALL analyze the current context and provide relevant suggestions
-2. WHEN patterns are detected THEN the system SHALL suggest improvements or alternatives
-3. IF anti-patterns are found THEN the system SHALL recommend better approaches
-4. WHEN libraries are used incorrectly THEN the system SHALL suggest proper usage patterns
-5. WHEN code quality issues are detected THEN the system SHALL provide actionable improvement suggestions
+1. QUANDO um usuário está codificando ativamente, ENTÃO o sistema DEVE analisar o contexto atual e fornecer sugestões relevantes
+2. QUANDO padrões são detectados, ENTÃO o sistema DEVE sugerir melhorias ou alternativas
+3. SE forem encontrados anti-padrões, ENTÃO o sistema DEVE recomendar abordagens melhores
+4. QUANDO bibliotecas são usadas incorretamente, ENTÃO o sistema DEVE sugerir padrões de uso adequados
+5. QUANDO problemas de qualidade de código são detectados, ENTÃO o sistema DEVE fornecer sugestões de melhoria acionáveis
