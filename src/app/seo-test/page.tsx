@@ -18,7 +18,7 @@ export default function SEOTestPage() {
     // Simulate audit delay
     setTimeout(() => {
       const homePageSEO = pageSEO.home();
-      const pricingPageSEO = pageSEO.pricing();
+
       
       const auditData = {
         url: window.location.origin,

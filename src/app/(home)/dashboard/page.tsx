@@ -7,7 +7,7 @@ import { Suspense, useState } from 'react';
 import { useTRPC } from '@/trpc/client';
 import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-// Interface não é mais necessária pois usamos o tipo do Prisma diretamente
+// Interface is no longer needed as we use Prisma type directly
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -25,7 +25,7 @@ function DashboardContent() {
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString('en-US');
   };
 
   return (
@@ -36,37 +36,37 @@ function DashboardContent() {
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
             <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
             <div>
-              <p className="text-green-800 font-medium">Assinatura ativada com sucesso!</p>
-              <p className="text-green-600 text-sm">Bem-vindo ao MinimalSaaS</p>
+              <p className="text-green-800 font-medium">Subscription activated successfully!</p>
+              <p className="text-green-600 text-sm">Welcome to MinimalSaaS</p>
             </div>
           </div>
         )}
 
         {/* Welcome Section */}
         <div className="mt-8">
-          <h2 className="text-3xl font-bold mb-2">Bem-vindo de volta!</h2>
-          <p className="text-background-600">Aqui está o resumo da sua conta</p>
+          <h2 className="text-3xl font-bold mb-2">Welcome back!</h2>
+          <p className="text-background-600">Here&apos;s your account summary</p>
         </div>
 
         {/* Subscription Details */}
         {subscriptionData && (
           <div className="bg-background rounded-lg shadow p-6 mb-8">
-            <h3 className="text-xl font-semibold mb-4">Detalhes da Assinatura</h3>
+            <h3 className="text-xl font-semibold mb-4">Subscription Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-background-600">Status</p>
                 <p className="font-medium capitalize">{subscriptionData.status}</p>
               </div>
               <div>
-                <p className="text-sm text-background-600">Cancelamento automático</p>
-                <p className="font-medium">{subscriptionData.cancelAtPeriodEnd ? 'Sim' : 'Não'}</p>
+                <p className="text-sm text-background-600">Auto cancellation</p>
+                <p className="font-medium">{subscriptionData.cancelAtPeriodEnd ? 'Yes' : 'No'}</p>
               </div>
               <div>
-                <p className="text-sm text-background-600">Criada em</p>
+                <p className="text-sm text-background-600">Created on</p>
                 <p className="font-medium">{formatDate(subscriptionData.createdAt.toString())}</p>
               </div>
               <div>
-                <p className="text-sm text-background-600">Última atualização</p>
+                <p className="text-sm text-background-600">Last updated</p>
                 <p className="font-medium">{formatDate(subscriptionData.updatedAt.toString())}</p>
               </div>
               <CustomerPortalButton customerId={subscriptionData.stripeCustomerId} />
@@ -85,12 +85,12 @@ function DashboardContent() {
         {!subscriptionData && (
           <div className="bg-background rounded-lg shadow p-6 text-center">
             <AlertCircle className="h-12 w-12 text-background-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma assinatura ativa</h3>
+            <h3 className="text-lg font-semibold mb-2">No active subscription</h3>
             <p className="text-background-600 mb-4">
-              Você não possui uma assinatura ativa no momento.
+              You don&apos;t have an active subscription at the moment.
             </p>
             <Button asChild>
-              <a href="/pricing">Ver Planos</a>
+              <a href="/pricing">View Plans</a>
             </Button>
           </div>
         )}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-background-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-background-900 mx-auto mb-4"></div>
-            <p>Carregando...</p>
+            <p>Loading...</p>
           </div>
         </div>
       }
@@ -134,7 +134,7 @@ function CancelSubscriptionButton({
   if (disabled) {
     return (
       <div className="text-sm text-gray-500">
-        Assinatura já está programada para cancelamento
+        Subscription is already scheduled for cancellation
       </div>
     );
   }
@@ -148,12 +148,12 @@ function CancelSubscriptionButton({
           onClick={() => setShowConfirmation(true)}
           disabled={isLoading}
         >
-          Cancelar Assinatura
+          Cancel Subscription
         </Button>
       ) : (
         <div className="space-y-2">
-          <p className="text-sm text-gray-600">
-            Tem certeza que deseja cancelar sua assinatura?
+          <p className="text-sm text-background-600">
+            Are you sure you want to cancel your subscription?
           </p>
           <div className="flex gap-2">
             <Button
@@ -162,7 +162,7 @@ function CancelSubscriptionButton({
               onClick={handleCancel}
               disabled={isLoading}
             >
-              {isLoading ? 'Cancelando...' : 'Sim, cancelar'}
+              {isLoading ? 'Canceling...' : 'Yes, cancel'}
             </Button>
             <Button
               variant="outline"
@@ -170,7 +170,7 @@ function CancelSubscriptionButton({
               onClick={() => setShowConfirmation(false)}
               disabled={isLoading}
             >
-              Não, manter
+              No, keep
             </Button>
           </div>
         </div>
@@ -195,7 +195,7 @@ function CustomerPortalButton({ customerId }: { customerId: string }) {
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error('Erro:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,7 @@ function CustomerPortalButton({ customerId }: { customerId: string }) {
       variant="outline"
       className="border-background-600"
     >
-      {loading ? 'Carregando...' : '⚙️ Gerenciar Assinatura'}
+      {loading ? 'Loading...' : '⚙️ Manage Subscription'}
     </Button>
   );
 }

@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { getSubscriptionByClerkId, cancelSubscription } from '@/lib/services/subscription';
 
 export const subscriptionRouter = createTRPCRouter({
-  // Buscar subscription do usuário atual
+  // Get current user subscription
   getCurrent: protectedProcedure.query(async ({ ctx }) => {
     try {
       const subscription = await getSubscriptionByClerkId(ctx.auth.userId!);
@@ -13,12 +13,12 @@ export const subscriptionRouter = createTRPCRouter({
       console.error('Get current subscription failed:', error);
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Falha ao buscar assinatura atual',
+        message: 'Failed to fetch current subscription',
       });
     }
   }),
 
-  // Cancelar subscription
+  // Cancel subscription
   cancel: protectedProcedure
     .input(
       z.object({
@@ -31,7 +31,7 @@ export const subscriptionRouter = createTRPCRouter({
         if (!subscription) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'Assinatura não encontrada',
+            message: 'Subscription not found',
           });
         }
         return subscription;
@@ -42,7 +42,7 @@ export const subscriptionRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Falha ao cancelar assinatura',
+          message: 'Failed to cancel subscription',
         });
       }
     }),

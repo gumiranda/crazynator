@@ -18,7 +18,7 @@ export const projectsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Verificar se o fragmento pertence ao usuário
+      // Check if the fragment belongs to the user
       const fragment = await prisma.fragment.findFirst({
         where: {
           id: input.fragmentId,
@@ -45,7 +45,7 @@ export const projectsRouter = createTRPCRouter({
       }
 
       try {
-        // Atualizar arquivos no banco de dados
+        // Update files in the database
         const updatedFragment = await prisma.fragment.update({
           where: { id: input.fragmentId },
           data: {
@@ -53,28 +53,28 @@ export const projectsRouter = createTRPCRouter({
           },
         });
 
-        // Tentar atualizar arquivos no sandbox E2B (se ainda estiver ativo)
+        // Try to update files in E2B sandbox (if still active)
         if (fragment.sandboxUrl) {
           try {
-            // Extrair sandboxId da URL do E2B
-            // Formato real: https://3000-sandboxId.e2b.app
+            // Extract sandboxId from E2B URL
+            // Real format: https://3000-sandboxId.e2b.app
             const url = new URL(fragment.sandboxUrl);
             const hostname = url.hostname;
 
-            // Extrair sandboxId do hostname (parte após o primeiro hífen)
+            // Extract sandboxId from hostname (part after the first hyphen)
             const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
 
             if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
               const sandbox = await getSandbox(sandboxId);
 
-              // Atualizar cada arquivo no sandbox
+              // Update each file in the sandbox
               for (const [filePath, content] of Object.entries(input.files)) {
                 await sandbox.files.write(filePath, content);
               }
             }
           } catch (sandboxError) {
-            // Se falhar ao conectar com o sandbox, apenas log o erro
-            // O sandbox pode ter expirado ou estar indisponível
+            // If it fails to connect to the sandbox, just log the error
+            // The sandbox may have expired or be unavailable
             console.warn('Failed to update sandbox files:', sandboxError);
           }
         }

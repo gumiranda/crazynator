@@ -12,10 +12,10 @@ if (
   stripeSecretKey.length < 25
 ) {
   console.error(
-    '⚠️  STRIPE_SECRET_KEY ausente ou inválida',
+    '⚠️  STRIPE_SECRET_KEY missing or invalid',
   );
   throw new Error(
-    'Stripe não configurado. Defina STRIPE_SECRET_KEY nas variáveis de ambiente.',
+    'Stripe not configured. Set STRIPE_SECRET_KEY in environment variables.',
   );
 }
 
@@ -78,7 +78,7 @@ export async function POST(
     });
   } catch (error) {
     console.error(
-      'Erro ao obter usuário autenticado:',
+      'Error getting authenticated user:',
       error,
     );
     return new NextResponse(
