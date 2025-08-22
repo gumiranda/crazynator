@@ -3,3 +3,23 @@
 
 
  se voce fosse dar um curso estruturando aulas desse projeto, qual seria a listagem de arquivos que voce iniciaria as aulas? de forma a copiar na integra arquivo por arquivo sem ter breaking changes conforme eu vou copiando
+
+Refatore a tela de pricing utilizando os componentes de UI disponíveis em https://ui.aceternity.com/components. 
+A implementação deve ser realizada no arquivo ,
+mantendo todas as funcionalidades existentes enquanto atualiza o design para seguir os padrões visuais
+ dos componentes referenciados. 
+
+Requisitos específicos:
+1. Garanta que a refatoração seja totalmente responsiva
+2. Mantenha uma experiência de usuário consistente com a implementação atual
+3. Siga rigorosamente os exemplos de uso da documentação
+4. Para qualquer componente utilizado (como ), instale via CLI seguindo o padrão: `npx shadcn@latest add [componente]`
+5. Não crie o arquivo diretamente - siga sempre o fluxo de instalação via CLI
+
+Observações importantes:
+- Preserve todas as funcionalidades existentes
+- Atualize apenas o design para seguir os componentes de referência
+- Certifique-se de que todas as interações e comportamentos sejam mantidos
+- A implementação deve ser feita exclusivamente no arquivo 
+
+
