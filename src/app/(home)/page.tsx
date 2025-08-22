@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ProjectForm } from '@/modules/home/ui/components/project-form';
 import ProjectsList from '@/modules/home/ui/components/projects-list';
 import Image from 'next/image';
+import { getOptimizedImageProps, getContextualAltText } from '@/lib/image-utils';
 
 const Page = () => {
   return (
@@ -26,16 +27,19 @@ const Page = () => {
             className="flex flex-col items-center mb-8"
           >
             <Image
-              src="/logo.svg"
-              alt="CrazyNator"
-              width={50}
-              height={50}
+              {...getOptimizedImageProps({
+                src: '/logo.svg',
+                alt: getContextualAltText('logo'),
+                width: 50,
+                height: 50,
+                priority: true,
+              })}
               className="hidden md:block"
             />
           </motion.div>
 
           <h1 className="relative z-10 mx-auto max-w-4xl text-center text-4xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
-            {'Build something with CrazyNator'.split(' ').map((word, index) => (
+            {'Build Apps with CrazyNator AI'.split(' ').map((word, index) => (
               <motion.span
                 key={index}
                 initial={{ opacity: 0, filter: 'blur(4px)', y: 10 }}

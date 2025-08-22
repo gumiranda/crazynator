@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { getOptimizedImageProps, getContextualAltText } from '@/lib/image-utils';
 import { toast } from 'sonner';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
@@ -89,20 +90,23 @@ export default function PricingPage() {
         <section className="space-y-6 pt-8 pb-8 sm:pt-16 sm:pb-16">
           <div className="flex flex-col items-center">
             <Image
-              src="/logo.svg"
-              alt="CrazyNator"
-              width={40}
-              height={40}
+              {...getOptimizedImageProps({
+                src: '/logo.svg',
+                alt: getContextualAltText('logo'),
+                width: 40,
+                height: 40,
+                priority: true,
+              })}
               className="hidden sm:block mb-4"
             />
           </div>
           <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-8 sm:mb-12">
+            <header className="text-center mb-8 sm:mb-12">
               <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white">
-                Escolha seu plano
+                Choose Your Plan - CrazyNator Pricing
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-gray-200 px-4">
-                Compare os recursos e escolha o plano que melhor atende às suas necessidades.
+                Compare features and choose the perfect plan for your AI-powered app development needs. Get started with our free tier or upgrade for more power.
               </p>
               {currentUsage?.plan && (
                 <div className="mt-6 p-4 bg-black/20 backdrop-blur-sm rounded-lg max-w-sm mx-auto border border-white/20">
@@ -126,7 +130,7 @@ export default function PricingPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </header>
 
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
@@ -166,10 +170,10 @@ export default function PricingPage() {
                       )}
 
                       {/* Seção do plano e preço */}
-                      <div className="lg:w-1/3 text-center lg:text-left mb-4 lg:mb-0">
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-white">
+                      <header className="lg:w-1/3 text-center lg:text-left mb-4 lg:mb-0">
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-white">
                           {plan.name}
-                        </h3>
+                        </h2>
                         <p className="text-gray-300 mb-3 text-sm sm:text-base">
                           {plan.description}
                         </p>
@@ -181,7 +185,7 @@ export default function PricingPage() {
                             <span className="text-sm sm:text-base text-gray-300 ml-1">/mês</span>
                           )}
                         </div>
-                      </div>
+                      </header>
 
                       {/* Seção dos recursos */}
                       <div className="lg:w-1/2 lg:px-6">
