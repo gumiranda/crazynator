@@ -100,8 +100,6 @@ export const projectsRouter = createTRPCRouter({
         topics: ['realtime'],
       });
 
-      console.log('subscriptionToken ->', subscriptionToken);
-
       return subscriptionToken;
     }),
   getOne: protectedProcedure
@@ -148,10 +146,12 @@ export const projectsRouter = createTRPCRouter({
       // Validate credits before attempting to consume
       try {
         const status = await validateCreditsBeforeAction();
-        
+
         // Show warning if credits are low (but still allow action)
         if (status.isLowCredits) {
-          console.warn(`User ${ctx.auth.userId} has low credits: ${status.remainingPoints}/${status.plan.credits} (${Math.round(status.creditsPercentage * 100)}%)`);
+          console.warn(
+            `User ${ctx.auth.userId} has low credits: ${status.remainingPoints}/${status.plan.credits} (${Math.round(status.creditsPercentage * 100)}%)`,
+          );
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -167,7 +167,7 @@ export const projectsRouter = createTRPCRouter({
           });
         }
       }
-      
+
       // Actually consume the credits
       try {
         await consumeCredits();

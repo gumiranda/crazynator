@@ -46,18 +46,16 @@ export interface UsageStatus {
 
 export async function getUsageStatus(): Promise<UsageStatus> {
   const { userId } = await auth();
-  console.log('🔍 [getUsageStatus] Called for userId:', userId);
-  
+
   if (!userId) {
     throw new Error('Unauthorized');
   }
 
   const planInfo = await getCurrentUserPlan();
-  console.log('🔍 [getUsageStatus] Got plan info:', planInfo);
-  
+
   const usageTracker = await getUsageTracker(planInfo);
   const result = await usageTracker.get(userId);
-  
+
   const remainingPoints = result ? result.remainingPoints || 0 : planInfo.credits;
   const creditsPercentage = remainingPoints / planInfo.credits;
   const isLowCredits = creditsPercentage <= LOW_CREDITS_THRESHOLD;
@@ -68,10 +66,9 @@ export async function getUsageStatus(): Promise<UsageStatus> {
     msBeforeNext: result ? result.msBeforeNext : 0,
     plan: planInfo,
     isLowCredits,
-    creditsPercentage
+    creditsPercentage,
   };
 
-  console.log('✅ [getUsageStatus] Returning usage status:', usageStatus);
   return usageStatus;
 }
 
@@ -86,10 +83,12 @@ export async function checkCreditsAvailable(): Promise<boolean> {
 
 export async function validateCreditsBeforeAction(): Promise<UsageStatus> {
   const status = await getUsageStatus();
-  
+
   if (status.remainingPoints <= 0) {
-    throw new Error(`Credits exhausted for ${status.plan.displayName} plan. Please upgrade or wait for reset.`);
+    throw new Error(
+      `Credits exhausted for ${status.plan.displayName} plan. Please upgrade or wait for reset.`,
+    );
   }
-  
+
   return status;
 }

@@ -1,0 +1,46 @@
+export const plans = [
+  {
+    name: 'Free',
+    price: 'Grátis',
+    priceId: null,
+    planType: 'FREE',
+    description: 'Para testar',
+    features: [
+      '5 créditos mensais',
+      'Acesso básico à plataforma',
+      'Gerador de código IA',
+      'Suporte da comunidade',
+    ],
+    credits: 5,
+    isFree: true,
+  },
+  // {
+  //   name: 'Básico',
+  //   price: 'R$ 29',
+  //   priceId: 'STRIPE_PRICE_ID_BASIC',
+  //   planType: 'BASIC',
+  //   description: 'Para começar',
+  //   features: [
+  //     '20 créditos mensais',
+  //     'Acesso à plataforma',
+  //     'Suporte por email',
+  //     'Gerador de código IA',
+  //   ],
+  //   credits: 20,
+  // },
+  {
+    name: 'Pro',
+    price: 'R$ 39,90',
+    priceId: 'STRIPE_PRICE_ID_PRO',
+    planType: 'PRO',
+    description: 'Para crescer',
+    features: [
+      '50 créditos mensais',
+      'Tudo do Básico',
+      'Suporte prioritário',
+      'Recursos avançados',
+    ],
+    popular: true,
+    credits: 50,
+  },
+];
