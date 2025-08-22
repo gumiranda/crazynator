@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { ExternalLinkIcon, RefreshCcwIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Fragment } from '@/generated/prisma';
 import Hint from '@/components/hint';
+import { Fragment } from '@prisma/client';
 
 type FragmentPreviewProps = {
   fragment: Fragment;

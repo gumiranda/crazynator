@@ -65,7 +65,7 @@ export const MessageForm = ({ projectId }: MessageFormProps) => {
 
   return (
     <Form {...form}>
-      {showUsage && <Usage points={usage.remainingPoints} msBeforeNext={usage.msBeforeNext} />}
+      {showUsage && <Usage {...usage} />}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(

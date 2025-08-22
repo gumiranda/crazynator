@@ -1,2 +1,5 @@
 1. criar um roadmap detalhado de implementaçao de assinaturas usando o gateway de pagamento stripe.sh . atualmente ja existe o plano gratuito que dá direito a 5 creditos mensais. teremos o plano pro de 
  39.90 que da direito a 100 creditos mensais  
+
+
+ se voce fosse dar um curso estruturando aulas desse projeto, qual seria a listagem de arquivos que voce iniciaria as aulas? de forma a copiar na integra arquivo por arquivo sem ter breaking changes conforme eu vou copiando
