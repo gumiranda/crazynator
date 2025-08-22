@@ -62,7 +62,7 @@ export async function cancelSubscription(
     });
     await stripe.subscriptions.cancel(stripeSubscriptionId);
   } catch (error) {
-    console.error('Erro ao cancelar assinatura:', error);
+    console.error('Error canceling subscription:', error);
     throw error;
   }
   return await prisma.subscription.update({
@@ -99,13 +99,13 @@ export async function createOrUpdateSubscriptionFromStripe(
       subscriptionData,
     );
     if (!updatedSubscription) {
-      throw new Error('Falha ao atualizar assinatura existente');
+      throw new Error('Failed to update existing subscription');
     }
     return updatedSubscription;
   } else {
     // Create new subscription - clerkUserId is required for new subscriptions
     if (!clerkUserId) {
-      throw new Error('clerkUserId é obrigatório para criar nova assinatura');
+      throw new Error('clerkUserId is required to create new subscription');
     }
 
     return await createSubscription({
@@ -171,16 +171,6 @@ export async function getCurrentUserPlan(): Promise<PlanInfo> {
     return getPlanInfo('FREE');
   }
 
-  // Buscar TODAS as assinaturas do usuário
-  const allSubscriptions = await prisma.subscription.findMany({
-    where: {
-      clerkUserId: userId,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
   const subscription = await getSubscriptionByClerkId(userId);
 
   if (!subscription || subscription.status !== 'active') {
@@ -192,10 +182,10 @@ export async function getCurrentUserPlan(): Promise<PlanInfo> {
   return getPlanInfo(plan);
 }
 
-// Função para debug - buscar assinaturas do Stripe diretamente
+// Debug function - search Stripe subscriptions directly
 export async function debugStripeSubscriptions(clerkUserId: string) {
   try {
-    // Primeiro buscar o customer do Stripe através das assinaturas no banco
+    // First find the Stripe customer through database subscriptions
     const dbSubscriptions = await prisma.subscription.findMany({
       where: { clerkUserId },
     });
@@ -207,7 +197,7 @@ export async function debugStripeSubscriptions(clerkUserId: string) {
 
       const customerId = dbSubscriptions[0].stripeCustomerId;
 
-      // Buscar todas as assinaturas do customer no Stripe
+      // Find all customer subscriptions in Stripe
       const stripeSubscriptions = await stripe.subscriptions.list({
         customer: customerId,
         status: 'all',

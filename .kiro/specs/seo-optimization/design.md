@@ -757,13 +757,7 @@ function generateBreadcrumbSchema(breadcrumbs: BreadcrumbItem[]): JsonLd {
 ### Content Strategy
 
 - **Landing Pages**: Otimizar para conversão e SEO
-- **Blog Content**: Criar conteúdo educativo sobre IA e desenvolvimento
-- **Documentation**: SEO-friendly docs e tutoriais
-- **Case Studies**: Histórias de sucesso de usuários
 
 ### Link Building Strategy
 
 - **Internal Linking**: Estrutura de links internos otimizada
-- **External Links**: Parcerias com blogs de tecnologia
-- **Social Signals**: Integração com redes sociais
-- **Community Building**: Presença em comunidades de desenvolvedores

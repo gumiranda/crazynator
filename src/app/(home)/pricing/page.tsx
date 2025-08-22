@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { getOptimizedImageProps, getContextualAltText } from '@/lib/image-utils';
 import { toast } from 'sonner';
 import { useTRPC } from '@/trpc/client';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +16,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const trpc = useTRPC();
 
-  // Buscar dados do plano atual
+  // Fetch current plan data
   const { data: currentUsage, isLoading: isLoadingUsage } = useQuery(
     trpc.usages.status.queryOptions(),
   );
@@ -34,13 +35,13 @@ export default function PricingPage() {
   const handleSubscribe = async (priceId: string, planType: string) => {
     // Verificar se o usuário já tem esse plano
     if (isCurrentPlan(planType)) {
-      toast.info('Você já possui este plano ativo!');
+      toast.info('You already have this plan active!');
       return;
     }
 
     // Verificar se é um downgrade
     if (isDowngrade(planType)) {
-      toast.info('Para alterar para um plano inferior, cancele sua assinatura atual primeiro.');
+      toast.info('To switch to a lower plan, please cancel your current subscription first.');
       return;
     }
 
@@ -60,12 +61,12 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('Erro ao criar sessão:', data.error);
-        toast.error('Erro ao processar pagamento. Tente novamente.');
+        console.error('Error creating session:', data.error);
+        toast.error('Error processing payment. Please try again.');
       }
     } catch (error) {
-      console.error('Erro:', error);
-      toast.error('Erro ao processar pagamento. Tente novamente.');
+      console.error('Error:', error);
+      toast.error('Error processing payment. Please try again.');
     } finally {
       setLoading(null);
     }
@@ -89,24 +90,28 @@ export default function PricingPage() {
         <section className="space-y-6 pt-8 pb-8 sm:pt-16 sm:pb-16">
           <div className="flex flex-col items-center">
             <Image
-              src="/logo.svg"
-              alt="CrazyNator"
-              width={40}
-              height={40}
+              {...getOptimizedImageProps({
+                src: '/logo.svg',
+                alt: getContextualAltText('logo'),
+                width: 40,
+                height: 40,
+                priority: true,
+              })}
               className="hidden sm:block mb-4"
             />
           </div>
           <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-8 sm:mb-12">
+            <header className="text-center mb-8 sm:mb-12">
               <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white">
-                Escolha seu plano
+                Choose Your Plan - CrazyNator Pricing
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-gray-200 px-4">
-                Compare os recursos e escolha o plano que melhor atende às suas necessidades.
+                Compare features and choose the perfect plan for your AI-powered app development
+                needs. Get started with our free tier or upgrade for more power.
               </p>
               {currentUsage?.plan && (
                 <div className="mt-6 p-4 bg-black/20 backdrop-blur-sm rounded-lg max-w-sm mx-auto border border-white/20">
-                  <p className="text-xs text-gray-300 mb-2">Seu plano atual:</p>
+                  <p className="text-xs text-gray-300 mb-2">Your current plan:</p>
                   <div className="flex items-center justify-center gap-2">
                     <Badge
                       variant={
@@ -121,17 +126,17 @@ export default function PricingPage() {
                       {currentUsage.plan.displayName}
                     </Badge>
                     <span className="text-xs text-gray-300">
-                      {currentUsage.remainingPoints} / {currentUsage.plan.credits} créditos
+                      {currentUsage.remainingPoints} / {currentUsage.plan.credits} credits
                     </span>
                   </div>
                 </div>
               )}
-            </div>
+            </header>
 
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-white" />
-                <span className="ml-2 text-white">Carregando planos...</span>
+                <span className="ml-2 text-white">Loading plans...</span>
               </div>
             ) : (
               <div className="space-y-4 sm:space-y-6 lg:space-y-8 max-w-5xl mx-auto">
@@ -152,7 +157,7 @@ export default function PricingPage() {
                       {plan.popular && !isCurrentPlan(plan.planType) && (
                         <div className="absolute -top-2 left-4 sm:left-6 lg:left-1/2 lg:transform lg:-translate-x-1/2">
                           <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
-                            Mais popular
+                            Most popular
                           </span>
                         </div>
                       )}
@@ -160,16 +165,16 @@ export default function PricingPage() {
                         <div className="absolute -top-2 left-4 sm:left-6 lg:left-1/2 lg:transform lg:-translate-x-1/2 z-10">
                           <span className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-lg">
                             <Crown className="h-3 w-3" />
-                            Atual
+                            Current
                           </span>
                         </div>
                       )}
 
-                      {/* Seção do plano e preço */}
-                      <div className="lg:w-1/3 text-center lg:text-left mb-4 lg:mb-0">
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-white">
+                      {/* Plan and price section */}
+                      <header className="lg:w-1/3 text-center lg:text-left mb-4 lg:mb-0">
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 text-white">
                           {plan.name}
-                        </h3>
+                        </h2>
                         <p className="text-gray-300 mb-3 text-sm sm:text-base">
                           {plan.description}
                         </p>
@@ -178,12 +183,14 @@ export default function PricingPage() {
                             {plan.price}
                           </span>
                           {!plan.isFree && (
-                            <span className="text-sm sm:text-base text-gray-300 ml-1">/mês</span>
+                            <span className="text-sm sm:text-base text-gray-300 ml-1">
+                              /monthly
+                            </span>
                           )}
                         </div>
-                      </div>
+                      </header>
 
-                      {/* Seção dos recursos */}
+                      {/* Features section */}
                       <div className="lg:w-1/2 lg:px-6">
                         <ul className="space-y-2 sm:space-y-3">
                           {plan.features.map((feature) => (
@@ -197,7 +204,7 @@ export default function PricingPage() {
                         </ul>
                       </div>
 
-                      {/* Seção do botão */}
+                      {/* Button section */}
                       <div className="lg:w-1/6 lg:flex lg:items-center mt-4 lg:mt-0">
                         {plan.isFree ? (
                           <Button
@@ -206,7 +213,7 @@ export default function PricingPage() {
                             size="lg"
                             className="w-full h-12 text-sm sm:text-base bg-white/10 border-white/30 text-white hover:bg-white/20"
                           >
-                            {isCurrentPlan(plan.planType) ? 'Atual' : 'Gratuito'}
+                            {isCurrentPlan(plan.planType) ? 'Current' : 'Free'}
                           </Button>
                         ) : (
                           <Button
@@ -218,7 +225,7 @@ export default function PricingPage() {
                             size="lg"
                             className="w-full h-12 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0 text-white shadow-lg cursor-pointer disabled:opacity-50"
                           >
-                            {loading === plan.priceId ? 'Processando...' : 'Assinar'}
+                            {loading === plan.priceId ? 'Processing...' : 'Subscribe'}
                           </Button>
                         )}
                       </div>

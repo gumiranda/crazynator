@@ -23,10 +23,9 @@ Esta feature implementa uma estratégia abrangente de SEO (Search Engine Optimiz
 
 #### Acceptance Criteria
 
-1. WHEN uma página é solicitada THEN o sistema SHALL carregar em menos de 3 segundos
-2. WHEN usuários navegam pelo site THEN o sistema SHALL fornecer uma estrutura de headings hierárquica (H1, H2, H3)
-3. WHEN conteúdo é exibido THEN o sistema SHALL usar URLs semânticas e amigáveis
-4. IF imagens são carregadas THEN o sistema SHALL incluir alt text descritivo e otimizar tamanhos
+1. WHEN usuários navegam pelo site THEN o sistema SHALL fornecer uma estrutura de headings hierárquica (H1, H2, H3)
+2. WHEN conteúdo é exibido THEN o sistema SHALL usar URLs semânticas e amigáveis
+3. IF imagens são carregadas THEN o sistema SHALL incluir alt text descritivo e otimizar tamanhos
 
 ### Requirement 3
 
@@ -36,8 +35,7 @@ Esta feature implementa uma estratégia abrangente de SEO (Search Engine Optimiz
 
 1. WHEN crawlers acessam o site THEN o sistema SHALL fornecer um arquivo robots.txt válido
 2. WHEN indexação é solicitada THEN o sistema SHALL gerar um sitemap.xml atualizado automaticamente
-3. WHEN páginas são analisadas THEN o sistema SHALL incluir dados estruturados (JSON-LD) relevantes
-4. IF novas páginas são criadas THEN o sistema SHALL atualizar automaticamente o sitemap
+3. IF novas páginas são criadas THEN o sistema SHALL atualizar automaticamente o sitemap
 
 ### Requirement 4
 
