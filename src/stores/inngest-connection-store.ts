@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { InngestSubscription } from '@inngest/realtime/hooks';
 import { createStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
