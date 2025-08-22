@@ -1,79 +1,79 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature will create a comprehensive project generator for Bun.js applications that automates the creation of backend projects with integrated frontend CRUD operations. Similar to Spring Initializr, this tool will allow developers to quickly scaffold complete full-stack applications with predefined configurations, database integrations, and automatically generated CRUD interfaces.
+Esta funcionalidade criará um gerador de projetos abrangente para aplicações Bun.js que automatiza a criação de projetos de backend com operações CRUD de frontend integradas. Semelhante ao Spring Initializr, esta ferramenta permitirá que os desenvolvedores estruturem rapidamente aplicações full-stack completas com configurações predefinidas, integrações de banco de dados e interfaces CRUD geradas automaticamente.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a developer, I want to generate a new Bun.js backend project with customizable configurations, so that I can quickly start development without manual setup.
+**História do Usuário:** Como desenvolvedor, quero gerar um novo projeto de backend Bun.js com configurações personalizáveis, para que eu possa iniciar o desenvolvimento rapidamente sem configuração manual.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses the project generator THEN the system SHALL display a configuration form with project metadata options
-2. WHEN a user selects project dependencies THEN the system SHALL validate compatibility and display warnings for conflicts
-3. WHEN a user submits the configuration THEN the system SHALL generate a complete Bun.js project structure with all selected dependencies
-4. WHEN the project is generated THEN the system SHALL include package.json, tsconfig.json, and environment configuration files
-5. IF the user selects database integration THEN the system SHALL include appropriate ORM setup and connection configuration
+1. QUANDO um usuário acessa o gerador de projetos, ENTÃO o sistema DEVE exibir um formulário de configuração com opções de metadados do projeto
+2. QUANDO um usuário seleciona as dependências do projeto, ENTÃO o sistema DEVE validar a compatibilidade e exibir avisos de conflitos
+3. QUANDO um usuário envia a configuração, ENTÃO o sistema DEVE gerar uma estrutura de projeto Bun.js completa com todas as dependências selecionadas
+4. QUANDO o projeto é gerado, ENTÃO o sistema DEVE incluir os arquivos de configuração package.json, tsconfig.json e de ambiente
+5. SE o usuário selecionar a integração com banco de dados, ENTÃO o sistema DEVE incluir a configuração apropriada do ORM e da conexão
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a developer, I want to automatically generate CRUD operations for my data models, so that I can have a working API without writing boilerplate code.
+**História do Usuário:** Como desenvolvedor, quero gerar operações CRUD automaticamente para meus modelos de dados, para que eu possa ter uma API funcional sem escrever código boilerplate.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user defines data models in the generator THEN the system SHALL create corresponding database schemas
-2. WHEN CRUD generation is requested THEN the system SHALL generate REST API endpoints for Create, Read, Update, and Delete operations
-3. WHEN API endpoints are generated THEN the system SHALL include proper validation, error handling, and response formatting
-4. WHEN database operations are created THEN the system SHALL include transaction support and connection pooling
-5. IF the user selects authentication THEN the system SHALL protect CRUD endpoints with appropriate middleware
+1. QUANDO um usuário define modelos de dados no gerador, ENTÃO o sistema DEVE criar os esquemas de banco de dados correspondentes
+2. QUANDO a geração de CRUD é solicitada, ENTÃO o sistema DEVE gerar endpoints de API REST para operações de Criar, Ler, Atualizar e Excluir
+3. QUANDO os endpoints da API são gerados, ENTÃO o sistema DEVE incluir validação, tratamento de erros e formatação de resposta adequados
+4. QUANDO as operações de banco de dados são criadas, ENTÃO o sistema DEVE incluir suporte a transações e pool de conexões
+5. SE o usuário selecionar autenticação, ENTÃO o sistema DEVE proteger os endpoints CRUD com o middleware apropriado
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a developer, I want an integrated frontend interface for the generated CRUD operations, so that I can immediately test and use the API functionality.
+**História do Usuário:** Como desenvolvedor, quero uma interface de frontend integrada para as operações CRUD geradas, para que eu possa testar e usar imediatamente a funcionalidade da API.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN frontend integration is selected THEN the system SHALL generate a React/Next.js frontend application
-2. WHEN CRUD frontend is generated THEN the system SHALL create forms for creating and editing records
-3. WHEN data tables are generated THEN the system SHALL include pagination, sorting, and filtering capabilities
-4. WHEN frontend components are created THEN the system SHALL include proper TypeScript types and API client integration
-5. IF real-time features are selected THEN the system SHALL include WebSocket integration for live updates
+1. QUANDO a integração de frontend é selecionada, ENTÃO o sistema DEVE gerar uma aplicação de frontend React/Next.js
+2. QUANDO o frontend CRUD é gerado, ENTÃO o sistema DEVE criar formulários para criar e editar registros
+3. QUANDO as tabelas de dados são geradas, ENTÃO o sistema DEVE incluir capacidades de paginação, ordenação e filtragem
+4. QUANDO os componentes de frontend são criados, ENTÃO o sistema DEVE incluir tipos TypeScript adequados e integração com o cliente da API
+5. SE recursos em tempo real forem selecionados, ENTÃO o sistema DEVE incluir integração com WebSocket para atualizações ao vivo
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a developer, I want to customize the generated project with different database providers and authentication methods, so that I can match my specific requirements.
+**História do Usuário:** Como desenvolvedor, quero personalizar o projeto gerado com diferentes provedores de banco de dados e métodos de autenticação, para que eu possa atender aos meus requisitos específicos.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN selecting database options THEN the system SHALL support PostgreSQL, MySQL, SQLite, and MongoDB
-2. WHEN choosing authentication THEN the system SHALL support JWT, OAuth2, and session-based authentication
-3. WHEN configuring deployment THEN the system SHALL include Docker configuration and deployment scripts
-4. WHEN selecting additional features THEN the system SHALL support file upload, email integration, and caching
-5. IF advanced features are selected THEN the system SHALL include rate limiting, logging, and monitoring setup
+1. AO selecionar opções de banco de dados, ENTÃO o sistema DEVE suportar PostgreSQL, MySQL, SQLite e MongoDB
+2. AO escolher a autenticação, ENTÃO o sistema DEVE suportar autenticação baseada em JWT, OAuth2 e sessão
+3. AO configurar a implantação, ENTÃO o sistema DEVE incluir configuração do Docker и scripts de implantação
+4. AO selecionar recursos adicionais, ENTÃO o sistema DEVE suportar upload de arquivos, integração de e-mail e cache
+5. SE recursos avançados forem selecionados, ENTÃO o sistema DEVE incluir configuração de limitação de taxa, logging e monitoramento
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a developer, I want the generated project to follow best practices and be production-ready, so that I can deploy it without additional configuration.
+**História do Usuário:** Como desenvolvedor, quero que o projeto gerado siga as melhores práticas e esteja pronto para produção, para que eu possa implantá-lo sem configuração adicional.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a project is generated THEN the system SHALL include proper error handling and logging configuration
-2. WHEN security features are included THEN the system SHALL implement CORS, helmet, and input validation
-3. WHEN the project structure is created THEN the system SHALL follow modular architecture patterns
-4. WHEN tests are generated THEN the system SHALL include unit tests and integration tests for CRUD operations
-5. IF documentation is requested THEN the system SHALL generate API documentation and README files
+1. QUANDO um projeto é gerado, ENTÃO o sistema DEVE incluir tratamento de erros e configuração de logging adequados
+2. QUANDO recursos de segurança são incluídos, ENTÃO o sistema DEVE implementar CORS, helmet e validação de entrada
+3. QUANDO a estrutura do projeto é criada, ENTÃO o sistema DEVE seguir padrões de arquitetura modular
+4. QUANDO os testes são gerados, ENTÃO o sistema DEVE incluir testes unitários e de integração para as operações CRUD
+5. SE a documentação for solicitada, ENTÃO o sistema DEVE gerar documentação da API e arquivos README
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a developer, I want to preview and download the generated project, so that I can review the code before using it.
+**História do Usuário:** Como desenvolvedor, quero visualizar e baixar o projeto gerado, para que eu possa revisar o código antes de usá-lo.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN generation is complete THEN the system SHALL provide a preview of the project structure
-2. WHEN previewing code THEN the system SHALL allow browsing through generated files
-3. WHEN downloading is requested THEN the system SHALL provide a ZIP file with the complete project
-4. WHEN the project is downloaded THEN the system SHALL include setup instructions and getting started guide
-5. IF modifications are needed THEN the system SHALL allow regeneration with updated configurations
+1. QUANDO a geração estiver concluída, ENTÃO o sistema DEVE fornecer uma pré-visualização da estrutura do projeto
+2. AO visualizar o código, ENTÃO o sistema DEVE permitir a navegação pelos arquivos gerados
+3. QUANDO o download for solicitado, ENTÃO o sistema DEVE fornecer um arquivo ZIP com o projeto completo
+4. QUANDO o projeto for baixado, ENTÃO o sistema DEVE incluir instruções de configuração e um guia de primeiros passos
+5. SE forem necessárias modificações, ENTÃO o sistema DEVE permitir a regeneração com configurações atualizadas

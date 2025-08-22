@@ -1,62 +1,62 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-This feature will extend the existing AI integration system to support user-provided API keys for OpenAI and Anthropic services. The design leverages the current architecture using Inngest agent-kit while adding a user settings layer that allows for dynamic model configuration based on user preferences and API key availability.
+Esta funcionalidade estenderá o sistema de integração de IA existente para suportar chaves de API fornecidas pelo usuário para os serviços OpenAI e Anthropic. O design aproveita a arquitetura atual usando o kit de agente Inngest, adicionando uma camada de configurações do usuário que permite a configuração dinâmica do modelo com base nas preferências do usuário e na disponibilidade da chave de API.
 
-The system will maintain backward compatibility with existing system-level API keys while providing users the flexibility to use their own credentials and select preferred models.
+O sistema manterá a compatibilidade com as chaves de API de nível de sistema existentes, ao mesmo tempo em que oferece aos usuários a flexibilidade de usar suas próprias credenciais e selecionar os modelos preferidos.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    A[User Settings UI] --> B[Settings API Layer]
-    B --> C[User Settings Service]
-    C --> D[Database - UserSettings Table]
+    A[UI de Configurações do Usuário] --> B[Camada de API de Configurações]
+    B --> C[Serviço de Configurações do Usuário]
+    C --> D[Banco de Dados - Tabela UserSettings]
 
-    E[AI Agent Functions] --> F[Model Configuration Service]
-    F --> G[API Key Resolution Service]
+    E[Funções do Agente de IA] --> F[Serviço de Configuração do Modelo]
+    F --> G[Serviço de Resolução de Chave de API]
     G --> D
-    G --> H[Environment Variables]
+    G --> H[Variáveis de Ambiente]
 
-    F --> I[Inngest Agent Kit]
-    I --> J[OpenAI API]
-    I --> K[Anthropic API]
+    F --> I[Kit de Agente Inngest]
+    I --> J[API da OpenAI]
+    I --> K[API da Anthropic]
 
-    L[Encryption Service] --> D
+    L[Serviço de Criptografia] --> D
 ```
 
-### Component Integration
+### Integração de Componentes
 
-The design integrates with existing components:
+O design se integra aos componentes existentes:
 
-- **Inngest Functions**: Current `claude-functions.ts` and `functions.ts` will be modified to use dynamic model configuration
-- **Database**: Extends Prisma schema with new `UserSettings` model
-- **tRPC API**: New procedures for managing user settings
-- **UI Components**: New settings page and model selection components
+-   **Funções Inngest**: Os arquivos `claude-functions.ts` e `functions.ts` atuais serão modificados para usar a configuração dinâmica do modelo
+-   **Banco de Dados**: Estende o esquema Prisma com o novo modelo `UserSettings`
+-   **API tRPC**: Novos procedimentos para gerenciar as configurações do usuário
+-   **Componentes de UI**: Nova página de configurações e componentes de seleção de modelo
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### 1. Database Schema Extension
+### 1. Extensão do Esquema do Banco de Dados
 
 ```typescript
-// Addition to prisma/schema.prisma
+// Adição ao prisma/schema.prisma
 model UserSettings {
   id                String   @id @default(uuid())
-  userId            String   @unique // Clerk user ID
-  openaiApiKey      String?  // Encrypted
-  anthropicApiKey   String?  // Encrypted
+  userId            String   @unique // ID de usuário do Clerk
+  openaiApiKey      String?  // Criptografado
+  anthropicApiKey   String?  // Criptografado
   preferredProvider String?  // "openai" | "anthropic" | "system"
-  openaiModel       String?  // e.g., "gpt-4o", "gpt-4o-mini"
-  anthropicModel    String?  // e.g., "claude-opus-4-20250514", "claude-sonnet-3-5"
+  openaiModel       String?  // ex: "gpt-4o", "gpt-4o-mini"
+  anthropicModel    String?  // ex: "claude-opus-4-20250514", "claude-sonnet-3-5"
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
 ```
 
-### 2. Settings Service Interface
+### 2. Interface do Serviço de Configurações
 
 ```typescript
 interface UserSettingsService {
@@ -68,7 +68,7 @@ interface UserSettingsService {
 }
 ```
 
-### 3. Model Configuration Service
+### 3. Serviço de Configuração do Modelo
 
 ```typescript
 interface ModelConfigService {
@@ -88,7 +88,7 @@ interface AvailableModels {
 }
 ```
 
-### 4. Encryption Service
+### 4. Serviço de Criptografia
 
 ```typescript
 interface EncryptionService {
@@ -97,16 +97,16 @@ interface EncryptionService {
 }
 ```
 
-## Data Models
+## Modelos de Dados
 
-### UserSettings Model
+### Modelo UserSettings
 
 ```typescript
 type UserSettings = {
   id: string;
   userId: string;
-  openaiApiKey?: string; // Encrypted in database
-  anthropicApiKey?: string; // Encrypted in database
+  openaiApiKey?: string; // Criptografado no banco de dados
+  anthropicApiKey?: string; // Criptografado no banco de dados
   preferredProvider?: 'openai' | 'anthropic' | 'system';
   openaiModel?: string;
   anthropicModel?: string;
@@ -115,26 +115,26 @@ type UserSettings = {
 };
 ```
 
-### Model Configuration Types
+### Tipos de Configuração de Modelo
 
 ```typescript
 type SupportedModels = {
   openai: {
-    'gpt-4o': { name: 'GPT-4o'; description: 'Most capable model' };
-    'gpt-4o-mini': { name: 'GPT-4o Mini'; description: 'Fast and efficient' };
-    'gpt-4-turbo': { name: 'GPT-4 Turbo'; description: 'Previous generation' };
+    'gpt-4o': { name: 'GPT-4o'; description: 'Modelo mais capaz' };
+    'gpt-4o-mini': { name: 'GPT-4o Mini'; description: 'Rápido e eficiente' };
+    'gpt-4-turbo': { name: 'GPT-4 Turbo'; description: 'Geração anterior' };
   };
   anthropic: {
-    'claude-opus-4-20250514': { name: 'Claude Opus'; description: 'Most capable model' };
-    'claude-sonnet-3-5': { name: 'Claude Sonnet 3.5'; description: 'Balanced performance' };
-    'claude-haiku-3': { name: 'Claude Haiku 3'; description: 'Fast and efficient' };
+    'claude-opus-4-20250514': { name: 'Claude Opus'; description: 'Modelo mais capaz' };
+    'claude-sonnet-3-5': { name: 'Claude Sonnet 3.5'; description: 'Desempenho equilibrado' };
+    'claude-haiku-3': { name: 'Claude Haiku 3'; description: 'Rápido e eficiente' };
   };
 };
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### API Key Validation Errors
+### Erros de Validação de Chave de API
 
 ```typescript
 enum ApiKeyError {
@@ -155,100 +155,100 @@ class ApiKeyValidationError extends Error {
 }
 ```
 
-### Fallback Strategy
+### Estratégia de Fallback
 
-1. **User API Key Fails**: Fall back to system API key
-2. **System API Key Fails**: Return error to user with clear message
-3. **Model Not Available**: Fall back to default model for provider
-4. **Provider Not Available**: Fall back to alternative provider if configured
+1.  **Falha na Chave de API do Usuário**: Recorrer à chave de API do sistema
+2.  **Falha na Chave de API do Sistema**: Retornar erro ao usuário com mensagem clara
+3.  **Modelo Não Disponível**: Recorrer ao modelo padrão do provedor
+4.  **Provedor Não Disponível**: Recorrer a um provedor alternativo, se configurado
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Tests
+### Testes Unitários
 
-1. **Encryption Service Tests**
-   - Test encryption/decryption roundtrip
-   - Test with various input lengths
-   - Test error handling for invalid inputs
+1.  **Testes do Serviço de Criptografia**
+    -   Testar a ida e volta da criptografia/descriptografia
+    -   Testar com vários comprimentos de entrada
+    -   Testar o tratamento de erros para entradas inválidas
 
-2. **Settings Service Tests**
-   - Test CRUD operations for user settings
-   - Test API key validation logic
-   - Test model preference updates
+2.  **Testes do Serviço de Configurações**
+    -   Testar operações CRUD para configurações do usuário
+    -   Testar a lógica de validação da chave de API
+    -   Testar as atualizações de preferência de modelo
 
-3. **Model Configuration Service Tests**
-   - Test model config resolution for different user states
-   - Test fallback logic
-   - Test available models filtering
+3.  **Testes do Serviço de Configuração do Modelo**
+    -   Testar a resolução de configuração de modelo para diferentes estados do usuário
+    -   Testar a lógica de fallback
+    -   Testar a filtragem de modelos disponíveis
 
-### Integration Tests
+### Testes de Integração
 
-1. **API Key Validation Tests**
-   - Test actual API calls with valid/invalid keys
-   - Test rate limiting scenarios
-   - Test network failure scenarios
+1.  **Testes de Validação de Chave de API**
+    -   Testar chamadas de API reais com chaves válidas/inválidas
+    -   Testar cenários de limitação de taxa
+    -   Testar cenários de falha de rede
 
-2. **End-to-End Settings Flow**
-   - Test complete user journey from settings to AI interaction
-   - Test model switching during conversation
-   - Test fallback scenarios
+2.  **Testes de Fluxo de Configurações de Ponta a Ponta**
+    -   Testar a jornada completa do usuário, desde as configurações até a interação com a IA
+    -   Testar a troca de modelo durante a conversa
+    -   Testar cenários de fallback
 
-### Security Tests
+### Testes de Segurança
 
-1. **Encryption Tests**
-   - Verify API keys are never stored in plaintext
-   - Test key rotation scenarios
-   - Verify proper key cleanup on deletion
+1.  **Testes de Criptografia**
+    -   Verificar se as chaves de API nunca são armazenadas em texto simples
+    -   Testar cenários de rotação de chaves
+    -   Verificar a limpeza adequada da chave na exclusão
 
-2. **Access Control Tests**
-   - Verify users can only access their own settings
-   - Test unauthorized access attempts
-   - Verify API key masking in responses
+2.  **Testes de Controle de Acesso**
+    -   Verificar se os usuários só podem acessar suas próprias configurações
+    -   Testar tentativas de acesso não autorizado
+    -   Verificar o mascaramento da chave de API nas respostas
 
-## Implementation Considerations
+## Considerações de Implementação
 
-### Security
+### Segurança
 
-- **Encryption at Rest**: All API keys encrypted using AES-256-GCM
-- **Encryption Key Management**: Use environment variable for encryption key
-- **API Key Masking**: Display only last 4 characters in UI
-- **Secure Transmission**: HTTPS only for all API key operations
+-   **Criptografia em Repouso**: Todas as chaves de API criptografadas usando AES-256-GCM
+-   **Gerenciamento de Chave de Criptografia**: Usar variável de ambiente para a chave de criptografia
+-   **Mascaramento de Chave de API**: Exibir apenas os últimos 4 caracteres na UI
+-   **Transmissão Segura**: Apenas HTTPS para todas as operações de chave de API
 
-### Performance
+### Desempenho
 
-- **Caching**: Cache decrypted API keys in memory for request duration only
-- **Connection Pooling**: Reuse HTTP connections for API calls
-- **Lazy Loading**: Load user settings only when needed
+-   **Cache**: Armazenar em cache as chaves de API descriptografadas na memória apenas durante a requisição
+-   **Pool de Conexões**: Reutilizar conexões HTTP para chamadas de API
+-   **Carregamento Lento**: Carregar as configurações do usuário apenas quando necessário
 
-### Scalability
+### Escalabilidade
 
-- **Database Indexing**: Index on userId for fast lookups
-- **API Rate Limiting**: Respect provider rate limits
-- **Graceful Degradation**: Fall back to system keys when user keys fail
+-   **Indexação de Banco de Dados**: Indexar por `userId` para buscas rápidas
+-   **Limitação de Taxa de API**: Respeitar os limites de taxa do provedor
+-   **Degradação Graciosa**: Recorrer às chaves do sistema quando as chaves do usuário falham
 
-### Monitoring
+### Monitoramento
 
-- **API Key Usage Tracking**: Log usage without exposing keys
-- **Error Monitoring**: Track validation failures and fallbacks
-- **Performance Metrics**: Monitor API response times by provider
+-   **Rastreamento de Uso de Chave de API**: Registrar o uso sem expor as chaves
+-   **Monitoramento de Erros**: Rastrear falhas de validação e fallbacks
+-   **Métricas de Desempenho**: Monitorar os tempos de resposta da API por provedor
 
-## Migration Strategy
+## Estratégia de Migração
 
-### Database Migration
+### Migração de Banco de Dados
 
-1. Add UserSettings table with proper indexes
-2. Migrate existing users to have default system preferences
-3. Add foreign key constraints and validation rules
+1.  Adicionar a tabela `UserSettings` com os índices adequados
+2.  Migrar os usuários existentes para terem as preferências padrão do sistema
+3.  Adicionar restrições de chave estrangeira e regras de validação
 
-### Code Migration
+### Migração de Código
 
-1. **Phase 1**: Add settings infrastructure without changing AI functions
-2. **Phase 2**: Modify AI functions to use dynamic configuration
-3. **Phase 3**: Add UI components and user-facing features
-4. **Phase 4**: Add advanced features like model switching mid-conversation
+1.  **Fase 1**: Adicionar a infraestrutura de configurações sem alterar as funções de IA
+2.  **Fase 2**: Modificar as funções de IA para usar a configuração dinâmica
+3.  **Fase 3**: Adicionar componentes de UI e recursos voltados para o usuário
+4.  **Fase 4**: Adicionar recursos avançados como a troca de modelo no meio da conversa
 
-### Backward Compatibility
+### Compatibilidade com Versões Anteriores
 
-- Existing AI functions continue to work with system keys
-- New users get system defaults until they configure custom keys
-- No breaking changes to existing API contracts
+-   As funções de IA existentes continuam a funcionar com as chaves do sistema
+-   Novos usuários recebem os padrões do sistema até que configurem chaves personalizadas
+-   Nenhuma alteração que quebre os contratos de API existentes

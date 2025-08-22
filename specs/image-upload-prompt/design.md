@@ -1,54 +1,54 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-This feature adds multimodal capabilities to the existing prompt system by enabling users to upload and include images alongside their text prompts. The system will integrate Cloudflare R2 for secure, scalable image storage and extend the current message architecture to support image attachments. The AI agent will receive both text and image data to provide comprehensive visual analysis and assistance.
+Esta funcionalidade adiciona capacidades multimodais ao sistema de prompt existente, permitindo que os usuários façam upload e incluam imagens junto com seus prompts de texto. O sistema integrará o Cloudflare R2 para armazenamento de imagens seguro e escalável e estenderá a arquitetura de mensagens atual para suportar anexos de imagem. O agente de IA receberá dados de texto e imagem para fornecer análise visual e assistência abrangentes.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    A[User Interface] --> B[Image Upload Component]
-    B --> C[File Validation]
-    C --> D[Cloudflare R2 Storage]
-    D --> E[Database Storage]
-    E --> F[Message Processing]
-    F --> G[AI Agent with Vision]
-    G --> H[Response with Image Context]
+    A[Interface do Usuário] --> B[Componente de Upload de Imagem]
+    B --> C[Validação de Arquivo]
+    C --> D[Armazenamento Cloudflare R2]
+    D --> E[Armazenamento no Banco de Dados]
+    E --> F[Processamento de Mensagem]
+    F --> G[Agente de IA com Visão]
+    G --> H[Resposta com Contexto de Imagem]
 
-    subgraph "Frontend Layer"
+    subgraph "Camada de Frontend"
         A
         B
         C
     end
 
-    subgraph "Backend Layer"
+    subgraph "Camada de Backend"
         D
         E
         F
     end
 
-    subgraph "AI Processing"
+    subgraph "Processamento de IA"
         G
         H
     end
 ```
 
-### Technology Stack Integration
+### Integração da Pilha de Tecnologia
 
-- **Frontend**: React components with drag-and-drop using native HTML5 APIs
-- **Backend**: tRPC procedures for image upload and message handling
-- **Storage**: Cloudflare R2 for image storage with signed URLs
-- **Database**: PostgreSQL with Prisma ORM for metadata storage
-- **AI Integration**: Extended Inngest functions to handle multimodal prompts
+-   **Frontend**: Componentes React com arrastar e soltar usando APIs nativas do HTML5
+-   **Backend**: Procedimentos tRPC para upload de imagens e manipulação de mensagens
+-   **Armazenamento**: Cloudflare R2 para armazenamento de imagens com URLs assinadas
+-   **Banco de Dados**: PostgreSQL com Prisma ORM para armazenamento de metadados
+-   **Integração de IA**: Funções Inngest estendidas para lidar com prompts multimodais
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### 1. Frontend Components
+### 1. Componentes de Frontend
 
-#### ImageUploadZone Component
+#### Componente ImageUploadZone
 
 ```typescript
 interface ImageUploadZoneProps {
@@ -69,7 +69,7 @@ interface UploadedImage {
 }
 ```
 
-#### ImagePreview Component
+#### Componente ImagePreview
 
 ```typescript
 interface ImagePreviewProps {
@@ -80,18 +80,18 @@ interface ImagePreviewProps {
 }
 ```
 
-#### Enhanced MessageForm Component
+#### Componente MessageForm Aprimorado
 
-- Extends existing MessageForm to include image upload functionality
-- Maintains current text input behavior while adding image support
-- Integrates with existing form validation and submission flow
+-   Estende o MessageForm existente para incluir a funcionalidade de upload de imagem
+-   Mantém o comportamento de entrada de texto atual enquanto adiciona suporte a imagens
+-   Integra-se com a validação e o envio de formulários existentes
 
-### 2. Backend API Interfaces
+### 2. Interfaces da API de Backend
 
-#### Image Upload tRPC Procedures
+#### Procedimentos tRPC de Upload de Imagem
 
 ```typescript
-// New router: src/modules/images/server/procedures.ts
+// Novo roteador: src/modules/images/server/procedures.ts
 export const imagesRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
@@ -102,7 +102,7 @@ export const imagesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Returns signed upload URL and image metadata
+      // Retorna a URL de upload assinada e os metadados da imagem
     }),
 
   getSignedUrl: protectedProcedure
@@ -112,15 +112,15 @@ export const imagesRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      // Returns signed download URL for image access
+      // Retorna a URL de download assinada para acesso à imagem
     }),
 });
 ```
 
-#### Enhanced Messages Procedures
+#### Procedimentos de Mensagens Aprimorados
 
 ```typescript
-// Extended input schema for message creation
+// Esquema de entrada estendido para criação de mensagem
 const createMessageSchema = z.object({
   value: z.string().min(1).max(10000),
   projectId: z.string().min(1),
@@ -138,9 +138,9 @@ const createMessageSchema = z.object({
 });
 ```
 
-### 3. Cloudflare R2 Integration
+### 3. Integração com o Cloudflare R2
 
-#### R2 Service Layer
+#### Camada de Serviço R2
 
 ```typescript
 // src/lib/r2.ts
@@ -152,18 +152,18 @@ export class R2Service {
 }
 ```
 
-#### Configuration
+#### Configuração
 
-- Bucket naming: `{environment}-user-images` (e.g., `prod-user-images`)
-- Object key structure: `{userId}/{projectId}/{messageId}/{imageId}.{ext}`
-- Signed URL expiration: 1 hour for uploads, 24 hours for downloads
-- CORS configuration for direct browser uploads
+-   Nomenclatura do bucket: `{environment}-user-images` (ex: `prod-user-images`)
+-   Estrutura da chave do objeto: `{userId}/{projectId}/{messageId}/{imageId}.{ext}`
+-   Expiração da URL assinada: 1 hora para uploads, 24 horas para downloads
+-   Configuração de CORS para uploads diretos do navegador
 
-## Data Models
+## Modelos de Dados
 
-### Database Schema Extensions
+### Extensões do Esquema do Banco de Dados
 
-#### New Image Table
+#### Nova Tabela de Imagens
 
 ```sql
 CREATE TABLE "Image" (
@@ -184,7 +184,7 @@ CREATE TABLE "Image" (
 CREATE INDEX "Image_messageId_idx" ON "Image"("messageId");
 ```
 
-#### Prisma Schema Addition
+#### Adição ao Esquema Prisma
 
 ```prisma
 model Image {
@@ -204,39 +204,39 @@ model Image {
   @@index([messageId])
 }
 
-// Extended Message model
+// Modelo de Mensagem estendido
 model Message {
-  // ... existing fields
+  // ... campos existentes
   images    Image[]
 }
 ```
 
-### File Validation Rules
+### Regras de Validação de Arquivo
 
-#### Supported Formats
+#### Formatos Suportados
 
-- **Image Types**: PNG, JPEG, JPG, GIF, WebP
-- **MIME Types**: `image/png`, `image/jpeg`, `image/gif`, `image/webp`
-- **File Extensions**: `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`
+-   **Tipos de Imagem**: PNG, JPEG, JPG, GIF, WebP
+-   **Tipos MIME**: `image/png`, `image/jpeg`, `image/gif`, `image/webp`
+-   **Extensões de Arquivo**: `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`
 
-#### Size Limits
+#### Limites de Tamanho
 
-- **Maximum File Size**: 10MB per image
-- **Maximum Images**: 5 images per message
-- **Total Size Limit**: 50MB per message
+-   **Tamanho Máximo do Arquivo**: 10MB por imagem
+-   **Máximo de Imagens**: 5 imagens por mensagem
+-   **Limite de Tamanho Total**: 50MB por mensagem
 
-#### Security Validation
+#### Validação de Segurança
 
-- MIME type verification against file headers
-- File signature validation
-- Malware scanning (basic header analysis)
-- Content-Type header validation
+-   Verificação do tipo MIME em relação aos cabeçalhos do arquivo
+-   Validação da assinatura do arquivo
+-   Verificação de malware (análise básica de cabeçalho)
+-   Validação do cabeçalho Content-Type
 
-## Error Handling
+## Tratamento de Erros
 
-### Upload Error Scenarios
+### Cenários de Erro de Upload
 
-#### Client-Side Errors
+#### Erros do Lado do Cliente
 
 ```typescript
 enum UploadErrorType {
@@ -254,174 +254,174 @@ interface UploadError {
 }
 ```
 
-#### Server-Side Error Handling
+#### Tratamento de Erros do Lado do Servidor
 
-- **R2 Service Errors**: Retry logic with exponential backoff
-- **Database Errors**: Transaction rollback for failed image metadata storage
-- **Validation Errors**: Clear error messages with specific validation failures
-- **Rate Limiting**: Integration with existing usage/credit system
+-   **Erros do Serviço R2**: Lógica de nova tentativa com recuo exponencial
+-   **Erros do Banco de Dados**: Reversão da transação para falha no armazenamento de metadados de imagem
+-   **Erros de Validação**: Mensagens de erro claras com falhas de validação específicas
+-   **Limitação de Taxa**: Integração com o sistema de uso/crédito existente
 
-### Fallback Strategies
+### Estratégias de Fallback
 
-- **R2 Unavailable**: Graceful degradation to text-only mode with user notification
-- **Upload Timeout**: Automatic retry with progress indication
-- **Partial Upload Failure**: Allow message submission with successfully uploaded images
+-   **R2 Indisponível**: Degradação graciosa para o modo somente texto com notificação ao usuário
+-   **Tempo Limite de Upload**: Nova tentativa automática com indicação de progresso
+-   **Falha de Upload Parcial**: Permitir o envio de mensagens com imagens carregadas com sucesso
 
-## AI Integration
+## Integração de IA
 
-### Multimodal Prompt Processing
+### Processamento de Prompt Multimodal
 
-#### Enhanced Inngest Function
+#### Função Inngest Aprimorada
 
 ```typescript
-// src/inngest/claude-functions.ts - Enhanced for images
+// src/inngest/claude-functions.ts - Aprimorado para imagens
 export const codeAgentRun = inngest.createFunction(
   { id: 'code-agent-run' },
   { event: 'code-agent/run' },
   async ({ event, step }) => {
     const { value, projectId, images } = event.data;
 
-    // Process images for AI context
+    // Processar imagens para o contexto da IA
     const imageContexts = await step.run('process-images', async () => {
       return await processImagesForAI(images);
     });
 
-    // Enhanced prompt with image context
+    // Prompt aprimorado com contexto de imagem
     const enhancedPrompt = await step.run('create-multimodal-prompt', async () => {
       return createMultimodalPrompt(value, imageContexts);
     });
 
-    // Send to AI with vision capabilities
-    // ... existing AI processing logic
+    // Enviar para a IA com capacidades de visão
+    // ... lógica de processamento de IA existente
   },
 );
 ```
 
-#### Image Context Processing
+#### Processamento de Contexto de Imagem
 
-- **Image Analysis**: Extract relevant visual information for AI context
-- **URL Generation**: Create accessible URLs for AI model consumption
-- **Metadata Enrichment**: Include image dimensions, format, and description
-- **Context Optimization**: Optimize image data for AI model input limits
+-   **Análise de Imagem**: Extrair informações visuais relevantes para o contexto da IA
+-   **Geração de URL**: Criar URLs acessíveis para o consumo do modelo de IA
+-   **Enriquecimento de Metadados**: Incluir dimensões da imagem, formato e descrição
+-   **Otimização de Contexto**: Otimizar os dados da imagem para os limites de entrada do modelo de IA
 
-### AI Model Integration
+### Integração do Modelo de IA
 
-- **Vision Model**: Utilize Claude 3 or GPT-4 Vision capabilities
-- **Prompt Engineering**: Structured prompts that reference specific images
-- **Response Format**: AI responses that can reference and describe image content
-- **Context Management**: Maintain image context throughout conversation
+-   **Modelo de Visão**: Utilizar as capacidades do Claude 3 ou GPT-4 Vision
+-   **Engenharia de Prompt**: Prompts estruturados que fazem referência a imagens específicas
+-   **Formato de Resposta**: Respostas da IA que podem fazer referência e descrever o conteúdo da imagem
+-   **Gerenciamento de Contexto**: Manter o contexto da imagem durante toda a conversa
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Testing
+### Teste Unitário
 
-#### Frontend Components
+#### Componentes de Frontend
 
 ```typescript
-// Image upload component tests
+// Testes do componente de upload de imagem
 describe('ImageUploadZone', () => {
-  test('accepts valid image files');
-  test('rejects invalid file formats');
-  test('enforces file size limits');
-  test('handles drag and drop events');
-  test('displays upload progress');
+  test('aceita arquivos de imagem válidos');
+  test('rejeita formatos de arquivo inválidos');
+  test('impõe limites de tamanho de arquivo');
+  test('lida com eventos de arrastar e soltar');
+  test('exibe o progresso do upload');
 });
 
-// Image preview component tests
+// Testes do componente de visualização de imagem
 describe('ImagePreview', () => {
-  test('displays uploaded images');
-  test('allows image removal');
-  test('supports image reordering');
-  test('shows upload status');
+  test('exibe imagens carregadas');
+  test('permite a remoção de imagens');
+  test('suporta a reordenação de imagens');
+  test('mostra o status do upload');
 });
 ```
 
-#### Backend Services
+#### Serviços de Backend
 
 ```typescript
-// R2 service tests
+// Testes do serviço R2
 describe('R2Service', () => {
-  test('generates valid upload URLs');
-  test('handles upload failures gracefully');
-  test('creates proper object keys');
-  test('manages signed URL expiration');
+  test('gera URLs de upload válidas');
+  test('lida com falhas de upload graciosamente');
+  test('cria chaves de objeto adequadas');
+  test('gerencia a expiração de URLs assinadas');
 });
 
-// Image validation tests
+// Testes de validação de imagem
 describe('ImageValidation', () => {
-  test('validates file types correctly');
-  test('enforces size limits');
-  test('detects malicious files');
+  test('valida os tipos de arquivo corretamente');
+  test('impõe limites de tamanho');
+  test('detecta arquivos maliciosos');
 });
 ```
 
-### Integration Testing
+### Teste de Integração
 
-#### End-to-End Workflows
+#### Fluxos de Trabalho de Ponta a Ponta
 
-- **Complete Upload Flow**: File selection → validation → upload → storage → AI processing
-- **Error Recovery**: Network failures, partial uploads, validation errors
-- **Multi-Image Handling**: Multiple file uploads, reordering, removal
-- **AI Integration**: Image + text prompts → AI processing → contextual responses
+-   **Fluxo de Upload Completo**: Seleção de arquivo → validação → upload → armazenamento → processamento de IA
+-   **Recuperação de Erros**: Falhas de rede, uploads parciais, erros de validação
+-   **Manipulação de Múltiplas Imagens**: Uploads de vários arquivos, reordenação, remoção
+-   **Integração de IA**: Prompts de imagem + texto → processamento de IA → respostas contextuais
 
-#### Performance Testing
+#### Teste de Desempenho
 
-- **Upload Performance**: Large file uploads, multiple concurrent uploads
-- **Storage Performance**: R2 read/write operations under load
-- **AI Processing**: Multimodal prompt processing times
-- **Database Performance**: Image metadata queries and relationships
+-   **Desempenho de Upload**: Uploads de arquivos grandes, uploads simultâneos múltiplos
+-   **Desempenho de Armazenamento**: Operações de leitura/gravação do R2 sob carga
+-   **Processamento de IA**: Tempos de processamento de prompts multimodais
+-   **Desempenho do Banco de Dados**: Consultas e relações de metadados de imagem
 
-### Security Testing
+### Teste de Segurança
 
-#### File Security
+#### Segurança de Arquivo
 
-- **Malicious File Detection**: Test with various malicious file types
-- **MIME Type Spoofing**: Verify proper file type validation
-- **Size Limit Bypass**: Test file size validation enforcement
-- **Path Traversal**: Ensure secure file naming and storage
+-   **Detecção de Arquivos Maliciosos**: Testar com vários tipos de arquivos maliciosos
+-   **Falsificação de Tipo MIME**: Verificar a validação adequada do tipo de arquivo
+-   **Bypass de Limite de Tamanho**: Testar a imposição da validação do tamanho do arquivo
+-   **Travessia de Caminho**: Garantir a nomeação e o armazenamento seguros de arquivos
 
-#### Access Control
+#### Controle de Acesso
 
-- **Authentication**: Verify user can only access their images
-- **Authorization**: Test project-level image access controls
-- **Signed URL Security**: Validate URL expiration and access restrictions
-- **Cross-User Access**: Ensure users cannot access others' images
+-   **Autenticação**: Verificar se o usuário só pode acessar suas imagens
+-   **Autorização**: Testar os controles de acesso à imagem no nível do projeto
+-   **Segurança de URL Assinada**: Validar a expiração da URL e as restrições de acesso
+-   **Acesso Entre Usuários**: Garantir que os usuários não possam acessar as imagens de outros
 
-## Performance Considerations
+## Considerações de Desempenho
 
-### Frontend Optimization
+### Otimização de Frontend
 
-- **Image Compression**: Client-side compression before upload
-- **Progressive Upload**: Show upload progress and allow cancellation
-- **Lazy Loading**: Load image previews on demand
-- **Caching**: Cache uploaded images for better UX
+-   **Compressão de Imagem**: Compressão no lado do cliente antes do upload
+-   **Upload Progressivo**: Mostrar o progresso do upload e permitir o cancelamento
+-   **Carregamento Lento**: Carregar visualizações de imagem sob demanda
+-   **Cache**: Armazenar em cache as imagens carregadas para uma melhor experiência do usuário
 
-### Backend Optimization
+### Otimização de Backend
 
-- **Direct Upload**: Use R2 signed URLs for direct browser-to-R2 uploads
-- **Async Processing**: Background image processing and AI analysis
-- **Connection Pooling**: Efficient database connections for image metadata
-- **CDN Integration**: Leverage R2's CDN capabilities for image delivery
+-   **Upload Direto**: Usar URLs assinadas do R2 para uploads diretos do navegador para o R2
+-   **Processamento Assíncrono**: Processamento de imagem em segundo plano e análise de IA
+-   **Pool de Conexões**: Conexões de banco de dados eficientes para metadados de imagem
+-   **Integração de CDN**: Aproveitar as capacidades de CDN do R2 para entrega de imagens
 
-### Storage Optimization
+### Otimização de Armazenamento
 
-- **Image Optimization**: Automatic format conversion and compression
-- **Cleanup Jobs**: Scheduled cleanup of orphaned images
-- **Storage Monitoring**: Track storage usage and costs
-- **Lifecycle Policies**: Automatic deletion of old images
+-   **Otimização de Imagem**: Conversão e compressão automática de formato
+-   **Trabalhos de Limpeza**: Limpeza agendada de imagens órfãs
+-   **Monitoramento de Armazenamento**: Rastrear o uso e os custos de armazenamento
+-   **Políticas de Ciclo de Vida**: Exclusão automática de imagens antigas
 
-## Security Considerations
+## Considerações de Segurança
 
-### Data Protection
+### Proteção de Dados
 
-- **Encryption**: Images encrypted at rest in R2
-- **Access Control**: Strict user-based access controls
-- **Audit Logging**: Track image uploads and access
-- **Data Retention**: Configurable image retention policies
+-   **Criptografia**: Imagens criptografadas em repouso no R2
+-   **Controle de Acesso**: Controles de acesso rigorosos baseados no usuário
+-   **Registro de Auditoria**: Rastrear uploads e acesso a imagens
+-   **Retenção de Dados**: Políticas de retenção de imagem configuráveis
 
-### Privacy
+### Privacidade
 
-- **User Consent**: Clear disclosure of image processing
-- **Data Minimization**: Only store necessary image metadata
-- **Right to Deletion**: User ability to delete uploaded images
-- **Cross-Border Data**: Compliance with data residency requirements
+-   **Consentimento do Usuário**: Divulgação clara do processamento de imagens
+-   **Minimização de Dados**: Armazenar apenas os metadados de imagem necessários
+-   **Direito à Exclusão**: Capacidade do usuário de excluir imagens carregadas
+-   **Dados Transfronteiriços**: Conformidade com os requisitos de residência de dados

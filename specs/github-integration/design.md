@@ -1,66 +1,66 @@
-# GitHub Integration Design Document
+# Documento de Design de Integração com o GitHub
 
-## Overview
+## Visão Geral
 
-The GitHub Integration feature enables seamless connection between user projects and GitHub repositories. The system will provide OAuth-based authentication, repository creation, automatic synchronization, pull request management, and comprehensive status tracking. The integration leverages GitHub's REST and GraphQL APIs while maintaining the existing tRPC-based architecture.
+A funcionalidade de Integração com o GitHub permite uma conexão perfeita entre os projetos do usuário e os repositórios do GitHub. O sistema fornecerá autenticação baseada em OAuth, criação de repositórios, sincronização automática, gerenciamento de pull requests e rastreamento abrangente de status. A integração aproveita as APIs REST e GraphQL do GitHub, mantendo a arquitetura existente baseada em tRPC.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    UI[User Interface] --> tRPC[tRPC Router]
-    tRPC --> Auth[GitHub OAuth Service]
-    tRPC --> Repo[Repository Service]
-    tRPC --> Sync[Sync Service]
-    tRPC --> PR[Pull Request Service]
+    UI[Interface do Usuário] --> tRPC[Roteador tRPC]
+    tRPC --> Auth[Serviço de OAuth do GitHub]
+    tRPC --> Repo[Serviço de Repositório]
+    tRPC --> Sync[Serviço de Sincronização]
+    tRPC --> PR[Serviço de Pull Request]
 
-    Auth --> GitHub[GitHub API]
+    Auth --> GitHub[API do GitHub]
     Repo --> GitHub
     Sync --> GitHub
     PR --> GitHub
 
-    tRPC --> DB[(Database)]
-    Sync --> Queue[Background Jobs]
-    Queue --> Inngest[Inngest Functions]
+    tRPC --> DB[(Banco de Dados)]
+    Sync --> Queue[Trabalhos em Segundo Plano]
+    Queue --> Inngest[Funções Inngest]
 ```
 
-### Component Interaction Flow
+### Fluxo de Interação dos Componentes
 
-1. **Authentication Flow**: User initiates GitHub connection → OAuth redirect → Token exchange → Store credentials
-2. **Repository Creation**: User requests repo creation → Validate settings → Create GitHub repo → Push initial files
-3. **Sync Flow**: File changes detected → Create commit → Push to GitHub → Update status
-4. **PR Flow**: User creates PR → Create branch → Push changes → Create GitHub PR
+1.  **Fluxo de Autenticação**: O usuário inicia a conexão com o GitHub → Redirecionamento OAuth → Troca de token → Armazenar credenciais
+2.  **Criação de Repositório**: O usuário solicita a criação do repositório → Validar configurações → Criar repositório no GitHub → Enviar arquivos iniciais
+3.  **Fluxo de Sincronização**: Alterações de arquivo detectadas → Criar commit → Enviar para o GitHub → Atualizar status
+4.  **Fluxo de PR**: O usuário cria PR → Criar branch → Enviar alterações → Criar PR no GitHub
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### Database Schema Extensions
+### Extensões do Esquema do Banco de Dados
 
 ```typescript
-// Add to prisma/schema.prisma
+// Adicionar ao prisma/schema.prisma
 model GitHubIntegration {
   id            String   @id @default(uuid())
   projectId     String   @unique
   project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // GitHub repository info
-  repositoryId  String   // GitHub repository ID
-  repositoryName String  // owner/repo format
+  // Informações do repositório do GitHub
+  repositoryId  String   // ID do repositório do GitHub
+  repositoryName String  // formato proprietário/repositório
   repositoryUrl String
 
-  // Authentication
-  accessToken   String   // Encrypted GitHub access token
-  refreshToken  String?  // Encrypted refresh token if applicable
+  // Autenticação
+  accessToken   String   // Token de acesso do GitHub criptografado
+  refreshToken  String?  // Token de atualização criptografado, se aplicável
   tokenExpiry   DateTime?
 
-  // Configuration
+  // Configuração
   autoSync      Boolean  @default(true)
   syncBranch    String   @default("main")
-  commitTemplate String @default("Update from project: {{timestamp}}")
+  commitTemplate String @default("Atualização do projeto: {{timestamp}}")
   excludePatterns String[] @default([])
 
-  // Status tracking
+  // Rastreamento de status
   lastSyncAt    DateTime?
   syncStatus    SyncStatus @default(IDLE)
   lastError     String?
@@ -80,7 +80,7 @@ model SyncHistory {
 
   commitSha       String?
   commitMessage   String
-  filesChanged    String[] // Array of file paths
+  filesChanged    String[] // Array de caminhos de arquivo
   syncType        SyncType // COMMIT, PR, MANUAL
   status          SyncStatus
   errorMessage    String?
@@ -107,21 +107,21 @@ enum SyncType {
 }
 ```
 
-### GitHub Service Layer
+### Camada de Serviço do GitHub
 
 ```typescript
 // src/lib/github.ts
 export interface GitHubService {
-  // Authentication
+  // Autenticação
   getAuthUrl(state: string): string;
   exchangeCodeForToken(code: string): Promise<GitHubTokens>;
   refreshToken(refreshToken: string): Promise<GitHubTokens>;
 
-  // Repository operations
+  // Operações de repositório
   createRepository(token: string, options: CreateRepoOptions): Promise<GitHubRepository>;
   getRepository(token: string, owner: string, repo: string): Promise<GitHubRepository>;
 
-  // File operations
+  // Operações de arquivo
   createOrUpdateFile(
     token: string,
     repo: string,
@@ -131,7 +131,7 @@ export interface GitHubService {
   ): Promise<void>;
   createCommit(token: string, repo: string, files: FileChange[], message: string): Promise<string>;
 
-  // Branch and PR operations
+  // Operações de branch e PR
   createBranch(token: string, repo: string, branchName: string, fromBranch: string): Promise<void>;
   createPullRequest(
     token: string,
@@ -141,35 +141,35 @@ export interface GitHubService {
 }
 ```
 
-### tRPC Router Structure
+### Estrutura do Roteador tRPC
 
 ```typescript
 // src/modules/github/server/procedures.ts
 export const githubRouter = createTRPCRouter({
-  // Authentication procedures
+  // Procedimentos de autenticação
   getAuthUrl: protectedProcedure.query(),
   connectRepository: protectedProcedure.input(connectSchema).mutation(),
   disconnect: protectedProcedure.input(projectIdSchema).mutation(),
 
-  // Repository procedures
+  // Procedimentos de repositório
   createRepository: protectedProcedure.input(createRepoSchema).mutation(),
   getIntegrationStatus: protectedProcedure.input(projectIdSchema).query(),
 
-  // Sync procedures
+  // Procedimentos de sincronização
   syncNow: protectedProcedure.input(projectIdSchema).mutation(),
   getSyncHistory: protectedProcedure.input(syncHistorySchema).query(),
   updateSyncSettings: protectedProcedure.input(syncSettingsSchema).mutation(),
 
-  // Pull request procedures
+  // Procedimentos de pull request
   createPullRequest: protectedProcedure.input(createPRSchema).mutation(),
   getPullRequests: protectedProcedure.input(projectIdSchema).query(),
 });
 ```
 
-### UI Components
+### Componentes da UI
 
 ```typescript
-// Component hierarchy
+// Hierarquia de componentes
 GitHubIntegrationPanel
 ├── ConnectionStatus
 ├── RepositorySettings
@@ -186,9 +186,9 @@ GitHubIntegrationPanel
     └── DisconnectButton
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Core Data Types
+### Tipos de Dados Principais
 
 ```typescript
 interface GitHubTokens {
@@ -201,7 +201,7 @@ interface GitHubTokens {
 interface GitHubRepository {
   id: number;
   name: string;
-  fullName: string; // owner/repo
+  fullName: string; // proprietário/repositório
   htmlUrl: string;
   private: boolean;
   defaultBranch: string;
@@ -224,13 +224,13 @@ interface SyncResult {
 interface CreatePROptions {
   title: string;
   body: string;
-  head: string; // branch name
-  base: string; // target branch
+  head: string; // nome do branch
+  base: string; // branch de destino
   draft?: boolean;
 }
 ```
 
-### Configuration Models
+### Modelos de Configuração
 
 ```typescript
 interface SyncSettings {
@@ -240,7 +240,7 @@ interface SyncSettings {
   excludePatterns: string[];
   syncOnSave: boolean;
   batchCommits: boolean;
-  batchTimeout: number; // minutes
+  batchTimeout: number; // minutos
 }
 
 interface IntegrationStatus {
@@ -253,32 +253,32 @@ interface IntegrationStatus {
 }
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### Error Categories
+### Categorias de Erros
 
-1. **Authentication Errors**
-   - Token expired/invalid
-   - Insufficient permissions
-   - OAuth flow interruption
+1.  **Erros de Autenticação**
+    -   Token expirado/inválido
+    -   Permissões insuficientes
+    -   Interrupção do fluxo OAuth
 
-2. **Repository Errors**
-   - Repository not found
-   - Access denied
-   - Repository creation failures
+2.  **Erros de Repositório**
+    -   Repositório não encontrado
+    -   Acesso negado
+    -   Falhas na criação do repositório
 
-3. **Sync Errors**
-   - Merge conflicts
-   - File size limits
-   - Network timeouts
-   - Rate limiting
+3.  **Erros de Sincronização**
+    -   Conflitos de mesclagem
+    -   Limites de tamanho de arquivo
+    -   Tempos limite de rede
+    -   Limitação de taxa
 
-4. **Validation Errors**
-   - Invalid repository names
-   - Malformed file content
-   - Configuration validation
+4.  **Erros de Validação**
+    -   Nomes de repositório inválidos
+    -   Conteúdo de arquivo malformado
+    -   Validação de configuração
 
-### Error Recovery Strategies
+### Estratégias de Recuperação de Erros
 
 ```typescript
 interface ErrorHandler {
@@ -289,102 +289,102 @@ interface ErrorHandler {
 }
 ```
 
-### User-Facing Error Messages
+### Mensagens de Erro Voltadas para o Usuário
 
-- Clear, actionable error descriptions
-- Suggested resolution steps
-- Retry mechanisms where appropriate
-- Fallback to manual operations
+-   Descrições de erro claras e acionáveis
+-   Etapas de resolução sugeridas
+-   Mecanismos de nova tentativa quando apropriado
+-   Fallback para operações manuais
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Testing
+### Teste Unitário
 
-1. **Service Layer Tests**
-   - GitHub API client mocking
-   - Token management validation
-   - File operation testing
-   - Error handling verification
+1.  **Testes da Camada de Serviço**
+    -   Mocking do cliente da API do GitHub
+    -   Validação do gerenciamento de tokens
+    -   Teste de operação de arquivo
+    -   Verificação do tratamento de erros
 
-2. **Database Layer Tests**
-   - Integration model CRUD operations
-   - Sync history tracking
-   - Data consistency validation
+2.  **Testes da Camada de Banco de Dados**
+    -   Operações CRUD do modelo de integração
+    -   Rastreamento do histórico de sincronização
+    -   Validação da consistência dos dados
 
-3. **Business Logic Tests**
-   - Sync algorithm testing
-   - Conflict resolution logic
-   - Configuration validation
+3.  **Testes de Lógica de Negócios**
+    -   Teste do algoritmo de sincronização
+    -   Lógica de resolução de conflitos
+    -   Validação de configuração
 
-### Integration Testing
+### Teste de Integração
 
-1. **GitHub API Integration**
-   - OAuth flow end-to-end
-   - Repository operations
-   - File synchronization
-   - Pull request creation
+1.  **Integração com a API do GitHub**
+    -   Fluxo OAuth de ponta a ponta
+    -   Operações de repositório
+    -   Sincronização de arquivos
+    -   Criação de pull request
 
-2. **Database Integration**
-   - Transaction handling
-   - Concurrent access scenarios
-   - Data migration testing
+2.  **Integração com o Banco de Dados**
+    -   Manipulação de transações
+    -   Cenários de acesso concorrente
+    -   Teste de migração de dados
 
-### End-to-End Testing
+### Teste de Ponta a Ponta
 
-1. **User Workflows**
-   - Complete integration setup
-   - File sync scenarios
-   - Pull request workflows
-   - Error recovery flows
+1.  **Fluxos de Trabalho do Usuário**
+    -   Configuração completa da integração
+    -   Cenários de sincronização de arquivos
+    -   Fluxos de trabalho de pull request
+    -   Fluxos de recuperação de erros
 
-2. **Performance Testing**
-   - Large file synchronization
-   - Batch operation performance
-   - Rate limit handling
-   - Concurrent user scenarios
+2.  **Teste de Desempenho**
+    -   Sincronização de arquivos grandes
+    -   Desempenho de operação em lote
+    -   Manipulação de limite de taxa
+    -   Cenários de usuário concorrente
 
-### Security Testing
+### Teste de Segurança
 
-1. **Token Security**
-   - Encryption validation
-   - Token rotation testing
-   - Access scope verification
+1.  **Segurança de Token**
+    -   Validação de criptografia
+    -   Teste de rotação de token
+    -   Verificação do escopo de acesso
 
-2. **Data Protection**
-   - Sensitive data handling
-   - Audit trail validation
-   - Permission boundary testing
+2.  **Proteção de Dados**
+    -   Manipulação de dados sensíveis
+    -   Validação da trilha de auditoria
+    -   Teste de limite de permissão
 
-## Implementation Considerations
+## Considerações de Implementação
 
-### Security
+### Segurança
 
-- Encrypt GitHub tokens at rest using industry-standard encryption
-- Implement token rotation and refresh mechanisms
-- Validate GitHub webhook signatures for security
-- Audit all GitHub API interactions
-- Implement proper access control for integration settings
+-   Criptografar tokens do GitHub em repouso usando criptografia padrão da indústria
+-   Implementar mecanismos de rotação e atualização de tokens
+-   Validar assinaturas de webhook do GitHub para segurança
+-   Auditar todas as interações da API do GitHub
+-   Implementar controle de acesso adequado para as configurações de integração
 
-### Performance
+### Desempenho
 
-- Implement efficient file diffing algorithms
-- Use batch operations for multiple file changes
-- Implement intelligent sync scheduling to avoid rate limits
-- Cache repository metadata to reduce API calls
-- Optimize database queries with proper indexing
+-   Implementar algoritmos eficientes de diferenciação de arquivos
+-   Usar operações em lote para várias alterações de arquivo
+-   Implementar agendamento de sincronização inteligente para evitar limites de taxa
+-   Armazenar em cache os metadados do repositório para reduzir as chamadas de API
+-   Otimizar as consultas ao banco de dados com indexação adequada
 
-### Scalability
+### Escalabilidade
 
-- Design for horizontal scaling of sync operations
-- Implement queue-based processing for background sync
-- Use connection pooling for GitHub API requests
-- Implement circuit breakers for API resilience
-- Plan for multi-tenant isolation
+-   Projetar para escalabilidade horizontal das operações de sincronização
+-   Implementar processamento baseado em fila para sincronização em segundo plano
+-   Usar pool de conexões para solicitações da API do GitHub
+-   Implementar disjuntores para resiliência da API
+-   Planejar o isolamento multilocatário
 
-### Monitoring and Observability
+### Monitoramento e Observabilidade
 
-- Track sync success/failure rates
-- Monitor GitHub API rate limit usage
-- Log all integration events for debugging
-- Implement health checks for GitHub connectivity
-- Create dashboards for integration metrics
+-   Rastrear taxas de sucesso/falha de sincronização
+-   Monitorar o uso do limite de taxa da API do GitHub
+-   Registrar todos os eventos de integração para depuração
+-   Implementar verificações de saúde para a conectividade com o GitHub
+-   Criar painéis para métricas de integração

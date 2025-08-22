@@ -1,95 +1,95 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature will transform the current system into a whitelabel solution, allowing multiple organizations to use the platform with their own branding, custom domains, and isolated data. The whitelabel system will enable the creation of multiple tenant instances while maintaining a single codebase and infrastructure, providing each tenant with a fully customized experience that appears as their own product.
+Esta funcionalidade transformará o sistema atual em uma solução whitelabel, permitindo que várias organizações usem a plataforma com sua própria marca, domínios personalizados e dados isolados. O sistema whitelabel permitirá a criação de múltiplas instâncias de inquilinos, mantendo uma única base de código e infraestrutura, proporcionando a cada inquilino uma experiência totalmente personalizada que aparece como seu próprio produto.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a platform administrator, I want to create and manage multiple tenant organizations, so that I can offer whitelabel services to different clients.
+**História do Usuário:** Como administrador da plataforma, quero criar e gerenciar várias organizações de inquilinos, para que eu possa oferecer serviços whitelabel a diferentes clientes.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN an administrator creates a new tenant THEN the system SHALL generate a unique tenant identifier and configuration
-2. WHEN a tenant is created THEN the system SHALL initialize default branding settings and database isolation
-3. WHEN viewing tenant list THEN the system SHALL display all active tenants with their status and configuration summary
-4. IF a tenant is deactivated THEN the system SHALL prevent access to that tenant's resources while preserving data
+1. QUANDO um administrador cria um novo inquilino, ENTÃO o sistema DEVE gerar um identificador e configuração de inquilino exclusivos
+2. QUANDO um inquilino é criado, ENTÃO o sistema DEVE inicializar as configurações de marca padrão e o isolamento do banco de dados
+3. AO visualizar a lista de inquilinos, ENTÃO o sistema DEVE exibir todos os inquilinos ativos com seu status e resumo da configuração
+4. SE um inquilino for desativado, ENTÃO o sistema DEVE impedir o acesso aos recursos desse inquilino, preservando os dados
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a tenant administrator, I want to customize my organization's branding and appearance, so that the platform reflects my company's identity.
+**História do Usuário:** Como administrador de inquilino, quero personalizar a marca e a aparência da minha organização, para que a plataforma reflita a identidade da minha empresa.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN accessing branding settings THEN the system SHALL allow upload of custom logos, colors, and styling
-2. WHEN branding is updated THEN the system SHALL apply changes across all tenant-specific pages immediately
-3. WHEN a user visits the tenant's domain THEN the system SHALL display the custom branding consistently
-4. IF branding assets are invalid THEN the system SHALL reject the upload and provide clear error messages
+1. AO acessar as configurações de marca, ENTÃO o sistema DEVE permitir o upload de logotipos, cores e estilos personalizados
+2. QUANDO a marca é atualizada, ENTÃO o sistema DEVE aplicar as alterações em todas as páginas específicas do inquilino imediatamente
+3. QUANDO um usuário visita o domínio do inquilino, ENTÃO o sistema DEVE exibir a marca personalizada de forma consistente
+4. SE os ativos de marca forem inválidos, ENTÃO o sistema DEVE rejeitar o upload e fornecer mensagens de erro claras
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a tenant user, I want to access the platform through my organization's custom domain, so that the experience feels native to my organization.
+**História do Usuário:** Como usuário de inquilino, quero acessar a plataforma através do domínio personalizado da minha organização, para que a experiência pareça nativa da minha organização.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a custom domain is configured THEN the system SHALL route requests to the correct tenant instance
-2. WHEN accessing via custom domain THEN the system SHALL display tenant-specific branding and content
-3. WHEN SSL is required THEN the system SHALL automatically provision and manage certificates for custom domains
-4. IF domain verification fails THEN the system SHALL provide clear instructions for DNS configuration
+1. QUANDO um domínio personalizado é configurado, ENTÃO o sistema DEVE rotear as solicitações para a instância correta do inquilino
+2. AO acessar via domínio personalizado, ENTÃO o sistema DEVE exibir a marca e o conteúdo específicos do inquilino
+3. QUANDO o SSL é necessário, ENTÃO o sistema DEVE provisionar e gerenciar certificados automaticamente para domínios personalizados
+4. SE a verificação do domínio falhar, ENTÃO o sistema DEVE fornecer instruções claras para a configuração do DNS
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a tenant user, I want my organization's data to be completely isolated from other tenants, so that privacy and security are maintained.
+**História do Usuário:** Como usuário de inquilino, quero que os dados da minha organização sejam completamente isolados de outros inquilinos, para que a privacidade e a segurança sejam mantidas.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user performs any operation THEN the system SHALL ensure data access is restricted to their tenant only
-2. WHEN querying the database THEN the system SHALL automatically filter results by tenant identifier
-3. WHEN creating new records THEN the system SHALL automatically associate them with the correct tenant
-4. IF a cross-tenant data access attempt occurs THEN the system SHALL block the operation and log the security event
+1. QUANDO um usuário realiza qualquer operação, ENTÃO o sistema DEVE garantir que o acesso aos dados seja restrito apenas ao seu inquilino
+2. AO consultar o banco de dados, ENTÃO o sistema DEVE filtrar automaticamente os resultados pelo identificador do inquilino
+3. AO criar novos registros, ENTÃO o sistema DEVE associá-los automaticamente ao inquilino correto
+4. SE ocorrer uma tentativa de acesso a dados entre inquilinos, ENTÃO o sistema DEVE bloquear a operação e registrar o evento de segurança
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a tenant administrator, I want to manage user access and permissions within my organization, so that I can control who has access to what features.
+**História do Usuário:** Como administrador de inquilino, quero gerenciar o acesso e as permissões do usuário em minha organização, para que eu possa controlar quem tem acesso a quais recursos.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN inviting users THEN the system SHALL restrict invitations to the tenant's domain or approved email list
-2. WHEN assigning roles THEN the system SHALL limit role assignments to tenant-specific permissions
-3. WHEN a user logs in THEN the system SHALL authenticate them within their tenant context only
-4. IF a user tries to access another tenant THEN the system SHALL deny access and redirect to their tenant
+1. AO convidar usuários, ENTÃO o sistema DEVE restringir os convites ao domínio do inquilino ou à lista de e-mails aprovada
+2. AO atribuir funções, ENTÃO o sistema DEVE limitar as atribuições de função a permissões específicas do inquilino
+3. QUANDO um usuário faz login, ENTÃO o sistema DEVE autenticá-lo apenas no contexto de seu inquilino
+4. SE um usuário tentar acessar outro inquilino, ENTÃO o sistema DEVE negar o acesso e redirecioná-lo para seu inquilino
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a platform administrator, I want to configure different feature sets for different tenants, so that I can offer tiered service levels.
+**História do Usuário:** Como administrador da plataforma, quero configurar diferentes conjuntos de recursos para diferentes inquilinos, para que eu possa oferecer níveis de serviço diferenciados.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN configuring a tenant THEN the system SHALL allow enabling/disabling specific features per tenant
-2. WHEN a user accesses a disabled feature THEN the system SHALL hide the feature or show upgrade prompts
-3. WHEN feature limits are reached THEN the system SHALL enforce restrictions and notify administrators
-4. IF feature configuration changes THEN the system SHALL apply changes immediately without requiring restart
+1. AO configurar um inquilino, ENTÃO o sistema DEVE permitir ativar/desativar recursos específicos por inquilino
+2. QUANDO um usuário acessa um recurso desativado, ENTÃO o sistema DEVE ocultar o recurso ou mostrar prompts de atualização
+3. QUANDO os limites de recursos são atingidos, ENTÃO o sistema DEVE impor restrições e notificar os administradores
+4. SE a configuração de recursos mudar, ENTÃO o sistema DEVE aplicar as alterações imediatamente sem exigir reinicialização
 
-### Requirement 7
+### Requisito 7
 
-**User Story:** As a tenant administrator, I want to configure custom authentication methods, so that users can login using our existing identity systems.
+**História do Usuário:** Como administrador de inquilino, quero configurar métodos de autenticação personalizados, para que os usuários possam fazer login usando nossos sistemas de identidade existentes.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN configuring SSO THEN the system SHALL support SAML and OAuth2 integration per tenant
-2. WHEN users authenticate via SSO THEN the system SHALL map user attributes to tenant-specific roles
-3. WHEN SSO is enabled THEN the system SHALL redirect login attempts to the tenant's identity provider
-4. IF SSO configuration is invalid THEN the system SHALL fall back to standard authentication and alert administrators
+1. AO configurar o SSO, ENTÃO o sistema DEVE suportar a integração SAML e OAuth2 por inquilino
+2. QUANDO os usuários se autenticam via SSO, ENTÃO o sistema DEVE mapear os atributos do usuário para funções específicas do inquilino
+3. QUANDO o SSO está ativado, ENTÃO o sistema DEVE redirecionar as tentativas de login para o provedor de identidade do inquilino
+4. SE a configuração do SSO for inválida, ENTÃO o sistema DEVE recorrer à autenticação padrão e alertar os administradores
 
-### Requirement 8
+### Requisito 8
 
-**User Story:** As a platform administrator, I want to monitor usage and performance across all tenants, so that I can ensure system health and plan capacity.
+**História do Usuário:** Como administrador da plataforma, quero monitorar o uso e o desempenho em todos os inquilinos, para que eu possa garantir a saúde do sistema e planejar a capacidade.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN viewing analytics THEN the system SHALL provide tenant-specific usage metrics and performance data
-2. WHEN resource limits are approached THEN the system SHALL alert administrators before limits are exceeded
-3. WHEN generating reports THEN the system SHALL aggregate data while maintaining tenant isolation
-4. IF performance issues occur THEN the system SHALL identify which tenant(s) are affected and provide diagnostic information
+1. AO visualizar as análises, ENTÃO o sistema DEVE fornecer métricas de uso e dados de desempenho específicos do inquilino
+2. QUANDO os limites de recursos são aproximados, ENTÃO o sistema DEVE alertar os administradores antes que os limites sejam excedidos
+3. AO gerar relatórios, ENTÃO o sistema DEVE agregar dados, mantendo o isolamento do inquilino
+4. SE ocorrerem problemas de desempenho, ENTÃO o sistema DEVE identificar qual(is) inquilino(s) são afetados e fornecer informações de diagnóstico

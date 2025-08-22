@@ -1,53 +1,53 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-The User Project Control system extends the existing project management capabilities to provide users with comprehensive control over their generated projects. The system will integrate with the current Next.js/tRPC architecture, leveraging E2B sandboxes for project execution and adding new functionality for environment management, library installation, file uploads, and project export.
+O sistema de Controle de Projeto do Usuário estende as capacidades de gerenciamento de projetos existentes para fornecer aos usuários controle abrangente sobre seus projetos gerados. O sistema se integrará com a arquitetura atual Next.js/tRPC, aproveitando as sandboxes E2B para execução de projetos e adicionando novas funcionalidades para gerenciamento de ambiente, instalação de bibliotecas, uploads de arquivos e exportação de projetos.
 
-The design builds upon the existing Fragment-based project structure where projects contain messages and fragments store the actual project files as JSON data. We'll extend this model to support additional project metadata, environment variables, and uploaded assets.
+O design se baseia na estrutura de projeto existente baseada em Fragmentos, onde os projetos contêm mensagens e os fragmentos armazenam os arquivos reais do projeto como dados JSON. Estenderemos este modelo para suportar metadados de projeto adicionais, variáveis de ambiente e ativos carregados.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    UI[User Interface] --> API[tRPC API Layer]
-    API --> Services[Business Logic Services]
-    Services --> DB[(PostgreSQL Database)]
-    Services --> Sandbox[E2B Sandbox]
-    Services --> Storage[File Storage]
-    Services --> NPM[NPM Registry]
+    UI[Interface do Usuário] --> API[Camada de API tRPC]
+    API --> Services[Serviços de Lógica de Negócios]
+    Services --> DB[(Banco de Dados PostgreSQL)]
+    Services --> Sandbox[Sandbox E2B]
+    Services --> Storage[Armazenamento de Arquivos]
+    Services --> NPM[Registro NPM]
 
     subgraph Services
-        ProjectService[Project Service]
-        EnvService[Environment Service]
-        LibraryService[Library Service]
-        FileService[File Upload Service]
-        ExportService[Export Service]
+        ProjectService[Serviço de Projeto]
+        EnvService[Serviço de Ambiente]
+        LibraryService[Serviço de Biblioteca]
+        FileService[Serviço de Upload de Arquivo]
+        ExportService[Serviço de Exportação]
     end
 ```
 
-### Data Flow
+### Fluxo de Dados
 
-1. **Environment Management**: User configures environment variables → API validates and stores → Sandbox restarts with new environment
-2. **Library Management**: User searches/installs libraries → API queries NPM → Updates package.json in sandbox → Rebuilds project
-3. **File Upload**: User uploads files → API validates and stores → Files added to project structure → Available in sandbox
-4. **Project Export**: User requests download → API generates ZIP from sandbox files → Provides download link
+1.  **Gerenciamento de Ambiente**: O usuário configura variáveis de ambiente → A API valida e armazena → A sandbox reinicia com o novo ambiente
+2.  **Gerenciamento de Biblioteca**: O usuário pesquisa/instala bibliotecas → A API consulta o NPM → Atualiza o `package.json` na sandbox → Reconstrói o projeto
+3.  **Upload de Arquivo**: O usuário carrega arquivos → A API valida e armazena → Os arquivos são adicionados à estrutura do projeto → Disponíveis na sandbox
+4.  **Exportação de Projeto**: O usuário solicita o download → A API gera um ZIP a partir dos arquivos da sandbox → Fornece o link para download
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### Database Schema Extensions
+### Extensões do Esquema do Banco de Dados
 
 ```typescript
-// Extend existing Project model
+// Estender o modelo de Projeto existente
 model Project {
   id        String   @id @default(uuid())
   name      String
   description String?
   userId    String
   visibility ProjectVisibility @default(PRIVATE)
-  settings  Json? // Project-specific settings
+  settings  Json? // Configurações específicas do projeto
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -82,8 +82,8 @@ model ProjectFile {
   originalName String
   mimeType  String
   size      Int
-  path      String   // Relative path within project
-  url       String   // Storage URL
+  path      String   // Caminho relativo dentro do projeto
+  url       String   // URL de armazenamento
   createdAt DateTime @default(now())
 
   @@unique([projectId, path])
@@ -92,7 +92,7 @@ model ProjectFile {
 model ProjectLibrary {
   id        String   @id @default(uuid())
   projectId String
-  name      String   // Package name
+  name      String   // Nome do pacote
   version   String
   isDev     Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -102,9 +102,9 @@ model ProjectLibrary {
 }
 ```
 
-### Service Layer
+### Camada de Serviço
 
-#### Environment Service
+#### Serviço de Ambiente
 
 ```typescript
 interface EnvironmentService {
@@ -120,7 +120,7 @@ interface EnvironmentService {
 }
 ```
 
-#### Library Service
+#### Serviço de Biblioteca
 
 ```typescript
 interface LibraryService {
@@ -137,7 +137,7 @@ interface LibraryService {
 }
 ```
 
-#### File Upload Service
+#### Serviço de Upload de Arquivo
 
 ```typescript
 interface FileUploadService {
@@ -148,19 +148,19 @@ interface FileUploadService {
 }
 ```
 
-#### Export Service
+#### Serviço de Exportação
 
 ```typescript
 interface ExportService {
-  generateProjectZip(projectId: string): Promise<string>; // Returns download URL
+  generateProjectZip(projectId: string): Promise<string>; // Retorna a URL de download
   getExportStatus(exportId: string): Promise<ExportStatus>;
 }
 ```
 
-### API Layer (tRPC Procedures)
+### Camada de API (Procedimentos tRPC)
 
 ```typescript
-// Environment procedures
+// Procedimentos de ambiente
 export const environmentRouter = router({
   getAll: protectedProcedure
     .input(z.object({ projectId: z.string() }))
@@ -191,7 +191,7 @@ export const environmentRouter = router({
     ),
 });
 
-// Library procedures
+// Procedimentos de biblioteca
 export const libraryRouter = router({
   search: protectedProcedure
     .input(z.object({ query: z.string() }))
@@ -215,13 +215,13 @@ export const libraryRouter = router({
     ),
 });
 
-// File upload procedures
+// Procedimentos de upload de arquivo
 export const fileRouter = router({
   upload: protectedProcedure
     .input(
       z.object({
         projectId: z.string(),
-        file: z.any(), // File upload handling
+        file: z.any(), // Manipulação de upload de arquivo
         path: z.string(),
       }),
     )
@@ -232,7 +232,7 @@ export const fileRouter = router({
     .query(({ input }) => fileUploadService.getProjectFiles(input.projectId)),
 });
 
-// Export procedures
+// Procedimentos de exportação
 export const exportRouter = router({
   generateZip: protectedProcedure
     .input(z.object({ projectId: z.string() }))
@@ -240,39 +240,39 @@ export const exportRouter = router({
 });
 ```
 
-### UI Components
+### Componentes da UI
 
-#### Environment Manager Component
+#### Componente Gerenciador de Ambiente
 
 ```typescript
 interface EnvironmentManagerProps {
   projectId: string;
 }
 
-// Features:
-// - List all environment variables
-// - Add/edit/delete variables
-// - Toggle secret visibility
-// - Validation for variable names
-// - Apply changes to sandbox
+// Recursos:
+// - Listar todas as variáveis de ambiente
+// - Adicionar/editar/excluir variáveis
+// - Alternar a visibilidade de segredos
+// - Validação para nomes de variáveis
+// - Aplicar alterações na sandbox
 ```
 
-#### Library Manager Component
+#### Componente Gerenciador de Biblioteca
 
 ```typescript
 interface LibraryManagerProps {
   projectId: string;
 }
 
-// Features:
-// - Search NPM packages
-// - Display installed packages with versions
-// - Install/uninstall packages
-// - Show dev vs production dependencies
-// - Update available indicators
+// Recursos:
+// - Pesquisar pacotes NPM
+// - Exibir pacotes instalados com versões
+// - Instalar/desinstalar pacotes
+// - Mostrar dependências de desenvolvimento vs produção
+// - Indicadores de atualização disponíveis
 ```
 
-#### File Upload Component
+#### Componente de Upload de Arquivo
 
 ```typescript
 interface FileUploadProps {
@@ -281,31 +281,31 @@ interface FileUploadProps {
   maxSize?: number;
 }
 
-// Features:
-// - Drag and drop interface
-// - File type validation
-// - Progress indicators
-// - Preview for images
-// - File organization
+// Recursos:
+// - Interface de arrastar e soltar
+// - Validação de tipo de arquivo
+// - Indicadores de progresso
+// - Visualização para imagens
+// - Organização de arquivos
 ```
 
-#### Project Export Component
+#### Componente de Exportação de Projeto
 
 ```typescript
 interface ProjectExportProps {
   projectId: string;
 }
 
-// Features:
-// - Generate ZIP download
-// - Progress tracking
-// - Download history
-// - Export options (include node_modules, etc.)
+// Recursos:
+// - Gerar download de ZIP
+// - Rastreamento de progresso
+// - Histórico de downloads
+// - Opções de exportação (incluir node_modules, etc.)
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Environment Variable Model
+### Modelo de Variável de Ambiente
 
 ```typescript
 interface EnvironmentVariable {
@@ -318,7 +318,7 @@ interface EnvironmentVariable {
 }
 ```
 
-### Package Search Result Model
+### Modelo de Resultado de Pesquisa de Pacote
 
 ```typescript
 interface PackageSearchResult {
@@ -332,7 +332,7 @@ interface PackageSearchResult {
 }
 ```
 
-### Project File Model
+### Modelo de Arquivo de Projeto
 
 ```typescript
 interface ProjectFile {
@@ -347,7 +347,7 @@ interface ProjectFile {
 }
 ```
 
-### Export Status Model
+### Modelo de Status de Exportação
 
 ```typescript
 interface ExportStatus {
@@ -360,39 +360,39 @@ interface ExportStatus {
 }
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### Environment Management Errors
+### Erros de Gerenciamento de Ambiente
 
-- Invalid environment variable names
-- Duplicate keys
-- Sandbox restart failures
-- Value validation errors
+-   Nomes de variáveis de ambiente inválidos
+-   Chaves duplicadas
+-   Falhas na reinicialização da sandbox
+-   Erros de validação de valor
 
-### Library Management Errors
+### Erros de Gerenciamento de Biblioteca
 
-- Package not found
-- Version conflicts
-- Installation failures
-- Network timeouts
-- Dependency resolution errors
+-   Pacote não encontrado
+-   Conflitos de versão
+-   Falhas na instalação
+-   Tempos limite de rede
+-   Erros de resolução de dependência
 
-### File Upload Errors
+### Erros de Upload de Arquivo
 
-- File size exceeded
-- Invalid file types
-- Storage failures
-- Path conflicts
-- Quota exceeded
+-   Tamanho do arquivo excedido
+-   Tipos de arquivo inválidos
+-   Falhas de armazenamento
+-   Conflitos de caminho
+-   Cota excedida
 
-### Export Errors
+### Erros de Exportação
 
-- Sandbox access failures
-- ZIP generation errors
-- Storage limitations
-- Large project timeouts
+-   Falhas de acesso à sandbox
+-   Erros na geração de ZIP
+-   Limitações de armazenamento
+-   Tempos limite de projetos grandes
 
-### Error Response Format
+### Formato de Resposta de Erro
 
 ```typescript
 interface ApiError {
@@ -403,40 +403,40 @@ interface ApiError {
 }
 ```
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Tests
+### Testes Unitários
 
-- Service layer methods
-- Validation functions
-- Utility functions
-- Error handling
+-   Métodos da camada de serviço
+-   Funções de validação
+-   Funções de utilitário
+-   Tratamento de erros
 
-### Integration Tests
+### Testes de Integração
 
-- tRPC procedure calls
-- Database operations
-- Sandbox interactions
-- File storage operations
+-   Chamadas de procedimento tRPC
+-   Operações de banco de dados
+-   Interações com a sandbox
+-   Operações de armazenamento de arquivos
 
-### End-to-End Tests
+### Testes de Ponta a Ponta
 
-- Complete user workflows
-- Environment variable management
-- Library installation process
-- File upload and download
-- Project export functionality
+-   Fluxos de trabalho completos do usuário
+-   Gerenciamento de variáveis de ambiente
+-   Processo de instalação de biblioteca
+-   Funcionalidade de upload e download de arquivos
+-   Funcionalidade de exportação de projeto
 
-### Performance Tests
+### Testes de Desempenho
 
-- Large file uploads
-- Multiple library installations
-- ZIP generation for large projects
-- Concurrent user operations
+-   Uploads de arquivos grandes
+-   Instalações de múltiplas bibliotecas
+-   Geração de ZIP para projetos grandes
+-   Operações de usuários concorrentes
 
-### Security Tests
+### Testes de Segurança
 
-- Environment variable access control
-- File upload validation
-- Path traversal prevention
-- User authorization checks
+-   Controle de acesso a variáveis de ambiente
+-   Validação de upload de arquivo
+-   Prevenção de travessia de caminho
+-   Verificações de autorização do usuário
