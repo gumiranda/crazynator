@@ -1,77 +1,77 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-The AI Code Blog system will be built as an integrated module within the existing Next.js application, leveraging the current tech stack including Next.js 15, Prisma ORM, tRPC, Clerk authentication, and Tailwind CSS. The blog will serve as a content marketing platform focused on AI code generators, featuring a modern, responsive design with rich content management capabilities.
+O sistema de Blog de Código de IA será construído como um módulo integrado dentro da aplicação Next.js existente, aproveitando a pilha de tecnologia atual, incluindo Next.js 15, Prisma ORM, tRPC, autenticação Clerk e Tailwind CSS. O blog servirá como uma plataforma de marketing de conteúdo focada em geradores de código de IA, apresentando um design moderno e responsivo com ricas capacidades de gerenciamento de conteúdo.
 
-The system will follow the existing application patterns with modular architecture, using the established folder structure and design system. It will integrate seamlessly with the current user authentication and subscription system to provide premium content features.
+O sistema seguirá os padrões de aplicação existentes com arquitetura modular, usando a estrutura de pastas e o sistema de design estabelecidos. Ele se integrará perfeitamente com o sistema de autenticação e assinatura de usuário atual para fornecer recursos de conteúdo premium.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    A[Blog Frontend] --> B[tRPC API Layer]
-    B --> C[Blog Service Layer]
+    A[Frontend do Blog] --> B[Camada de API tRPC]
+    B --> C[Camada de Serviço do Blog]
     C --> D[Prisma ORM]
-    D --> E[PostgreSQL Database]
+    D --> E[Banco de Dados PostgreSQL]
 
-    F[Admin Panel] --> B
-    G[SEO Module] --> A
-    H[Analytics Module] --> C
-    I[Email Service] --> C
-    J[Search Engine] --> D
+    F[Painel de Administração] --> B
+    G[Módulo de SEO] --> A
+    H[Módulo de Análise] --> C
+    I[Serviço de Email] --> C
+    J[Motor de Busca] --> D
 
-    K[Content Management] --> C
-    L[Comment System] --> C
-    M[Social Sharing] --> A
+    K[Gerenciamento de Conteúdo] --> C
+    L[Sistema de Comentários] --> C
+    M[Compartilhamento Social] --> A
 ```
 
-### Technology Stack Integration
+### Integração da Pilha de Tecnologia
 
-- **Frontend**: Next.js 15 with App Router, React 19, Tailwind CSS
-- **Backend**: tRPC procedures following existing patterns
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk (existing integration)
-- **Styling**: Tailwind CSS with existing design system
-- **Rich Text Editor**: Integrate with existing CodeMirror setup for code highlighting
-- **SEO**: Next.js built-in SEO features with structured data
-- **Analytics**: Custom analytics using existing usage tracking patterns
+- **Frontend**: Next.js 15 com App Router, React 19, Tailwind CSS
+- **Backend**: Procedimentos tRPC seguindo os padrões existentes
+- **Banco de Dados**: PostgreSQL com Prisma ORM
+- **Autenticação**: Clerk (integração existente)
+- **Estilização**: Tailwind CSS com sistema de design existente
+- **Editor de Texto Rico**: Integrar com a configuração existente do CodeMirror para destaque de código
+- **SEO**: Recursos de SEO integrados do Next.js com dados estruturados
+- **Análise**: Análise personalizada usando os padrões de rastreamento de uso existentes
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### Database Models
+### Modelos de Banco de Dados
 
 ```prisma
 model BlogPost {
   id          String   @id @default(uuid())
   title       String
   slug        String   @unique
-  content     String   // Rich text content
-  excerpt     String?  // Short description
-  coverImage  String?  // Cover image URL
+  content     String   // Conteúdo de texto rico
+  excerpt     String?  // Descrição curta
+  coverImage  String?  // URL da imagem de capa
 
-  // SEO fields
+  // Campos de SEO
   metaTitle       String?
   metaDescription String?
   keywords        String[]
 
-  // Publishing
+  // Publicação
   status          PostStatus @default(DRAFT)
   publishedAt     DateTime?
   scheduledAt     DateTime?
 
-  // Organization
+  // Organização
   categoryId      String?
   category        BlogCategory? @relation(fields: [categoryId], references: [id])
   tags            BlogTag[]
 
-  // Analytics
+  // Análise
   viewCount       Int @default(0)
-  readingTime     Int? // Estimated reading time in minutes
+  readingTime     Int? // Tempo de leitura estimado em minutos
 
-  // Authoring
+  // Autoria
   authorId        String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -88,7 +88,7 @@ model BlogCategory {
   name        String     @unique
   slug        String     @unique
   description String?
-  color       String?    // Hex color for UI
+  color       String?    // Cor hexadecimal para a UI
   posts       BlogPost[]
   createdAt   DateTime   @default(now())
 }
@@ -103,7 +103,7 @@ model BlogTag {
 model BlogComment {
   id        String   @id @default(uuid())
   content   String
-  author    String   // Name or email
+  author    String   // Nome ou email
   email     String
   website   String?
 
@@ -126,7 +126,7 @@ model BlogSubscriber {
   id            String   @id @default(uuid())
   email         String   @unique
   name          String?
-  subscriptions String[] // Array of subscription types
+  subscriptions String[] // Array de tipos de assinatura
   isActive      Boolean  @default(true)
   confirmedAt   DateTime?
   createdAt     DateTime @default(now())
@@ -148,12 +148,12 @@ enum CommentStatus {
 }
 ```
 
-### API Interfaces (tRPC Procedures)
+### Interfaces de API (Procedimentos tRPC)
 
 ```typescript
-// Blog Router
+// Roteador do Blog
 export const blogRouter = router({
-  // Public procedures
+  // Procedimentos públicos
   getPosts: publicProcedure
     .input(
       z.object({
@@ -165,60 +165,60 @@ export const blogRouter = router({
       }),
     )
     .query(async ({ input }) => {
-      /* Implementation */
+      /* Implementação */
     }),
 
   getPost: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    /* Implementation */
+    /* Implementação */
   }),
 
   getCategories: publicProcedure.query(async () => {
-    /* Implementation */
+    /* Implementação */
   }),
 
-  // Admin procedures (protected)
+  // Procedimentos de administração (protegidos)
   createPost: protectedProcedure.input(createPostSchema).mutation(async ({ input, ctx }) => {
-    /* Implementation */
+    /* Implementação */
   }),
 
   updatePost: protectedProcedure.input(updatePostSchema).mutation(async ({ input, ctx }) => {
-    /* Implementation */
+    /* Implementação */
   }),
 
   deletePost: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      /* Implementation */
+      /* Implementação */
     }),
 
-  // Comments
+  // Comentários
   addComment: publicProcedure.input(addCommentSchema).mutation(async ({ input }) => {
-    /* Implementation */
+    /* Implementação */
   }),
 
   moderateComment: protectedProcedure
     .input(moderateCommentSchema)
     .mutation(async ({ input, ctx }) => {
-      /* Implementation */
+      /* Implementação */
     }),
 
-  // Analytics
+  // Análise
   incrementViewCount: publicProcedure
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ input }) => {
-      /* Implementation */
+      /* Implementação */
     }),
 
   getAnalytics: protectedProcedure.query(async ({ ctx }) => {
-    /* Implementation */
+    /* Implementação */
   }),
 });
 ```
 
-### Frontend Components
+### Componentes de Frontend
 
 ```typescript
-// Component structure following existing patterns
+// Estrutura de componentes seguindo os padrões existentes
 src/modules/blog/
 ├── ui/
 │   ├── components/
@@ -244,150 +244,150 @@ src/modules/blog/
     └── procedures.ts
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Content Structure
+### Estrutura de Conteúdo
 
-**BlogPost Model**
+**Modelo BlogPost**
 
-- Supports rich text content with embedded code snippets
-- SEO optimization fields (meta title, description, keywords)
-- Publishing workflow (draft → published/scheduled)
-- Categorization and tagging system
-- Analytics tracking (views, reading time)
+- Suporta conteúdo de texto rico com trechos de código embutidos
+- Campos de otimização de SEO (título meta, descrição, palavras-chave)
+- Fluxo de trabalho de publicação (rascunho → publicado/agendado)
+- Sistema de categorização e etiquetagem
+- Rastreamento de análise (visualizações, tempo de leitura)
 
-**Category System**
+**Sistema de Categorias**
 
-- Hierarchical organization of content
-- Color-coded for visual distinction
-- SEO-friendly URLs
+- Organização hierárquica de conteúdo
+- Codificado por cores para distinção visual
+- URLs amigáveis para SEO
 
-**Tagging System**
+**Sistema de Etiquetagem**
 
-- Flexible content labeling
-- Many-to-many relationship with posts
-- Auto-suggestion based on existing tags
+- Rotulagem de conteúdo flexível
+- Relação muitos-para-muitos com postagens
+- Sugestão automática com base em tags existentes
 
-**Comment System**
+**Sistema de Comentários**
 
-- Nested comments (replies)
-- Moderation workflow
-- Anti-spam measures
-- Email notifications
+- Comentários aninhados (respostas)
+- Fluxo de trabalho de moderação
+- Medidas anti-spam
+- Notificações por email
 
-### Content Management Workflow
+### Fluxo de Trabalho de Gerenciamento de Conteúdo
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft
-    Draft --> Published : Publish Now
-    Draft --> Scheduled : Schedule
-    Scheduled --> Published : Auto-publish
-    Published --> Archived : Archive
-    Archived --> Published : Restore
-    Published --> Draft : Unpublish
+    [*] --> Rascunho
+    Rascunho --> Publicado : Publicar Agora
+    Rascunho --> Agendado : Agendar
+    Agendado --> Publicado : Publicação Automática
+    Publicado --> Arquivado : Arquivar
+    Arquivado --> Publicado : Restaurar
+    Publicado --> Rascunho : Despublicar
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### Content Validation
+### Validação de Conteúdo
 
-- Rich text content sanitization
-- Image upload validation and optimization
-- SEO field validation (character limits, format checks)
-- Slug uniqueness validation
+- Sanitização de conteúdo de texto rico
+- Validação e otimização de upload de imagem
+- Validação de campos de SEO (limites de caracteres, verificações de formato)
+- Validação de exclusividade de slug
 
-### Publishing Errors
+### Erros de Publicação
 
-- Handle scheduled publishing failures
-- Rollback mechanisms for failed publications
-- Email notifications for publishing errors
+- Lidar com falhas de publicação agendada
+- Mecanismos de reversão para publicações com falha
+- Notificações por email para erros de publicação
 
-### Comment Moderation
+### Moderação de Comentários
 
-- Spam detection and filtering
-- Rate limiting for comment submissions
-- Graceful handling of moderation queue overflow
+- Detecção e filtragem de spam
+- Limitação de taxa para envio de comentários
+- Tratamento gracioso de estouro da fila de moderação
 
-### SEO and Performance
+### SEO e Desempenho
 
-- Automatic sitemap generation error handling
-- Image optimization failure fallbacks
-- Search indexing error recovery
+- Tratamento de erros de geração automática de sitemap
+- Fallbacks para falha na otimização de imagem
+- Recuperação de erros de indexação de pesquisa
 
-## Testing Strategy
+## Estratégia de Testes
 
-### Unit Testing
+### Testes Unitários
 
-- Blog service layer functions
-- Content validation utilities
-- SEO helper functions
-- Comment moderation logic
+- Funções da camada de serviço do blog
+- Utilitários de validação de conteúdo
+- Funções auxiliares de SEO
+- Lógica de moderação de comentários
 
-### Integration Testing
+### Testes de Integração
 
-- tRPC procedure testing
-- Database operations
-- Email service integration
-- Search functionality
+- Teste de procedimentos tRPC
+- Operações de banco de dados
+- Integração de serviço de email
+- Funcionalidade de pesquisa
 
-### End-to-End Testing
+### Testes de Ponta a Ponta
 
-- Complete blog post creation workflow
-- Public blog browsing experience
-- Comment submission and moderation
-- Newsletter subscription flow
+- Fluxo de trabalho completo de criação de postagem de blog
+- Experiência de navegação pública no blog
+- Envio e moderação de comentários
+- Fluxo de assinatura de newsletter
 
-### Performance Testing
+### Testes de Desempenho
 
-- Page load times for blog posts
-- Search query performance
-- Image loading optimization
-- Database query optimization
+- Tempos de carregamento de página para postagens de blog
+- Desempenho de consulta de pesquisa
+- Otimização de carregamento de imagem
+- Otimização de consulta de banco de dados
 
-### SEO Testing
+### Testes de SEO
 
-- Meta tag generation
-- Structured data validation
-- Sitemap generation
-- Social media preview testing
+- Geração de meta tags
+- Validação de dados estruturados
+- Geração de sitemap
+- Teste de visualização em mídias sociais
 
-### Content Testing
+### Testes de Conteúdo
 
-- Rich text editor functionality
-- Code syntax highlighting
-- Responsive design across devices
-- Accessibility compliance (WCAG 2.1)
+- Funcionalidade do editor de texto rico
+- Destaque de sintaxe de código
+- Design responsivo em todos os dispositivos
+- Conformidade de acessibilidade (WCAG 2.1)
 
-## Implementation Phases
+## Fases de Implementação
 
-### Phase 1: Core Blog Infrastructure
+### Fase 1: Infraestrutura Principal do Blog
 
-- Database models and migrations
-- Basic tRPC procedures
-- Simple blog post CRUD operations
+- Modelos de banco de dados e migrações
+- Procedimentos tRPC básicos
+- Operações CRUD simples de postagem de blog
 
-### Phase 2: Content Management
+### Fase 2: Gerenciamento de Conteúdo
 
-- Rich text editor integration
-- Category and tag management
-- Publishing workflow
+- Integração do editor de texto rico
+- Gerenciamento de categorias e tags
+- Fluxo de trabalho de publicação
 
-### Phase 3: Public Blog Interface
+### Fase 3: Interface Pública do Blog
 
-- Blog homepage and post pages
-- Search and filtering
-- Responsive design implementation
+- Página inicial do blog e páginas de postagem
+- Pesquisa e filtragem
+- Implementação de design responsivo
 
-### Phase 4: Advanced Features
+### Fase 4: Recursos Avançados
 
-- Comment system
-- Newsletter subscription
-- Social sharing
-- SEO optimization
+- Sistema de comentários
+- Assinatura de newsletter
+- Compartilhamento social
+- Otimização de SEO
 
-### Phase 5: Analytics and Admin
+### Fase 5: Análise e Administração
 
-- Analytics dashboard
-- Content performance tracking
-- Advanced admin features
+- Painel de análise
+- Rastreamento de desempenho de conteúdo
+- Recursos avançados de administração

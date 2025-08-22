@@ -1,59 +1,59 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-The Code Patterns Suggestions system provides intelligent, contextual recommendations to help users write better code following modern development patterns and best practices. The system analyzes user code in real-time and suggests improvements based on established patterns like Atomic Design, Feature-Sliced Design, and proper usage of libraries like React Query and Zustand.
+O sistema de Sugestões de Padrões de Código fornece recomendações inteligentes e contextuais para ajudar os usuários a escreverem um código melhor, seguindo padrões de desenvolvimento modernos e melhores práticas. O sistema analisa o código do usuário em tempo real e sugere melhorias com base em padrões estabelecidos como Atomic Design, Feature-Sliced Design e o uso adequado de bibliotecas como React Query e Zustand.
 
-The system integrates with the existing Next.js/tRPC architecture and leverages the current AI integration (Claude) and E2B sandbox environment to analyze code and provide contextual suggestions. It extends the current message-based interaction model to include proactive pattern suggestions.
+O sistema se integra à arquitetura Next.js/tRPC existente e aproveita a integração atual de IA (Claude) e o ambiente de sandbox E2B para analisar o código e fornecer sugestões contextuais. Ele estende o modelo de interação baseado em mensagens atual para incluir sugestões proativas de padrões.
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    CodeAnalyzer[Code Analyzer] --> PatternEngine[Pattern Detection Engine]
-    PatternEngine --> SuggestionEngine[Suggestion Engine]
-    SuggestionEngine --> UI[Suggestion UI]
+    AnalisadorCodigo[Analisador de Código] --> MotorPadroes[Motor de Detecção de Padrões]
+    MotorPadroes --> MotorSugestoes[Motor de Sugestões]
+    MotorSugestoes --> UI[UI de Sugestões]
 
-    CodeAnalyzer --> Sandbox[E2B Sandbox]
-    PatternEngine --> RuleEngine[Rule Engine]
-    SuggestionEngine --> AI[Claude AI]
+    AnalisadorCodigo --> Sandbox[Sandbox E2B]
+    MotorPadroes --> MotorRegras[Motor de Regras]
+    MotorSugestoes --> IA[Claude AI]
 
-    subgraph "Pattern Categories"
+    subgraph "Categorias de Padrões"
         Atomic[Atomic Design]
         FSD[Feature-Sliced Design]
-        StateManagement[State Management]
-        DataFetching[Data Fetching]
-        TypeScript[TypeScript Patterns]
-        Performance[Performance]
-        Testing[Testing Patterns]
-        A11y[Accessibility]
+        GerenciamentoEstado[Gerenciamento de Estado]
+        BuscaDados[Busca de Dados]
+        PadroesTypeScript[Padrões TypeScript]
+        Desempenho[Desempenho]
+        Testes[Padrões de Teste]
+        A11y[Acessibilidade]
     end
 
-    RuleEngine --> Atomic
-    RuleEngine --> FSD
-    RuleEngine --> StateManagement
-    RuleEngine --> DataFetching
-    RuleEngine --> TypeScript
-    RuleEngine --> Performance
-    RuleEngine --> Testing
-    RuleEngine --> A11y
+    MotorRegras --> Atomic
+    MotorRegras --> FSD
+    MotorRegras --> GerenciamentoEstado
+    MotorRegras --> BuscaDados
+    MotorRegras --> PadroesTypeScript
+    MotorRegras --> Desempenho
+    MotorRegras --> Testes
+    MotorRegras --> A11y
 ```
 
-### Data Flow
+### Fluxo de Dados
 
-1. **Code Analysis**: User writes code → System analyzes in real-time → Patterns detected
-2. **Suggestion Generation**: Patterns analyzed → Rules applied → AI generates contextual suggestions
-3. **Suggestion Delivery**: Suggestions formatted → Delivered via UI → User can accept/dismiss
-4. **Learning**: User feedback collected → Pattern preferences updated → Suggestions improved
+1.  **Análise de Código**: O usuário escreve o código → O sistema analisa em tempo real → Padrões são detectados
+2.  **Geração de Sugestões**: Padrões analisados → Regras aplicadas → A IA gera sugestões contextuais
+3.  **Entrega de Sugestões**: Sugestões formatadas → Entregues via UI → O usuário pode aceitar/dispensar
+4.  **Aprendizagem**: Feedback do usuário coletado → Preferências de padrão atualizadas → Sugestões aprimoradas
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### Database Schema Extensions
+### Extensões do Esquema do Banco de Dados
 
 ```typescript
-// Extend existing schema
+// Estender o esquema existente
 model CodeSuggestion {
   id          String            @id @default(uuid())
   projectId   String
@@ -67,7 +67,7 @@ model CodeSuggestion {
   lineNumber  Int?
   severity    SuggestionSeverity @default(INFO)
   status      SuggestionStatus   @default(PENDING)
-  metadata    Json?             // Additional context data
+  metadata    Json?             // Dados de contexto adicionais
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   dismissedAt DateTime?
@@ -119,9 +119,9 @@ model PatternRule {
   category    SuggestionCategory
   type        SuggestionType
   description String
-  pattern     String   // Regex or AST pattern to match
-  suggestion  String   // Template for suggestion text
-  codeExample String?  // Example code to show
+  pattern     String   // Regex ou padrão AST para corresponder
+  suggestion  String   // Template para o texto da sugestão
+  codeExample String?  // Código de exemplo para mostrar
   severity    SuggestionSeverity @default(INFO)
   enabled     Boolean  @default(true)
   priority    Int      @default(0)
@@ -151,9 +151,9 @@ enum PreferenceFrequency {
 }
 ```
 
-### Service Layer
+### Camada de Serviço
 
-#### Code Analysis Service
+#### Serviço de Análise de Código
 
 ```typescript
 interface CodeAnalysisService {
@@ -188,7 +188,7 @@ interface DetectedPattern {
 }
 ```
 
-#### Pattern Detection Service
+#### Serviço de Detecção de Padrões
 
 ```typescript
 interface PatternDetectionService {
@@ -203,7 +203,7 @@ interface PatternDetectionService {
 }
 ```
 
-#### Suggestion Engine Service
+#### Serviço do Motor de Sugestões
 
 ```typescript
 interface SuggestionEngineService {
@@ -231,9 +231,9 @@ interface FileChange {
 }
 ```
 
-### Pattern Rule Definitions
+### Definições de Regras de Padrão
 
-#### Atomic Design Rules
+#### Regras de Atomic Design
 
 ```typescript
 const atomicDesignRules: PatternRule[] = [
@@ -241,16 +241,16 @@ const atomicDesignRules: PatternRule[] = [
     name: 'component-too-complex',
     category: 'ATOMIC_DESIGN',
     type: 'COMPONENT_STRUCTURE',
-    pattern: 'function\\s+\\w+.*{[\\s\\S]{500,}}', // Components over 500 chars
+    pattern: 'function\\s+\\w+.*{[\\s\\S]{500,}}', // Componentes com mais de 500 caracteres
     suggestion:
-      'This component is quite large. Consider breaking it down into smaller components following Atomic Design principles.',
+      'Este componente é muito grande. Considere dividi-lo em componentes menores seguindo os princípios do Atomic Design.',
     codeExample: `
-// Instead of one large component:
+// Em vez de um componente grande:
 function LargeComponent() {
-  // 500+ lines of code
+  // 500+ linhas de código
 }
 
-// Break it down:
+// Divida-o:
 function OrganismComponent() {
   return (
     <div>
@@ -269,13 +269,13 @@ function OrganismComponent() {
     type: 'ARCHITECTURE',
     pattern: 'components/(?!atoms|molecules|organisms|templates|pages)',
     suggestion:
-      'Consider organizing components using Atomic Design structure: atoms, molecules, organisms, templates, pages.',
+      'Considere organizar os componentes usando a estrutura do Atomic Design: atoms, molecules, organisms, templates, pages.',
     severity: 'INFO',
   },
 ];
 ```
 
-#### Feature-Sliced Design Rules
+#### Regras de Feature-Sliced Design
 
 ```typescript
 const fsdRules: PatternRule[] = [
@@ -285,7 +285,7 @@ const fsdRules: PatternRule[] = [
     type: 'ARCHITECTURE',
     pattern: 'src/(?!shared|entities|features|widgets|pages|app)',
     suggestion:
-      'Consider organizing your code using Feature-Sliced Design: shared, entities, features, widgets, pages, app.',
+      'Considere organizar seu código usando o Feature-Sliced Design: shared, entities, features, widgets, pages, app.',
     severity: 'INFO',
   },
   {
@@ -294,13 +294,13 @@ const fsdRules: PatternRule[] = [
     type: 'ARCHITECTURE',
     pattern: 'import.*from.*\\.\\./\\.\\./(?:features|widgets|pages)',
     suggestion:
-      'Avoid importing from higher layers. Consider moving shared logic to the shared layer.',
+      'Evite importar de camadas superiores. Considere mover a lógica compartilhada para a camada shared.',
     severity: 'WARNING',
   },
 ];
 ```
 
-#### State Management Rules
+#### Regras de Gerenciamento de Estado
 
 ```typescript
 const zustandRules: PatternRule[] = [
@@ -310,12 +310,12 @@ const zustandRules: PatternRule[] = [
     type: 'STATE_MANAGEMENT',
     pattern: 'useState.*\\[.*,.*\\].*=.*useState\\(.*\\)',
     suggestion:
-      'This state seems to be used across multiple components. Consider using Zustand for global state management.',
+      'Este estado parece ser usado em vários componentes. Considere usar o Zustand para gerenciamento de estado global.',
     codeExample: `
-// Instead of prop drilling:
+// Em vez de passar props:
 const [user, setUser] = useState(null)
 
-// Use Zustand:
+// Use o Zustand:
 const useUserStore = create((set) => ({
   user: null,
   setUser: (user) => set({ user })
@@ -326,7 +326,7 @@ const useUserStore = create((set) => ({
 ];
 ```
 
-### API Layer (tRPC Procedures)
+### Camada de API (Procedimentos tRPC)
 
 ```typescript
 export const suggestionsRouter = router({
@@ -378,9 +378,9 @@ export const suggestionsRouter = router({
 });
 ```
 
-### UI Components
+### Componentes de UI
 
-#### Suggestions Panel Component
+#### Componente do Painel de Sugestões
 
 ```typescript
 interface SuggestionsPanelProps {
@@ -389,15 +389,15 @@ interface SuggestionsPanelProps {
   onClose: () => void;
 }
 
-// Features:
-// - List all active suggestions
-// - Filter by category/type/severity
-// - Apply/dismiss suggestions
-// - Show code examples
-// - Real-time updates
+// Recursos:
+// - Listar todas as sugestões ativas
+// - Filtrar por categoria/tipo/severidade
+// - Aplicar/dispensar sugestões
+// - Mostrar exemplos de código
+// - Atualizações em tempo real
 ```
 
-#### Suggestion Card Component
+#### Componente do Cartão de Sugestão
 
 ```typescript
 interface SuggestionCardProps {
@@ -407,15 +407,15 @@ interface SuggestionCardProps {
   onViewCode: (id: string) => void;
 }
 
-// Features:
-// - Display suggestion details
-// - Show code examples
-// - Apply/dismiss actions
-// - Severity indicators
-// - Category badges
+// Recursos:
+// - Exibir detalhes da sugestão
+// - Mostrar exemplos de código
+// - Ações de aplicar/dispensar
+// - Indicadores de severidade
+// - Emblemas de categoria
 ```
 
-#### Pattern Analyzer Component
+#### Componente do Analisador de Padrões
 
 ```typescript
 interface PatternAnalyzerProps {
@@ -423,14 +423,14 @@ interface PatternAnalyzerProps {
   onAnalysisComplete: (results: AnalysisResult) => void;
 }
 
-// Features:
-// - Trigger code analysis
-// - Show analysis progress
-// - Display analysis results
-// - Pattern detection summary
+// Recursos:
+// - Acionar análise de código
+// - Mostrar progresso da análise
+// - Exibir resultados da análise
+// - Resumo da detecção de padrões
 ```
 
-#### Preferences Panel Component
+#### Componente do Painel de Preferências
 
 ```typescript
 interface PreferencesPanelProps {
@@ -438,16 +438,16 @@ interface PreferencesPanelProps {
   onSave: (preferences: UserPreference[]) => void;
 }
 
-// Features:
-// - Configure suggestion categories
-// - Set frequency preferences
-// - Enable/disable specific patterns
-// - Import/export preferences
+// Recursos:
+// - Configurar categorias de sugestão
+// - Definir preferências de frequência
+// - Habilitar/desabilitar padrões específicos
+// - Importar/exportar preferências
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Code Analysis Models
+### Modelos de Análise de Código
 
 ```typescript
 interface CodeMetrics {
@@ -475,7 +475,7 @@ interface CodeIssue {
 }
 ```
 
-### Pattern Models
+### Modelos de Padrão
 
 ```typescript
 interface AtomicDesignIssue {
@@ -501,29 +501,29 @@ interface PerformanceIssue {
 }
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### Analysis Errors
+### Erros de Análise
 
-- Code parsing failures
-- Sandbox connection issues
-- Pattern detection timeouts
-- AI service unavailability
+-   Falhas na análise de código
+-   Problemas de conexão com o sandbox
+-   Tempos limite de detecção de padrões
+-   Indisponibilidade do serviço de IA
 
-### Suggestion Errors
+### Erros de Sugestão
 
-- Invalid suggestion application
-- File modification conflicts
-- Permission issues
-- Rollback failures
+-   Aplicação de sugestão inválida
+-   Conflitos de modificação de arquivo
+-   Problemas de permissão
+-   Falhas de reversão
 
-### User Experience Errors
+### Erros de Experiência do Usuário
 
-- Preference save failures
-- UI state inconsistencies
-- Real-time update failures
+-   Falhas ao salvar preferências
+-   Inconsistências de estado da UI
+-   Falhas na atualização em tempo real
 
-### Error Response Format
+### Formato de Resposta de Erro
 
 ```typescript
 interface SuggestionError {
@@ -539,39 +539,39 @@ interface SuggestionError {
 }
 ```
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Tests
+### Testes Unitários
 
-- Pattern detection algorithms
-- Suggestion generation logic
-- Rule engine functionality
-- Code analysis utilities
+-   Algoritmos de detecção de padrões
+-   Lógica de geração de sugestões
+-   Funcionalidade do motor de regras
+-   Utilitários de análise de código
 
-### Integration Tests
+### Testes de Integração
 
-- tRPC procedure calls
-- Database operations
-- AI service integration
-- Sandbox interactions
+-   Chamadas de procedimento tRPC
+-   Operações de banco de dados
+-   Integração de serviço de IA
+-   Interações com o sandbox
 
-### End-to-End Tests
+### Testes de Ponta a Ponta
 
-- Complete suggestion workflow
-- Pattern detection accuracy
-- User preference management
-- Real-time suggestion updates
+-   Fluxo de trabalho completo de sugestões
+-   Precisão da detecção de padrões
+-   Gerenciamento de preferências do usuário
+-   Atualizações de sugestões em tempo real
 
-### Performance Tests
+### Testes de Desempenho
 
-- Large codebase analysis
-- Real-time pattern detection
-- Concurrent user suggestions
-- Memory usage optimization
+-   Análise de grandes bases de código
+-   Detecção de padrões em tempo real
+-   Sugestões de usuários concorrentes
+-   Otimização do uso de memória
 
-### Pattern Accuracy Tests
+### Testes de Precisão de Padrão
 
-- Known pattern detection
-- False positive rates
-- Suggestion relevance
-- User acceptance rates
+-   Detecção de padrões conhecidos
+-   Taxas de falsos positivos
+-   Relevância da sugestão
+-   Taxas de aceitação do usuário

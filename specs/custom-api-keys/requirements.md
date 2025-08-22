@@ -1,79 +1,79 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature will allow users to configure their own API keys for OpenAI and Anthropic services, giving them control over their AI model usage and costs. Users will be able to input their API keys, select from available models, and manage their own AI service consumption directly through the application interface.
+Esta funcionalidade permitirá que os usuários configurem suas próprias chaves de API para os serviços OpenAI e Anthropic, dando-lhes controle sobre o uso e os custos de seus modelos de IA. Os usuários poderão inserir suas chaves de API, selecionar entre os modelos disponíveis e gerenciar seu próprio consumo de serviços de IA diretamente através da interface da aplicação.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a user, I want to input my own OpenAI API key, so that I can use my own OpenAI account and control my usage costs.
+**História do Usuário:** Como usuário, quero inserir minha própria chave de API da OpenAI, para que eu possa usar minha própria conta da OpenAI e controlar meus custos de uso.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses the settings page THEN the system SHALL display an input field for OpenAI API key
-2. WHEN a user enters a valid OpenAI API key THEN the system SHALL validate the key format and store it securely
-3. WHEN a user enters an invalid OpenAI API key THEN the system SHALL display an appropriate error message
-4. WHEN a user saves their OpenAI API key THEN the system SHALL encrypt and store the key in the database
-5. WHEN a user has configured their OpenAI API key THEN the system SHALL use this key for all OpenAI API calls instead of the default system key
+1. QUANDO um usuário acessa a página de configurações, ENTÃO o sistema DEVE exibir um campo de entrada para a chave de API da OpenAI
+2. QUANDO um usuário insere uma chave de API da OpenAI válida, ENTÃO o sistema DEVE validar o formato da chave e armazená-la de forma segura
+3. QUANDO um usuário insere uma chave de API da OpenAI inválida, ENTÃO o sistema DEVE exibir uma mensagem de erro apropriada
+4. QUANDO um usuário salva sua chave de API da OpenAI, ENTÃO o sistema DEVE criptografar e armazenar a chave no banco de dados
+5. QUANDO um usuário configurou sua chave de API da OpenAI, ENTÃO o sistema DEVE usar esta chave para todas as chamadas da API da OpenAI em vez da chave padrão do sistema
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a user, I want to input my own Anthropic API key, so that I can use my own Anthropic account and control my usage costs.
+**História do Usuário:** Como usuário, quero inserir minha própria chave de API da Anthropic, para que eu possa usar minha própria conta da Anthropic e controlar meus custos de uso.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses the settings page THEN the system SHALL display an input field for Anthropic API key
-2. WHEN a user enters a valid Anthropic API key THEN the system SHALL validate the key format and store it securely
-3. WHEN a user enters an invalid Anthropic API key THEN the system SHALL display an appropriate error message
-4. WHEN a user saves their Anthropic API key THEN the system SHALL encrypt and store the key in the database
-5. WHEN a user has configured their Anthropic API key THEN the system SHALL use this key for all Anthropic API calls instead of the default system key
+1. QUANDO um usuário acessa a página de configurações, ENTÃO o sistema DEVE exibir um campo de entrada para a chave de API da Anthropic
+2. QUANDO um usuário insere uma chave de API da Anthropic válida, ENTÃO o sistema DEVE validar o formato da chave e armazená-la de forma segura
+3. QUANDO um usuário insere uma chave de API da Anthropic inválida, ENTÃO o sistema DEVE exibir uma mensagem de erro apropriada
+4. QUANDO um usuário salva sua chave de API da Anthropic, ENTÃO o sistema DEVE criptografar e armazenar a chave no banco de dados
+5. QUANDO um usuário configurou sua chave de API da Anthropic, ENTÃO o sistema DEVE usar esta chave para todas as chamadas da API da Anthropic em vez da chave padrão do sistema
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a user, I want to select which AI model to use, so that I can choose the model that best fits my needs and budget.
+**História do Usuário:** Como usuário, quero selecionar qual modelo de IA usar, para que eu possa escolher o modelo que melhor se adapta às minhas necessidades e orçamento.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user has configured an OpenAI API key THEN the system SHALL display available OpenAI models for selection
-2. WHEN a user has configured an Anthropic API key THEN the system SHALL display available Anthropic models for selection
-3. WHEN a user selects a model THEN the system SHALL save this preference and use it for future AI interactions
-4. WHEN a user has not configured any API keys THEN the system SHALL use the default system configuration
-5. WHEN a user changes their selected model THEN the system SHALL apply the change to subsequent AI interactions
+1. QUANDO um usuário configurou uma chave de API da OpenAI, ENTÃO o sistema DEVE exibir os modelos da OpenAI disponíveis para seleção
+2. QUANDO um usuário configurou uma chave de API da Anthropic, ENTÃO o sistema DEVE exibir os modelos da Anthropic disponíveis para seleção
+3. QUANDO um usuário seleciona um modelo, ENTÃO o sistema DEVE salvar essa preferência e usá-la para futuras interações de IA
+4. QUANDO um usuário não configurou nenhuma chave de API, ENTÃO o sistema DEVE usar a configuração padrão do sistema
+5. QUANDO um usuário altera seu modelo selecionado, ENTÃO o sistema DEVE aplicar a alteração às interações de IA subsequentes
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a user, I want to manage my API key settings, so that I can update or remove my keys when needed.
+**História do Usuário:** Como usuário, quero gerenciar minhas configurações de chave de API, para que eu possa atualizar ou remover minhas chaves quando necessário.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user views their API key settings THEN the system SHALL display masked versions of their stored keys
-2. WHEN a user wants to update an API key THEN the system SHALL allow them to enter a new key and validate it
-3. WHEN a user wants to remove an API key THEN the system SHALL allow them to delete the key and revert to system defaults
-4. WHEN a user removes an API key THEN the system SHALL securely delete the key from storage
-5. WHEN a user has removed all custom API keys THEN the system SHALL fall back to using system default keys
+1. QUANDO um usuário visualiza suas configurações de chave de API, ENTÃO o sistema DEVE exibir versões mascaradas de suas chaves armazenadas
+2. QUANDO um usuário deseja atualizar uma chave de API, ENTÃO o sistema DEVE permitir que ele insira uma nova chave e a valide
+3. QUANDO um usuário deseja remover uma chave de API, ENTÃO o sistema DEVE permitir que ele exclua a chave e reverta para os padrões do sistema
+4. QUANDO um usuário remove uma chave de API, ENTÃO o sistema DEVE excluir a chave do armazenamento de forma segura
+5. QUANDO um usuário removeu todas as chaves de API personalizadas, ENTÃO o sistema DEVE voltar a usar as chaves padrão do sistema
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a user, I want my API keys to be stored securely, so that my credentials are protected from unauthorized access.
+**História do Usuário:** Como usuário, quero que minhas chaves de API sejam armazenadas de forma segura, para que minhas credenciais fiquem protegidas contra acesso não autorizado.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user enters an API key THEN the system SHALL encrypt the key before storing it in the database
-2. WHEN the system needs to use an API key THEN it SHALL decrypt the key only in memory for the duration of the API call
-3. WHEN displaying API keys in the UI THEN the system SHALL show only masked versions (e.g., "sk-...xyz123")
-4. WHEN a user's session expires THEN the system SHALL not cache decrypted API keys
-5. IF there is a security breach THEN the stored API keys SHALL remain encrypted and unusable without the decryption key
+1. QUANDO um usuário insere uma chave de API, ENTÃO o sistema DEVE criptografar a chave antes de armazená-la no banco de dados
+2. QUANDO o sistema precisa usar uma chave de API, ENTÃO ele DEVE descriptografar a chave apenas na memória durante a chamada da API
+3. AO exibir chaves de API na interface do usuário, ENTÃO o sistema DEVE mostrar apenas versões mascaradas (por exemplo, "sk-...xyz123")
+4. QUANDO a sessão de um usuário expira, ENTÃO o sistema NÃO DEVE armazenar em cache as chaves de API descriptografadas
+5. SE houver uma violação de segurança, ENTÃO as chaves de API armazenadas DEVEM permanecer criptografadas e inutilizáveis sem a chave de descriptografia
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a user, I want to see which model I'm currently using, so that I can understand what AI service is processing my requests.
+**História do Usuário:** Como usuário, quero ver qual modelo estou usando atualmente, para que eu possa entender qual serviço de IA está processando minhas solicitações.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user is interacting with the AI THEN the system SHALL display which model is currently being used
-2. WHEN a user switches between different configured models THEN the system SHALL update the display to show the active model
-3. WHEN a user has multiple API keys configured THEN the system SHALL clearly indicate which service provider and model is active
-4. WHEN a user is using system default keys THEN the system SHALL indicate this in the model display
-5. WHEN an AI response is generated THEN the system SHALL include metadata about which model was used
+1. QUANDO um usuário está interagindo com a IA, ENTÃO o sistema DEVE exibir qual modelo está sendo usado no momento
+2. QUANDO um usuário alterna entre diferentes modelos configurados, ENTÃO o sistema DEVE atualizar a exibição para mostrar o modelo ativo
+3. QUANDO um usuário tem várias chaves de API configuradas, ENTÃO o sistema DEVE indicar claramente qual provedor de serviço e modelo está ativo
+4. QUANDO um usuário está usando as chaves padrão do sistema, ENTÃO o sistema DEVE indicar isso na exibição do modelo
+5. QUANDO uma resposta de IA é gerada, ENTÃO o sistema DEVE incluir metadados sobre qual modelo foi usado

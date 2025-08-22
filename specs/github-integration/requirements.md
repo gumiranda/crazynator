@@ -1,79 +1,79 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature enables users to seamlessly integrate their projects with GitHub by creating repositories directly from the platform and maintaining synchronization with future commits and pull requests. The integration will provide a bridge between the project development environment and GitHub's version control system, allowing for continuous collaboration and code management.
+Esta funcionalidade permite que os usuários integrem perfeitamente seus projetos com o GitHub, criando repositórios diretamente da plataforma e mantendo a sincronização com futuros commits e pull requests. A integração fornecerá uma ponte entre o ambiente de desenvolvimento do projeto e o sistema de controle de versão do GitHub, permitindo colaboração contínua e gerenciamento de código.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a project owner, I want to create a GitHub repository from my existing project, so that I can version control my code and collaborate with others.
+**História do Usuário:** Como proprietário de um projeto, quero criar um repositório no GitHub a partir do meu projeto existente, para que eu possa controlar a versão do meu código e colaborar com outras pessoas.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user clicks "Create GitHub Repository" THEN the system SHALL authenticate with GitHub using OAuth
-2. WHEN authentication is successful THEN the system SHALL display a form to configure repository settings (name, description, visibility)
-3. WHEN the user submits the repository form THEN the system SHALL create a new GitHub repository with the specified settings
-4. WHEN the repository is created THEN the system SHALL push the current project files to the new repository
-5. IF the repository creation fails THEN the system SHALL display an appropriate error message and allow retry
+1. QUANDO um usuário clica em "Criar Repositório no GitHub", ENTÃO o sistema DEVE autenticar com o GitHub usando OAuth
+2. QUANDO a autenticação for bem-sucedida, ENTÃO o sistema DEVE exibir um formulário para configurar as configurações do repositório (nome, descrição, visibilidade)
+3. QUANDO o usuário envia o formulário do repositório, ENTÃO o sistema DEVE criar um novo repositório no GitHub com as configurações especificadas
+4. QUANDO o repositório for criado, ENTÃO o sistema DEVE enviar os arquivos do projeto atual para o novo repositório
+5. SE a criação do repositório falhar, ENTÃO o sistema DEVE exibir uma mensagem de erro apropriada e permitir uma nova tentativa
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a developer, I want my local changes to be automatically synchronized with GitHub, so that my repository stays up-to-date without manual intervention.
+**História do Usuário:** Como desenvolvedor, quero que minhas alterações locais sejam sincronizadas automaticamente com o GitHub, para que meu repositório permaneça atualizado sem intervenção manual.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user makes changes to project files THEN the system SHALL detect file modifications
-2. WHEN changes are detected AND auto-sync is enabled THEN the system SHALL create a commit with the changes
-3. WHEN creating a commit THEN the system SHALL generate a meaningful commit message based on the changes
-4. WHEN the commit is created THEN the system SHALL push the commit to the connected GitHub repository
-5. IF the push fails due to conflicts THEN the system SHALL notify the user and provide resolution options
+1. QUANDO um usuário faz alterações nos arquivos do projeto, ENTÃO o sistema DEVE detectar as modificações nos arquivos
+2. QUANDO as alterações são detectadas E a sincronização automática está ativada, ENTÃO o sistema DEVE criar um commit com as alterações
+3. AO criar um commit, ENTÃO o sistema DEVE gerar uma mensagem de commit significativa com base nas alterações
+4. QUANDO o commit é criado, ENTÃO o sistema DEVE enviar o commit para o repositório do GitHub conectado
+5. SE o push falhar devido a conflitos, ENTÃO o sistema DEVE notificar o usuário e fornecer opções de resolução
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a project collaborator, I want to create pull requests directly from the platform, so that I can propose changes for review without leaving the development environment.
+**História do Usuário:** Como colaborador de um projeto, quero criar pull requests diretamente da plataforma, para que eu possa propor alterações para revisão sem sair do ambiente de desenvolvimento.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user has uncommitted changes THEN the system SHALL provide an option to create a pull request
-2. WHEN creating a pull request THEN the system SHALL create a new branch with the changes
-3. WHEN the branch is created THEN the system SHALL push the branch to GitHub
-4. WHEN the branch is pushed THEN the system SHALL create a pull request with title, description, and target branch
-5. WHEN the pull request is created THEN the system SHALL display the PR URL and status
+1. QUANDO um usuário tem alterações não commitadas, ENTÃO o sistema DEVE fornecer uma opção para criar um pull request
+2. AO criar um pull request, ENTÃO o sistema DEVE criar um novo branch com as alterações
+3. QUANDO o branch é criado, ENTÃO o sistema DEVE enviar o branch para o GitHub
+4. QUANDO o branch é enviado, ENTÃO o sistema DEVE criar um pull request com título, descrição e branch de destino
+5. QUANDO o pull request é criado, ENTÃO o sistema DEVE exibir a URL e o status do PR
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a project owner, I want to configure GitHub integration settings, so that I can control how my project synchronizes with GitHub.
+**História do Usuário:** Como proprietário de um projeto, quero configurar as configurações de integração do GitHub, para que eu possa controlar como meu projeto é sincronizado com o GitHub.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses integration settings THEN the system SHALL display current GitHub connection status
-2. WHEN configuring settings THEN the system SHALL allow enabling/disabling auto-sync
-3. WHEN configuring settings THEN the system SHALL allow setting commit message templates
-4. WHEN configuring settings THEN the system SHALL allow selecting which file types to sync
-5. WHEN settings are saved THEN the system SHALL validate and apply the new configuration
+1. QUANDO um usuário acessa as configurações de integração, ENTÃO o sistema DEVE exibir o status atual da conexão com o GitHub
+2. AO configurar as configurações, ENTÃO o sistema DEVE permitir ativar/desativar a sincronização automática
+3. AO configurar as configurações, ENTÃO o sistema DEVE permitir a configuração de modelos de mensagem de commit
+4. AO configurar as configurações, ENTÃO o sistema DEVE permitir a seleção de quais tipos de arquivo sincronizar
+5. QUANDO as configurações são salvas, ENTÃO o sistema DEVE validar e aplicar a nova configuração
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a developer, I want to view the synchronization status and history, so that I can track what changes have been pushed to GitHub.
+**História do Usuário:** Como desenvolvedor, quero visualizar o status e o histórico de sincronização, para que eu possa rastrear quais alterações foram enviadas para o GitHub.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN viewing sync status THEN the system SHALL display the last sync timestamp
-2. WHEN viewing sync history THEN the system SHALL show a list of recent commits with timestamps and messages
-3. WHEN viewing sync history THEN the system SHALL indicate successful and failed sync attempts
-4. WHEN a sync fails THEN the system SHALL display the error details and suggested actions
-5. WHEN viewing status THEN the system SHALL show pending changes that haven't been synced
+1. AO visualizar o status de sincronização, ENTÃO o sistema DEVE exibir o carimbo de data/hora da última sincronização
+2. AO visualizar o histórico de sincronização, ENTÃO o sistema DEVE mostrar uma lista de commits recentes com carimbos de data/hora e mensagens
+3. AO visualizar o histórico de sincronização, ENTÃO o sistema DEVE indicar tentativas de sincronização bem-sucedidas e com falha
+4. QUANDO uma sincronização falha, ENTÃO o sistema DEVE exibir os detalhes do erro e as ações sugeridas
+5. AO visualizar o status, ENTÃO o sistema DEVE mostrar as alterações pendentes que não foram sincronizadas
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a user, I want to disconnect GitHub integration, so that I can stop synchronization while preserving my existing repository.
+**História do Usuário:** Como usuário, quero desconectar a integração com o GitHub, para que eu possa interromper a sincronização, preservando meu repositório existente.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user chooses to disconnect THEN the system SHALL confirm the action with a warning dialog
-2. WHEN disconnection is confirmed THEN the system SHALL remove stored GitHub credentials
-3. WHEN disconnected THEN the system SHALL stop all automatic synchronization
-4. WHEN disconnected THEN the system SHALL preserve the existing GitHub repository unchanged
-5. WHEN disconnected THEN the system SHALL allow reconnecting to the same or different repository later
+1. QUANDO um usuário opta por desconectar, ENTÃO o sistema DEVE confirmar a ação com uma caixa de diálogo de aviso
+2. QUANDO a desconexão for confirmada, ENTÃO o sistema DEVE remover as credenciais do GitHub armazenadas
+3. QUANDO desconectado, ENTÃO o sistema DEVE interromper toda a sincronização automática
+4. QUANDO desconectado, ENTÃO o sistema DEVE preservar o repositório do GitHub existente inalterado
+5. QUANDO desconectado, ENTÃO o sistema DEVE permitir a reconexão ao mesmo ou a um repositório diferente posteriormente

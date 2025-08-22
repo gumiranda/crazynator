@@ -1,82 +1,82 @@
-# Requirements Document
+# Documento de Requisitos
 
-## Introduction
+## Introdução
 
-This feature enables users to have complete control over their generated projects, including environment configuration, library management, file uploads, and project export capabilities. Users will be able to customize their projects beyond the initial generation, manage dependencies, upload assets like images, and download their complete projects as ZIP files whenever needed.
+Esta funcionalidade permite que os usuários tenham controle total sobre seus projetos gerados, incluindo configuração de ambiente, gerenciamento de bibliotecas, upload de arquivos e capacidades de exportação de projetos. Os usuários poderão personalizar seus projetos além da geração inicial, gerenciar dependências, fazer upload de ativos como imagens e baixar seus projetos completos como arquivos ZIP sempre que necessário.
 
-## Requirements
+## Requisitos
 
-### Requirement 1
+### Requisito 1
 
-**User Story:** As a user, I want to configure environment variables for my generated project, so that I can customize the project's behavior and integrate with external services.
+**História do Usuário:** Como usuário, quero configurar variáveis de ambiente para meu projeto gerado, para que eu possa personalizar o comportamento do projeto e integrar com serviços externos.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses a generated project THEN the system SHALL display an environment configuration interface
-2. WHEN a user adds or modifies environment variables THEN the system SHALL validate the variable names and values
-3. WHEN a user saves environment changes THEN the system SHALL update the project's .env file
-4. IF environment variables contain sensitive data THEN the system SHALL mask the values in the UI
-5. WHEN a user views environment variables THEN the system SHALL show both custom and default variables separately
+1. QUANDO um usuário acessa um projeto gerado, ENTÃO o sistema DEVE exibir uma interface de configuração de ambiente
+2. QUANDO um usuário adiciona ou modifica variáveis de ambiente, ENTÃO o sistema DEVE validar os nomes e valores das variáveis
+3. QUANDO um usuário salva as alterações de ambiente, ENTÃO o sistema DEVE atualizar o arquivo .env do projeto
+4. SE as variáveis de ambiente contiverem dados sensíveis, ENTÃO o sistema DEVE mascarar os valores na interface do usuário
+5. QUANDO um usuário visualiza as variáveis de ambiente, ENTÃO o sistema DEVE mostrar as variáveis personalizadas e padrão separadamente
 
-### Requirement 2
+### Requisito 2
 
-**User Story:** As a user, I want to install and manage libraries in my generated project, so that I can add functionality and dependencies as needed.
+**História do Usuário:** Como usuário, quero instalar и gerenciar bibliotecas em meu projeto gerado, para que eu possa adicionar funcionalidades e dependências conforme necessário.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses the library management interface THEN the system SHALL display currently installed packages
-2. WHEN a user searches for a library THEN the system SHALL provide search results from npm registry
-3. WHEN a user installs a library THEN the system SHALL update package.json and install the dependency
-4. WHEN a user removes a library THEN the system SHALL uninstall the package and update package.json
-5. WHEN library installation fails THEN the system SHALL display clear error messages
-6. WHEN a user views installed libraries THEN the system SHALL show version information and update availability
+1. QUANDO um usuário acessa a interface de gerenciamento de bibliotecas, ENTÃO o sistema DEVE exibir os pacotes atualmente instalados
+2. QUANDO um usuário procura por uma biblioteca, ENTÃO o sistema DEVE fornecer resultados de busca do registro npm
+3. QUANDO um usuário instala uma biblioteca, ENTÃO o sistema DEVE atualizar o package.json e instalar a dependência
+4. QUANDO um usuário remove uma biblioteca, ENTÃO o sistema DEVE desinstalar o pacote e atualizar o package.json
+5. QUANDO a instalação da biblioteca falha, ENTÃO o sistema DEVE exibir mensagens de erro claras
+6. QUANDO um usuário visualiza as bibliotecas instaladas, ENTÃO o sistema DEVE mostrar informações de versão e disponibilidade de atualização
 
-### Requirement 3
+### Requisito 3
 
-**User Story:** As a user, I want to upload images and other files to my project, so that I can include custom assets and resources.
+**História do Usuário:** Como usuário, quero fazer upload de imagens e outros arquivos para meu projeto, para que eu possa incluir ativos e recursos personalizados.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses the file upload interface THEN the system SHALL allow drag-and-drop file uploads
-2. WHEN a user uploads files THEN the system SHALL validate file types and sizes
-3. WHEN files are uploaded THEN the system SHALL store them in the appropriate project directory
-4. WHEN a user uploads images THEN the system SHALL provide preview functionality
-5. IF file upload fails THEN the system SHALL display specific error messages
-6. WHEN a user manages uploaded files THEN the system SHALL allow file deletion and organization
+1. QUANDO um usuário acessa a interface de upload de arquivos, ENTÃO o sistema DEVE permitir o upload de arquivos por arrastar e soltar
+2. QUANDO um usuário faz upload de arquivos, ENTÃO o sistema DEVE validar os tipos e tamanhos dos arquivos
+3. QUANDO os arquivos são carregados, ENTÃO o sistema DEVE armazená-los no diretório apropriado do projeto
+4. QUANDO um usuário faz upload de imagens, ENTÃO o sistema DEVE fornecer funcionalidade de pré-visualização
+5. SE o upload de arquivos falhar, ENTÃO o sistema DEVE exibir mensagens de erro específicas
+6. QUANDO um usuário gerencia os arquivos carregados, ENTÃO o sistema DEVE permitir a exclusão e organização de arquivos
 
-### Requirement 4
+### Requisito 4
 
-**User Story:** As a user, I want to download my complete project as a ZIP file, so that I can work on it locally or create backups.
+**História do Usuário:** Como usuário, quero baixar meu projeto completo como um arquivo ZIP, para que eu possa trabalhar nele localmente ou criar backups.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user requests project download THEN the system SHALL generate a complete ZIP archive
-2. WHEN creating the ZIP file THEN the system SHALL include all project files, dependencies, and uploaded assets
-3. WHEN the ZIP is ready THEN the system SHALL provide a download link
-4. IF ZIP generation fails THEN the system SHALL display error messages and retry options
-5. WHEN downloading large projects THEN the system SHALL show progress indicators
-6. WHEN a user downloads a project THEN the system SHALL log the download activity
+1. QUANDO um usuário solicita o download do projeto, ENTÃO o sistema DEVE gerar um arquivo ZIP completo
+2. AO criar o arquivo ZIP, ENTÃO o sistema DEVE incluir todos os arquivos do projeto, dependências e ativos carregados
+3. QUANDO o ZIP estiver pronto, ENTÃO o sistema DEVE fornecer um link para download
+4. SE a geração do ZIP falhar, ENTÃO o sistema DEVE exibir mensagens de erro e opções de nova tentativa
+5. AO baixar projetos grandes, ENTÃO o sistema DEVE mostrar indicadores de progresso
+6. QUANDO um usuário baixa um projeto, ENTÃO o sistema DEVE registrar a atividade de download
 
-### Requirement 5
+### Requisito 5
 
-**User Story:** As a user, I want to preview and test my project changes in real-time, so that I can see the impact of my modifications immediately.
+**História do Usuário:** Como usuário, quero visualizar e testar as alterações do meu projeto em tempo real, para que eu possa ver o impacto das minhas modificações imediatamente.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user makes changes to the project THEN the system SHALL provide live preview functionality
-2. WHEN environment variables are updated THEN the system SHALL restart the preview with new settings
-3. WHEN new libraries are installed THEN the system SHALL rebuild the project for preview
-4. IF preview fails THEN the system SHALL display build errors and logs
-5. WHEN a user uploads assets THEN the system SHALL make them available in the preview immediately
+1. QUANDO um usuário faz alterações no projeto, ENTÃO o sistema DEVE fornecer funcionalidade de pré-visualização ao vivo
+2. QUANDO as variáveis de ambiente são atualizadas, ENTÃO o sistema DEVE reiniciar a pré-visualização com as novas configurações
+3. QUANDO novas bibliotecas são instaladas, ENTÃO o sistema DEVE reconstruir o projeto para pré-visualização
+4. SE a pré-visualização falhar, ENTÃO o sistema DEVE exibir erros de compilação e logs
+5. QUANDO um usuário faz upload de ativos, ENTÃO o sistema DEVE torná-los disponíveis na pré-visualização imediatamente
 
-### Requirement 6
+### Requisito 6
 
-**User Story:** As a user, I want to manage project settings and metadata, so that I can organize and customize my projects effectively.
+**História do Usuário:** Como usuário, quero gerenciar as configurações e metadados do projeto, para que eu possa organizar e personalizar meus projetos de forma eficaz.
 
-#### Acceptance Criteria
+#### Critérios de Aceitação
 
-1. WHEN a user accesses project settings THEN the system SHALL display editable project information
-2. WHEN a user updates project name or description THEN the system SHALL save the changes
-3. WHEN a user sets project visibility THEN the system SHALL apply appropriate access controls
-4. WHEN project settings are invalid THEN the system SHALL provide validation feedback
-5. WHEN a user deletes a project THEN the system SHALL require confirmation and clean up all associated data
+1. QUANDO um usuário acessa as configurações do projeto, ENTÃO o sistema DEVE exibir informações editáveis do projeto
+2. QUANDO um usuário atualiza o nome ou a descrição do projeto, ENTÃO o sistema DEVE salvar as alterações
+3. QUANDO um usuário define a visibilidade do projeto, ENTÃO o sistema DEVE aplicar os controles de acesso apropriados
+4. QUANDO as configurações do projeto são inválidas, ENTÃO o sistema DEVE fornecer feedback de validação
+5. QUANDO um usuário exclui um projeto, ENTÃO o sistema DEVE exigir confirmação e limpar todos os dados associados

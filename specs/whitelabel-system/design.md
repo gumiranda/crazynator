@@ -1,49 +1,49 @@
-# Design Document - Whitelabel System
+# Documento de Design - Sistema Whitelabel
 
-## Overview
+## Visão Geral
 
-The whitelabel system will transform the current single-tenant application into a multi-tenant SaaS platform. The design leverages a shared database with tenant isolation through row-level security, custom domain routing, and dynamic branding configuration. The system maintains the existing Next.js + tRPC + Prisma architecture while adding tenant context throughout the application stack.
+O sistema whitelabel transformará a aplicação atual de um único inquilino em uma plataforma SaaS multi-inquilino. O design aproveita um banco de dados compartilhado com isolamento de inquilino por meio de segurança em nível de linha, roteamento de domínio personalizado e configuração de marca dinâmica. O sistema mantém a arquitetura existente Next.js + tRPC + Prisma enquanto adiciona o contexto do inquilino em toda a pilha de aplicativos.
 
-## Architecture
+## Arquitetura
 
-### Multi-Tenancy Strategy
+### Estratégia Multi-Inquilino
 
-**Database-Level Isolation**: Implement row-level security using a `tenantId` field across all data models. This approach provides strong isolation while maintaining a single database instance for operational simplicity.
+**Isolamento em Nível de Banco de Dados**: Implementar segurança em nível de linha usando um campo `tenantId` em todos os modelos de dados. Essa abordagem fornece um forte isolamento, mantendo uma única instância de banco de dados para simplicidade operacional.
 
-**Application-Level Context**: Inject tenant context at the middleware layer, ensuring all database operations are automatically scoped to the correct tenant.
+**Contexto em Nível de Aplicação**: Injetar o contexto do inquilino na camada de middleware, garantindo que todas as operações de banco de dados sejam automaticamente escopadas para o inquilino correto.
 
-**Domain-Based Routing**: Use Next.js middleware to detect custom domains and route requests to the appropriate tenant context.
+**Roteamento Baseado em Domínio**: Usar o middleware do Next.js para detectar domínios personalizados e rotear as solicitações para o contexto do inquilino apropriado.
 
-### High-Level Architecture Flow
+### Fluxo de Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    A[Custom Domain Request] --> B[Next.js Middleware]
-    B --> C[Tenant Resolution]
-    C --> D[Tenant Context Injection]
-    D --> E[tRPC Procedures]
-    E --> F[Prisma with Tenant Filter]
-    F --> G[PostgreSQL with RLS]
+    A[Requisição de Domínio Personalizado] --> B[Middleware Next.js]
+    B --> C[Resolução de Inquilino]
+    C --> D[Injeção de Contexto de Inquilino]
+    D --> E[Procedimentos tRPC]
+    E --> F[Prisma com Filtro de Inquilino]
+    F --> G[PostgreSQL com RLS]
 
-    H[Admin Dashboard] --> I[Tenant Management]
-    I --> J[Branding Configuration]
-    I --> K[Feature Flags]
-    I --> L[Domain Management]
+    H[Painel de Administração] --> I[Gerenciamento de Inquilino]
+    I --> J[Configuração de Marca]
+    I --> K[Sinalizadores de Recurso]
+    I --> L[Gerenciamento de Domínio]
 ```
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### 1. Tenant Management System
+### 1. Sistema de Gerenciamento de Inquilino
 
-**Tenant Model**
+**Modelo de Inquilino**
 
 ```typescript
 interface Tenant {
   id: string;
-  slug: string; // URL-friendly identifier
+  slug: string; // Identificador amigável para URL
   name: string;
-  domain?: string; // Custom domain
-  subdomain: string; // Default subdomain
+  domain?: string; // Domínio personalizado
+  subdomain: string; // Subdomínio padrão
   status: 'active' | 'inactive' | 'suspended';
   branding: TenantBranding;
   features: TenantFeatures;
@@ -53,19 +53,19 @@ interface Tenant {
 }
 ```
 
-**Tenant Context Provider**
+**Provedor de Contexto de Inquilino**
 
-- Middleware component that resolves tenant from domain/subdomain
-- Injects tenant context into all downstream requests
-- Handles tenant-specific routing and error handling
+-   Componente de middleware que resolve o inquilino a partir do domínio/subdomínio
+-   Injeta o contexto do inquilino em todas as solicitações downstream
+-   Lida com roteamento e tratamento de erros específicos do inquilino
 
-### 2. Branding System
+### 2. Sistema de Marca
 
-**Dynamic Theme Engine**
+**Motor de Tema Dinâmico**
 
 ```typescript
 interface TenantBranding {
-  logo: string; // URL to logo asset
+  logo: string; // URL para o ativo do logotipo
   favicon: string;
   primaryColor: string;
   secondaryColor: string;
@@ -76,29 +76,29 @@ interface TenantBranding {
 }
 ```
 
-**Asset Management**
+**Gerenciamento de Ativos**
 
-- File upload system for logos and assets
-- CDN integration for global asset delivery
-- Automatic image optimization and resizing
+-   Sistema de upload de arquivos para logotipos e ativos
+-   Integração com CDN para entrega global de ativos
+-   Otimização e redimensionamento automático de imagens
 
-### 3. Domain Management
+### 3. Gerenciamento de Domínio
 
-**Domain Resolution Service**
+**Serviço de Resolução de Domínio**
 
-- DNS verification system
-- Automatic SSL certificate provisioning via Let's Encrypt
-- Domain validation and health monitoring
+-   Sistema de verificação de DNS
+-   Provisionamento automático de certificados SSL via Let's Encrypt
+-   Validação e monitoramento da saúde do domínio
 
-**Routing Strategy**
+**Estratégia de Roteamento**
 
-- Primary domain: `app.yourplatform.com`
-- Tenant subdomains: `{tenant-slug}.yourplatform.com`
-- Custom domains: `app.clientdomain.com`
+-   Domínio principal: `app.suaplataforma.com`
+-   Subdomínios de inquilino: `{slug-do-inquilino}.suaplataforma.com`
+-   Domínios personalizados: `app.dominiocliente.com`
 
-### 4. Authentication & Authorization
+### 4. Autenticação e Autorização
 
-**Multi-Tenant Clerk Integration**
+**Integração Multi-Inquilino com Clerk**
 
 ```typescript
 interface TenantAuthConfig {
@@ -111,15 +111,15 @@ interface TenantAuthConfig {
 }
 ```
 
-**Permission System**
+**Sistema de Permissão**
 
-- Tenant-scoped roles and permissions
-- Cross-tenant access prevention
-- Admin vs tenant-admin role separation
+-   Funções e permissões com escopo de inquilino
+-   Prevenção de acesso entre inquilinos
+-   Separação de funções de administrador vs. administrador de inquilino
 
-### 5. Feature Flag System
+### 5. Sistema de Sinalizadores de Recurso
 
-**Tenant Feature Configuration**
+**Configuração de Recurso do Inquilino**
 
 ```typescript
 interface TenantFeatures {
@@ -130,13 +130,13 @@ interface TenantFeatures {
   apiAccess: boolean;
   maxProjects: number;
   maxUsers: number;
-  storageLimit: number; // in MB
+  storageLimit: number; // em MB
 }
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Updated Prisma Schema
+### Esquema Prisma Atualizado
 
 ```prisma
 model Tenant {
@@ -146,13 +146,13 @@ model Tenant {
   domain      String?  @unique
   subdomain   String   @unique
   status      TenantStatus @default(ACTIVE)
-  branding    Json     // TenantBranding object
-  features    Json     // TenantFeatures object
-  ssoConfig   Json?    // SSO configuration
+  branding    Json     // Objeto TenantBranding
+  features    Json     // Objeto TenantFeatures
+  ssoConfig   Json?    // Configuração de SSO
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
+  // Relações
   projects    Project[]
   users       TenantUser[]
   customers   Customer[]
@@ -163,7 +163,7 @@ model Tenant {
 model TenantUser {
   id        String @id @default(uuid())
   tenantId  String
-  userId    String // Clerk user ID
+  userId    String // ID de usuário do Clerk
   role      TenantRole @default(USER)
   status    UserStatus @default(ACTIVE)
   invitedBy String?
@@ -176,10 +176,10 @@ model TenantUser {
   @@map("tenant_users")
 }
 
-// Updated existing models
+// Modelos existentes atualizados
 model Project {
   id        String   @id @default(uuid())
-  tenantId  String   // Add tenant isolation
+  tenantId  String   // Adicionar isolamento de inquilino
   name      String
   userId    String
   createdAt DateTime @default(now())
@@ -193,7 +193,7 @@ model Project {
 
 model Customer {
   id         String   @id @default(uuid())
-  tenantId   String   // Add tenant isolation
+  tenantId   String   // Adicionar isolamento de inquilino
   userId     String
   stripeId    String   @unique
   email      String
@@ -225,17 +225,17 @@ enum UserStatus {
 }
 ```
 
-### Row-Level Security Implementation
+### Implementação de Segurança em Nível de Linha
 
 ```sql
--- Enable RLS on tenant-isolated tables
+-- Habilitar RLS nas tabelas isoladas por inquilino
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fragments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Create policies for tenant isolation
+-- Criar políticas para isolamento de inquilino
 CREATE POLICY tenant_isolation_projects ON projects
   USING (tenant_id = current_setting('app.current_tenant_id'));
 
@@ -245,29 +245,29 @@ CREATE POLICY tenant_isolation_messages ON messages
   ));
 ```
 
-## Error Handling
+## Tratamento de Erros
 
-### Tenant-Specific Error Handling
+### Tratamento de Erros Específico do Inquilino
 
-**Domain Resolution Errors**
+**Erros de Resolução de Domínio**
 
-- Invalid domain → Redirect to main platform
-- Suspended tenant → Show maintenance page with tenant branding
-- Non-existent tenant → 404 with platform branding
+-   Domínio inválido → Redirecionar para a plataforma principal
+-   Inquilino suspenso → Mostrar página de manutenção com a marca do inquilino
+-   Inquilino inexistente → 404 com a marca da plataforma
 
-**Cross-Tenant Access Attempts**
+**Tentativas de Acesso Entre Inquilinos**
 
-- Log security events
-- Return 403 Forbidden
-- Alert tenant administrators
+-   Registrar eventos de segurança
+-   Retornar 403 Proibido
+-   Alertar os administradores do inquilino
 
-**Branding Asset Failures**
+**Falhas de Ativos de Marca**
 
-- Fallback to default platform branding
-- Graceful degradation for missing assets
-- Asset validation and sanitization
+-   Fallback para a marca padrão da plataforma
+-   Degradação graciosa para ativos ausentes
+-   Validação e sanitização de ativos
 
-### Error Response Format
+### Formato de Resposta de Erro
 
 ```typescript
 interface TenantError {
@@ -279,69 +279,69 @@ interface TenantError {
 }
 ```
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Testing
+### Teste Unitário
 
-- Tenant context injection middleware
-- Domain resolution logic
-- Branding configuration validation
-- Feature flag enforcement
+-   Middleware de injeção de contexto de inquilino
+-   Lógica de resolução de domínio
+-   Validação de configuração de marca
+-   Aplicação de sinalizadores de recurso
 
-### Integration Testing
+### Teste de Integração
 
-- Multi-tenant database operations
-- Cross-tenant isolation verification
-- Custom domain routing
-- SSO integration flows
+-   Operações de banco de dados multi-inquilino
+-   Verificação de isolamento entre inquilinos
+-   Roteamento de domínio personalizado
+-   Fluxos de integração de SSO
 
-### End-to-End Testing
+### Teste de Ponta a Ponta
 
-- Complete tenant onboarding flow
-- Custom domain setup and verification
-- Branding customization workflow
-- User invitation and access control
+-   Fluxo completo de integração de inquilino
+-   Configuração e verificação de domínio personalizado
+-   Fluxo de trabalho de personalização de marca
+-   Convite de usuário e controle de acesso
 
-### Performance Testing
+### Teste de Desempenho
 
-- Database query performance with tenant filtering
-- Asset loading performance across tenants
-- Concurrent tenant request handling
-- Memory usage with multiple tenant contexts
+-   Desempenho de consulta de banco de dados com filtragem de inquilino
+-   Desempenho de carregamento de ativos entre inquilinos
+-   Manipulação de solicitações de inquilinos concorrentes
+-   Uso de memória com múltiplos contextos de inquilino
 
-### Security Testing
+### Teste de Segurança
 
-- Tenant isolation verification
-- Cross-tenant data access prevention
-- Domain spoofing protection
-- SQL injection with tenant context
+-   Verificação de isolamento de inquilino
+-   Prevenção de acesso a dados entre inquilinos
+-   Proteção contra falsificação de domínio
+-   Injeção de SQL com contexto de inquilino
 
-## Implementation Considerations
+## Considerações de Implementação
 
-### Migration Strategy
+### Estratégia de Migração
 
-1. **Phase 1**: Add tenant models and basic isolation
-2. **Phase 2**: Implement domain routing and branding
-3. **Phase 3**: Add advanced features (SSO, feature flags)
-4. **Phase 4**: Admin dashboard and tenant management
+1.  **Fase 1**: Adicionar modelos de inquilino e isolamento básico
+2.  **Fase 2**: Implementar roteamento de domínio e marca
+3.  **Fase 3**: Adicionar recursos avançados (SSO, sinalizadores de recurso)
+4.  **Fase 4**: Painel de administração e gerenciamento de inquilino
 
-### Performance Optimizations
+### Otimizações de Desempenho
 
-- Database connection pooling per tenant
-- Redis caching for tenant configurations
-- CDN for tenant-specific assets
-- Lazy loading of tenant features
+-   Pool de conexões de banco de dados por inquilino
+-   Cache Redis para configurações de inquilino
+-   CDN para ativos específicos do inquilino
+-   Carregamento lento de recursos de inquilino
 
-### Monitoring and Observability
+### Monitoramento e Observabilidade
 
-- Tenant-specific metrics and logging
-- Performance monitoring per tenant
-- Usage analytics and billing integration
-- Health checks for custom domains
+-   Métricas e registro específicos do inquilino
+-   Monitoramento de desempenho por inquilino
+-   Análise de uso e integração de faturamento
+-   Verificações de saúde para domínios personalizados
 
-### Security Considerations
+### Considerações de Segurança
 
-- Input validation for all tenant configurations
-- Asset upload restrictions and scanning
-- Rate limiting per tenant
-- Audit logging for tenant operations
+-   Validação de entrada para todas as configurações de inquilino
+-   Restrições e verificação de upload de ativos
+-   Limitação de taxa por inquilino
+-   Registro de auditoria para operações de inquilino
