@@ -1,67 +1,67 @@
-# Design Document
+# Documento de Design
 
-## Overview
+## Visão Geral
 
-The Bun.js Project Generator is a comprehensive full-stack application generator that creates production-ready backend projects with integrated frontend CRUD interfaces. Similar to Spring Initializr, it provides a web-based interface for configuring and generating complete applications with customizable features, database integrations, and automated code generation.
+O Gerador de Projetos Bun.js é um gerador de aplicações full-stack abrangente que cria projetos de backend prontos para produção com interfaces CRUD de frontend integradas. Semelhante ao Spring Initializr, ele fornece uma interface baseada na web para configurar e gerar aplicações completas com recursos personalizáveis, integrações de banco de dados e geração de código automatizada.
 
-The system consists of three main components:
+O sistema consiste em três componentes principais:
 
-1. **Configuration Interface**: Web-based form for project customization
-2. **Code Generation Engine**: Backend service that generates project files and structures
-3. **Template System**: Modular templates for different project configurations
+1.  **Interface de Configuração**: Formulário baseado na web para personalização do projeto
+2.  **Motor de Geração de Código**: Serviço de backend que gera arquivos e estruturas de projeto
+3.  **Sistema de Templates**: Templates modulares para diferentes configurações de projeto
 
-## Architecture
+## Arquitetura
 
-### High-Level Architecture
+### Arquitetura de Alto Nível
 
 ```mermaid
 graph TB
-    A[Web Interface] --> B[Configuration API]
-    B --> C[Generation Engine]
-    C --> D[Template Engine]
-    C --> E[File System Generator]
-    C --> F[Package Manager]
+    A[Interface Web] --> B[API de Configuração]
+    B --> C[Motor de Geração]
+    C --> D[Motor de Template]
+    C --> E[Gerador de Sistema de Arquivos]
+    C --> F[Gerenciador de Pacotes]
 
-    D --> G[Backend Templates]
-    D --> H[Frontend Templates]
-    D --> I[Database Templates]
+    D --> G[Templates de Backend]
+    D --> H[Templates de Frontend]
+    D --> I[Templates de Banco de Dados]
 
-    E --> J[Project Structure]
-    E --> K[Configuration Files]
-    E --> L[CRUD Operations]
+    E --> J[Estrutura do Projeto]
+    E --> K[Arquivos de Configuração]
+    E --> L[Operações CRUD]
 
-    F --> M[Dependency Installation]
-    F --> N[Script Generation]
+    F --> M[Instalação de Dependências]
+    F --> N[Geração de Scripts]
 ```
 
-### System Components
+### Componentes do Sistema
 
-#### 1. Web Configuration Interface
+#### 1. Interface de Configuração Web
 
-- Built with Next.js and React
-- Form-based configuration with real-time validation
-- Preview capabilities for generated project structure
-- Integration with existing UI components (shadcn/ui)
+-   Construída com Next.js e React
+-   Configuração baseada em formulário com validação em tempo real
+-   Capacidades de visualização para a estrutura do projeto gerado
+-   Integração com componentes de UI existentes (shadcn/ui)
 
-#### 2. Generation Engine
+#### 2. Motor de Geração
 
-- Bun.js backend service with tRPC API
-- Template processing and file generation
-- Dependency resolution and validation
-- Project packaging and download
+-   Serviço de backend Bun.js com API tRPC
+-   Processamento de templates e geração de arquivos
+-   Resolução e validação de dependências
+-   Empacotamento e download do projeto
 
-#### 3. Template System
+#### 3. Sistema de Templates
 
-- Modular template architecture
-- Support for multiple frameworks and databases
-- Customizable code generation patterns
-- Version management for templates
+-   Arquitetura de template modular
+-   Suporte para múltiplos frameworks e bancos de dados
+-   Padrões de geração de código personalizáveis
+-   Gerenciamento de versão para templates
 
-## Components and Interfaces
+## Componentes e Interfaces
 
-### Configuration Interface Components
+### Componentes da Interface de Configuração
 
-#### ProjectConfigurationForm
+#### Formulário de Configuração do Projeto
 
 ```typescript
 interface ProjectConfiguration {
@@ -113,16 +113,16 @@ interface FieldDefinition {
 }
 ```
 
-#### GenerationPreview
+#### Visualização da Geração
 
-- File tree visualization
-- Code preview with syntax highlighting
-- Dependency list with version information
-- Generated API documentation preview
+-   Visualização da árvore de arquivos
+-   Visualização de código com destaque de sintaxe
+-   Lista de dependências com informações de versão
+-   Visualização da documentação da API gerada
 
-### Backend API Interfaces
+### Interfaces da API de Backend
 
-#### Generation Service
+#### Serviço de Geração
 
 ```typescript
 interface GenerationService {
@@ -141,7 +141,7 @@ interface GenerationResult {
 }
 ```
 
-#### Template Engine
+#### Motor de Template
 
 ```typescript
 interface TemplateEngine {
@@ -161,11 +161,11 @@ interface Template {
 }
 ```
 
-## Data Models
+## Modelos de Dados
 
-### Project Generation Models
+### Modelos de Geração de Projeto
 
-#### Generated Project Structure
+#### Estrutura do Projeto Gerado
 
 ```
 generated-project/
@@ -183,7 +183,7 @@ generated-project/
 │   ├── tsconfig.json
 │   ├── .env.example
 │   └── README.md
-├── frontend/ (if enabled)
+├── frontend/ (se habilitado)
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
@@ -193,42 +193,42 @@ generated-project/
 │   ├── public/
 │   ├── package.json
 │   └── next.config.js
-├── docker-compose.yml (if Docker enabled)
+├── docker-compose.yml (se Docker habilitado)
 └── README.md
 ```
 
-#### Database Schema Generation
+#### Geração de Esquema de Banco de Dados
 
-- Prisma schema generation based on model definitions
-- Migration files for database setup
-- Seed data generation for testing
-- Connection configuration with environment variables
+-   Geração de esquema Prisma com base nas definições do modelo
+-   Arquivos de migração para configuração do banco de dados
+-   Geração de dados de semente para teste
+-   Configuração de conexão com variáveis de ambiente
 
-#### CRUD Operation Generation
+#### Geração de Operação CRUD
 
-- RESTful API endpoints for each model
-- Request/response validation with Zod
-- Error handling and status codes
-- Pagination, filtering, and sorting
-- TypeScript types for API contracts
+-   Endpoints de API RESTful para cada modelo
+-   Validação de requisição/resposta com Zod
+-   Tratamento de erros e códigos de status
+-   Paginação, filtragem e ordenação
+-   Tipos TypeScript para contratos de API
 
-## Error Handling
+## Tratamento de Erros
 
-### Validation Errors
+### Erros de Validação
 
-- Configuration validation with detailed error messages
-- Template compatibility checking
-- Dependency conflict resolution
-- Model relationship validation
+-   Validação de configuração com mensagens de erro detalhadas
+-   Verificação de compatibilidade de template
+-   Resolução de conflitos de dependência
+-   Validação de relacionamento de modelo
 
-### Generation Errors
+### Erros de Geração
 
-- Template processing error recovery
-- File system operation error handling
-- Package installation failure handling
-- Rollback mechanisms for failed generations
+-   Recuperação de erro de processamento de template
+-   Tratamento de erro de operação do sistema de arquivos
+-   Tratamento de falha de instalação de pacote
+-   Mecanismos de reversão para gerações com falha
 
-### Runtime Error Handling
+### Tratamento de Erros em Tempo de Execução
 
 ```typescript
 class GenerationError extends Error {
@@ -250,33 +250,33 @@ enum ErrorCodes {
 }
 ```
 
-## Testing Strategy
+## Estratégia de Teste
 
-### Unit Testing
+### Teste Unitário
 
-- Template engine testing with various configurations
-- Configuration validation testing
-- File generation testing with mock file systems
-- API endpoint testing with different scenarios
+-   Teste do motor de template com várias configurações
+-   Teste de validação de configuração
+-   Teste de geração de arquivos com sistemas de arquivos mock
+-   Teste de endpoint de API com diferentes cenários
 
-### Integration Testing
+### Teste de Integração
 
-- End-to-end project generation testing
-- Generated project compilation and execution testing
-- Database integration testing with different providers
-- Frontend-backend integration testing
+-   Teste de geração de projeto de ponta a ponta
+-   Teste de compilação e execução de projeto gerado
+-   Teste de integração de banco de dados com diferentes provedores
+-   Teste de integração frontend-backend
 
-### Generated Code Testing
+### Teste de Código Gerado
 
-- Automatic test generation for CRUD operations
-- API endpoint testing with generated test suites
-- Database model testing with sample data
-- Frontend component testing with generated components
+-   Geração automática de testes para operações CRUD
+-   Teste de endpoint de API com suítes de teste geradas
+-   Teste de modelo de banco de dados com dados de amostra
+-   Teste de componente de frontend com componentes gerados
 
-### Test Structure
+### Estrutura de Teste
 
 ```typescript
-// Generated test example
+// Exemplo de teste gerado
 describe('UserController', () => {
   it('should create a new user', async () => {
     const userData = { name: 'Test User', email: 'test@example.com' };
@@ -294,32 +294,32 @@ describe('UserController', () => {
 });
 ```
 
-## Implementation Considerations
+## Considerações de Implementação
 
-### Performance Optimization
+### Otimização de Desempenho
 
-- Template caching for faster generation
-- Parallel file generation where possible
-- Streaming for large project downloads
-- Background processing for complex generations
+-   Cache de template para geração mais rápida
+-   Geração de arquivos paralela sempre que possível
+-   Streaming para downloads de projetos grandes
+-   Processamento em segundo plano para gerações complexas
 
-### Security Considerations
+### Considerações de Segurança
 
-- Input sanitization for all configuration fields
-- Template injection prevention
-- File path traversal protection
-- Rate limiting for generation requests
+-   Sanitização de entrada para todos os campos de configuração
+-   Prevenção de injeção de template
+-   Proteção contra travessia de caminho de arquivo
+-   Limitação de taxa para solicitações de geração
 
-### Scalability
+### Escalabilidade
 
-- Horizontal scaling support for generation workers
-- Template versioning and caching
-- Database connection pooling
-- CDN integration for template distribution
+-   Suporte à escalabilidade horizontal para trabalhadores de geração
+-   Versionamento e cache de template
+-   Pool de conexões de banco de dados
+-   Integração de CDN para distribuição de template
 
-### Extensibility
+### Extensibilidade
 
-- Plugin system for custom templates
-- Hook system for custom generation steps
-- API for third-party integrations
-- Template marketplace support
+-   Sistema de plugins para templates personalizados
+-   Sistema de hooks para etapas de geração personalizadas
+-   API para integrações de terceiros
+-   Suporte a marketplace de templates

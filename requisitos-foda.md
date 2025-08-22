@@ -1,8 +1,47 @@
+# Documento de Requisitos
+
+## Introdução
+
+Esta especificação define uma plataforma avançada de scaffolding de projetos que vai além dos tradicionais "starter kits" para se tornar parte viva do ciclo de vida do projeto. A plataforma combina conceitos testados em batalha de ferramentas como Yeoman, Cookiecutter e Plop.js com recursos inovadores inspirados no Copier para atualizações dinâmicas de templates. O sistema suportará tanto a geração completa de projetos quanto microgeradores para tarefas de desenvolvimento contínuas, criando um sistema de ciclo fechado que mantém a consistência arquitetônica ao longo da evolução de um projeto.
+
+## Requisitos
+
+### Requisito 1
+
+**História do Usuário:** Como desenvolvedor, quero gerar estruturas de projeto completas a partir de templates selecionados, para que eu possa iniciar rapidamente novos projetos com arquiteturas e melhores práticas comprovadas.
+
+#### Critérios de Aceitação
+
+1. QUANDO um usuário seleciona um template da biblioteca oficial, ENTÃO o sistema DEVE gerar uma estrutura de projeto completa com todos os arquivos e configurações necessários
+2. AO gerar um projeto, ENTÃO o sistema DEVE suportar parametrização, permitindo que os usuários personalizem detalhes do projeto (nome, tipo de banco de dados, método de autenticação, etc.)
+3. QUANDO a geração do projeto estiver concluída, ENTÃO o sistema DEVE fornecer um resumo dos arquivos gerados e os próximos passos
+
+### Requisito 2
+
+**História do Usuário:** Como desenvolvedor trabalhando em um projeto existente, quero usar microgeradores para tarefas repetitivas, para que eu possa manter a consistência e economizar tempo com código boilerplate.
+
+#### Critérios de Aceitação
+
+1. QUANDO um usuário executa um comando de microgerador, ENTÃO o sistema DEVE executar o gerador definido no template do projeto
+2. QUANDO microgeradores estão disponíveis, ENTÃO o sistema DEVE fornecer uma lista detectável de geradores disponíveis para o projeto atual
+3. AO executar um microgerador, ENTÃO o sistema DEVE seguir os padrões arquitetônicos definidos no template do projeto
+4. SE um microgerador exigir parâmetros, ENTÃO o sistema DEVE solicitar as entradas necessárias
+5. QUANDO um microgerador for concluído, ENTÃO o sistema DEVE gerar arquivos seguindo as convenções estabelecidas do projeto
+
+### Requisito 3
+
+**História do Usuário:** Como desenvolvedor, quero documentação e exemplos abrangentes para templates, para que eu possa entender e usar efetivamente as opções de scaffolding disponíveis.
+
+#### Critérios de Aceitação
+
+1. AO navegar pelos templates, ENTÃO o sistema DEVE exibir documentação abrangente e exemplos de uso
+2. QUANDO um template é criado, ENTÃO o sistema DEVE fornecer guias passo a passo e exemplos de configuração
+3. AO aprender a criar templates, ENTÃO o sistema DEVE oferecer tutoriais e documentação de referência
+4. SE um template tiver requisitos específicos, ENTÃO o sistema DEVE documentar claramente os pré-requisitos e as etapas de configuração
+
 # Documento de Design
 
 ## Visão Geral
-
-A Plataforma de Scaffolding Avançada é um sistema de geração de projetos de última geração que combina capacidades de scaffolding tradicionais com atualizações dinâmicas de templates e microgeradores. A plataforma cria um sistema de ciclo fechado onde os templates não apenas geram as estruturas iniciais do projeto, mas também mantêm a consistência arquitetônica ao longo do ciclo de vida do projeto.
 
 O sistema consiste em três componentes principais:
 
@@ -46,81 +85,6 @@ O sistema consiste em três componentes principais:
   - Integração com a estrutura do projeto existente
 
 ## Componentes e Interfaces
-
-### Estrutura do Template
-
-```yaml
-# template.yml
-name: 'Next.js SaaS Starter'
-version: '1.2.0'
-description: 'Aplicação SaaS full-stack com autenticação e faturamento'
-author: 'Equipe da Plataforma'
-
-parameters:
-  - name: projectName
-    type: string
-    prompt: 'Nome do projeto'
-    required: true
-  - name: database
-    type: select
-    prompt: 'Tipo de banco de dados'
-    options: ['postgresql', 'mysql', 'sqlite']
-    default: 'postgresql'
-  - name: authentication
-    type: select
-    prompt: 'Provedor de autenticação'
-    options: ['clerk', 'auth0', 'supabase']
-    default: 'clerk'
-
-files:
-  - source: '**/*'
-    destination: '.'
-    ignore: ['node_modules', '.git']
-
-generators:
-  - name: 'component'
-    description: 'Gerar componente React'
-    template: 'generators/component'
-    prompts:
-      - name: 'componentName'
-        type: 'string'
-        message: 'Nome do componente'
-
-hooks:
-  post_generate:
-    - 'npm install'
-    - 'npx prisma generate'
-```
-
-### Manifesto do Projeto (.gen-spec.yml)
-
-```yaml
-# .gen-spec.yml
-template:
-  name: 'nextjs-saas-starter'
-  version: '1.2.0'
-  source: 'https://templates.platform.com/nextjs-saas-starter'
-
-generated_at: '2025-01-15T10:30:00Z'
-parameters:
-  projectName: 'my-saas-app'
-  database: 'postgresql'
-  authentication: 'clerk'
-
-generators:
-  - name: 'component'
-    path: '.generators/component'
-  - name: 'api-route'
-    path: '.generators/api-route'
-  - name: 'database-model'
-    path: '.generators/database-model'
-
-customizations:
-  - file: 'src/app/layout.tsx'
-    hash: 'abc123def456'
-  - file: 'package.json'
-    hash: 'def456ghi789'
-```
 
 ### Interfaces de API
 
