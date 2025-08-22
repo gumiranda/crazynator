@@ -9,7 +9,6 @@ import { markdown } from '@codemirror/lang-markdown';
 import { xml } from '@codemirror/lang-xml';
 import { sql } from '@codemirror/lang-sql';
 import { dracula } from '@uiw/codemirror-theme-dracula';
-import { useTheme } from 'next-themes';
 import { useCallback, useMemo } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorView } from '@codemirror/view';
@@ -85,8 +84,6 @@ export default function CodeEditor({
   readOnly = false,
   height = '100%',
 }: CodeEditorProps) {
-  const { theme } = useTheme();
-
   // Debounced onChange to avoid too many API calls
   const debouncedOnChange = useDebouncedCallback(
     (value: string) => {
@@ -124,12 +121,6 @@ export default function CodeEditor({
   }, [language, height, readOnly]);
 
   // Use official Dracula theme for dark mode, default light theme for light mode
-  const selectedTheme = useMemo(() => {
-    if (theme === 'dark') {
-      return dracula;
-    }
-    return 'light'; // Use default light theme
-  }, [theme]);
 
   return (
     <div className="h-full w-full overflow-hidden">
@@ -137,7 +128,7 @@ export default function CodeEditor({
         value={value}
         onChange={readOnly ? undefined : handleEditorChange}
         extensions={extensions}
-        theme={selectedTheme}
+        theme={dracula}
         editable={!readOnly}
         height={height === '100%' ? '100%' : height}
         className="h-full"
