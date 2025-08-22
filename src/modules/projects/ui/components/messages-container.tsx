@@ -4,7 +4,7 @@ import { MessageCard } from './message-card';
 import { MessageForm } from './message-form';
 import { useRef, useEffect, useMemo } from 'react';
 
-import { Fragment } from '@/generated/prisma';
+import { Fragment } from '@prisma/client';
 
 import { MessageLoading } from './message-loading';
 import { useInngest } from '@/components/ui/inngest-provider';
