@@ -1,5 +1,5 @@
 import { useTRPC } from '@/trpc/client';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQuery, useMutation } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, DownloadIcon, LoaderIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -27,6 +27,7 @@ import {
 import { useInngest } from '@/components/ui/inngest-provider';
 import { GitHubSyncStatus } from '@/modules/github/ui/components/github-sync-status';
 import { CreateRepositoryDialog } from '@/modules/github/ui/components/create-repository-dialog';
+import { toast } from 'sonner';
 interface Props {
   projectId: string;
 }
@@ -38,8 +39,42 @@ export const ProjectHeader = ({ projectId }: Props) => {
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
   const { state: realtimeConnectionState } = useInngest();
 
+  // Download ZIP mutation
+  const downloadZip = useMutation(
+    trpc.projects.downloadZip.mutationOptions({
+      onSuccess: (data) => {
+        // Create blob from base64 data
+        const binaryString = atob(data.data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/zip' });
+
+        // Create download link and trigger download
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = data.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success(`Downloaded ${data.fileCount} files (${Math.round(data.size / 1024)}KB)`);
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to download project');
+      },
+    }),
+  );
+
   const handleThemeChange = (value: string) => {
     setTheme(value);
+  };
+
+  const handleDownloadZip = () => {
+    downloadZip.mutate({ projectId });
   };
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
@@ -69,6 +104,15 @@ export const ProjectHeader = ({ projectId }: Props) => {
               <ChevronLeftIcon className="size-4" />
               <span>Go to Dashboard</span>
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleDownloadZip} disabled={downloadZip.isPending}>
+            {downloadZip.isPending ? (
+              <LoaderIcon className="size-4 animate-spin" />
+            ) : (
+              <DownloadIcon className="size-4" />
+            )}
+            <span>{downloadZip.isPending ? 'Preparing download...' : 'Download ZIP'}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuSub>

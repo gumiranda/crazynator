@@ -8,6 +8,7 @@ import { consumeCredits, validateCreditsBeforeAction } from '@/lib/usage';
 import { projectChannel } from '@/inngest/channels';
 import { getSubscriptionToken } from '@inngest/realtime';
 import { getSandbox } from '@/lib/sandbox';
+import JSZip from 'jszip';
 
 export const projectsRouter = createTRPCRouter({
   updateFragment: protectedProcedure
@@ -219,5 +220,88 @@ export const projectsRouter = createTRPCRouter({
         },
       });
       return createdProject;
+    }),
+
+  downloadZip: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      // Find the latest fragment with files
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.files,
+      );
+
+      if (!latestFragmentMessage?.fragment) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No project files found to download',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+      const files = fragment.files as Record<string, string>;
+
+      try {
+        // Create ZIP file
+        const zip = new JSZip();
+
+        // Add all files to the ZIP
+        for (const [filePath, content] of Object.entries(files)) {
+          zip.file(filePath, content);
+        }
+
+        // Generate ZIP buffer
+        const zipBuffer = await zip.generateAsync({ 
+          type: 'nodebuffer',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+
+        // Create filename with project name and timestamp
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+        const filename = `${project.name}-${timestamp}.zip`;
+
+        // Return the ZIP data as base64 for client download
+        return {
+          filename,
+          data: zipBuffer.toString('base64'),
+          size: zipBuffer.length,
+          fileCount: Object.keys(files).length,
+        };
+      } catch (error) {
+        console.error('Failed to generate ZIP:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to generate ZIP file',
+        });
+      }
     }),
 });
