@@ -14,6 +14,11 @@ import { prisma } from '@/lib/prisma';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
 import { projectChannel } from './channels';
+import { 
+  githubSyncFunction, 
+  githubInitialSyncFunction, 
+  githubBatchSyncFunction 
+} from './github-functions';
 
 interface AgentState {
   summary: string;
@@ -28,7 +33,7 @@ const generatedAgentResponse = (output: Message[], defaultValue: string) => {
   }
   return output[0].content;
 };
-export const codeAgentFunction = inngest.createFunction(
+const codeAgentFunction = inngest.createFunction(
   { id: 'code-agent' },
   { event: 'code-agent/run' },
   async ({ event, step, publish }) => {
@@ -251,6 +256,34 @@ export const codeAgentFunction = inngest.createFunction(
         },
       });
     });
+    
+    // Trigger GitHub sync if repository exists and fragment was created successfully
+    if (!isError && savedMessage.fragment) {
+      await step.run('trigger-github-sync', async () => {
+        try {
+          // Check if project has a GitHub repository
+          const githubRepo = await prisma.gitHubRepository.findUnique({
+            where: { projectId: event.data.projectId },
+          });
+          
+          if (githubRepo) {
+            // Send GitHub sync event
+            await inngest.send({
+              name: 'github/sync',
+              data: {
+                fragmentId: savedMessage.fragment!.id,
+                projectId: event.data.projectId,
+                commitMessage: `Update project files: ${savedMessage.fragment!.title}`,
+              },
+            });
+          }
+        } catch (error) {
+          console.error('Failed to trigger GitHub sync:', error);
+          // Don't fail the main function if GitHub sync fails
+        }
+      });
+    }
+    
     await publish(projectChannel(event.data.projectId).realtime(savedMessage));
 
     return {
@@ -263,3 +296,11 @@ export const codeAgentFunction = inngest.createFunction(
     };
   },
 );
+
+// Export all functions
+export { 
+  codeAgentFunction, 
+  githubSyncFunction, 
+  githubInitialSyncFunction, 
+  githubBatchSyncFunction 
+};

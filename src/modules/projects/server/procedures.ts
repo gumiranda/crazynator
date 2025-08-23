@@ -79,6 +79,27 @@ export const projectsRouter = createTRPCRouter({
           }
         }
 
+        // Trigger GitHub sync if repository exists
+        try {
+          const githubRepo = await prisma.gitHubRepository.findUnique({
+            where: { projectId: fragment.message.project.id },
+          });
+          
+          if (githubRepo) {
+            await inngest.send({
+              name: 'github/sync',
+              data: {
+                fragmentId: input.fragmentId,
+                projectId: fragment.message.project.id,
+                commitMessage: `Update project files: Manual edit`,
+              },
+            });
+          }
+        } catch (syncError) {
+          console.error('Failed to trigger GitHub sync:', syncError);
+          // Don't fail the main operation if GitHub sync fails
+        }
+
         return updatedFragment;
       } catch {
         throw new TRPCError({

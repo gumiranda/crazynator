@@ -25,6 +25,8 @@ import {
   InngestConnectionStatusIndicator,
 } from '@/components/inngest-connection-status';
 import { useInngest } from '@/components/ui/inngest-provider';
+import { GitHubSyncStatus } from '@/modules/github/ui/components/github-sync-status';
+import { CreateRepositoryDialog } from '@/modules/github/ui/components/create-repository-dialog';
 interface Props {
   projectId: string;
 }
@@ -92,7 +94,20 @@ export const ProjectHeader = ({ projectId }: Props) => {
           </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="px-2 sm:px-3 pl-1 sm:pl-2">
+      <div className="flex items-center gap-2 px-2 sm:px-3 pl-1 sm:pl-2">
+        {/* GitHub Sync Status */}
+        <div className="hidden sm:block">
+          <GitHubSyncStatus projectId={projectId} />
+        </div>
+        
+        {/* Create Repository Dialog */}
+        <div className="hidden sm:block">
+          <CreateRepositoryDialog 
+            projectId={projectId} 
+            projectName={project.name}
+          />
+        </div>
+        
         <InngestConnectionStatus
           status={
             realtimeConnectionState === InngestSubscriptionState.Connecting ||

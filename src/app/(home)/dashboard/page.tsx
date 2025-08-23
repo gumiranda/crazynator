@@ -3,19 +3,49 @@
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useTRPC } from '@/trpc/client';
 import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { GitHubSettings } from '@/modules/github/ui/components/github-settings';
+import { toast } from 'sonner';
 
 // Interface is no longer needed as we use Prisma type directly
 
 function DashboardContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const githubSuccess = searchParams.get('github_success');
+  const githubError = searchParams.get('github_error');
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { data: subscriptionData } = useSuspenseQuery(trpc.subscription.getCurrent.queryOptions());
+
+  // Handle GitHub OAuth results
+  useEffect(() => {
+    if (githubSuccess === 'connected') {
+      toast.success('GitHub account connected successfully!');
+      // Clean up URL parameters
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('github_success');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+    
+    if (githubError) {
+      const errorMessages: Record<string, string> = {
+        missing_parameters: 'Missing required parameters for GitHub connection',
+        invalid_session: 'Invalid session. Please try connecting again',
+        invalid_state: 'Security validation failed. Please try again',
+        callback_failed: 'GitHub connection failed. Please try again',
+      };
+      
+      toast.error(errorMessages[githubError] || 'Failed to connect GitHub account');
+      // Clean up URL parameters
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('github_error');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [githubSuccess, githubError]);
   
   const cancelSubscriptionMutation = useMutation({
     ...trpc.subscription.cancel.mutationOptions(),
@@ -83,7 +113,7 @@ function DashboardContent() {
 
         {/* No Subscription Message */}
         {!subscriptionData && (
-          <div className="bg-background rounded-lg shadow p-6 text-center">
+          <div className="bg-background rounded-lg shadow p-6 text-center mb-8">
             <AlertCircle className="h-12 w-12 text-background-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No active subscription</h3>
             <p className="text-background-600 mb-4">
@@ -94,6 +124,9 @@ function DashboardContent() {
             </Button>
           </div>
         )}
+
+        {/* GitHub Integration Section */}
+        <GitHubSettings />
       </div>
     </div>
   );
