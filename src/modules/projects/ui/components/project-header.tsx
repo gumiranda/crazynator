@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, DownloadIcon, LoaderIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, DownloadIcon, LoaderIcon, FileArchiveIcon, CodeIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -39,42 +39,66 @@ export const ProjectHeader = ({ projectId }: Props) => {
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
   const { state: realtimeConnectionState } = useInngest();
 
-  // Download ZIP mutation
+  // Download ZIP (source files only) mutation
   const downloadZip = useMutation(
     trpc.projects.downloadZip.mutationOptions({
       onSuccess: (data) => {
-        // Create blob from base64 data
-        const binaryString = atob(data.data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'application/zip' });
-
-        // Create download link and trigger download
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast.success(`Downloaded ${data.fileCount} files (${Math.round(data.size / 1024)}KB)`);
+        // Create blob from base64 data and trigger download
+        triggerDownload(data);
+        toast.success(`Source Code Downloaded: ${data.fileCount} files (${Math.round(data.size / 1024)}KB)`);
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to download project');
+        toast.error(error.message || 'Failed to download source code');
       },
     }),
   );
+
+  // Download Full Project mutation
+  const downloadFullProject = useMutation(
+    trpc.projects.downloadFullProject.mutationOptions({
+      onSuccess: (data) => {
+        // Create blob from base64 data and trigger download
+        triggerDownload(data);
+        const sizeKB = Math.round(data.size / 1024);
+        const sizeText = sizeKB > 1024 ? `${Math.round(sizeKB / 1024)}MB` : `${sizeKB}KB`;
+        toast.success(`Full Project Downloaded: ${data.fileCount} files (${sizeText})${data.skippedFiles ? ` - ${data.skippedFiles} files skipped` : ''}`);
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to download full project');
+      },
+    }),
+  );
+
+  // Helper function to trigger download
+  const triggerDownload = (data: { data: string; filename: string }) => {
+    const binaryString = atob(data.data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: 'application/zip' });
+
+    // Create download link and trigger download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = data.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const handleThemeChange = (value: string) => {
     setTheme(value);
   };
 
-  const handleDownloadZip = () => {
+  const handleDownloadSourceCode = () => {
     downloadZip.mutate({ projectId });
+  };
+
+  const handleDownloadFullProject = () => {
+    downloadFullProject.mutate({ projectId });
   };
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
@@ -106,14 +130,57 @@ export const ProjectHeader = ({ projectId }: Props) => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleDownloadZip} disabled={downloadZip.isPending}>
-            {downloadZip.isPending ? (
-              <LoaderIcon className="size-4 animate-spin" />
-            ) : (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="gap-2">
               <DownloadIcon className="size-4" />
-            )}
-            <span>{downloadZip.isPending ? 'Preparing download...' : 'Download ZIP'}</span>
-          </DropdownMenuItem>
+              <span>Download Project</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem 
+                  onClick={handleDownloadSourceCode} 
+                  disabled={downloadZip.isPending}
+                  className="gap-2"
+                >
+                  {downloadZip.isPending ? (
+                    <LoaderIcon className="size-4 animate-spin" />
+                  ) : (
+                    <CodeIcon className="size-4" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {downloadZip.isPending ? 'Preparing...' : 'Source Code Only'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Generated files from database (~few KB)
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem 
+                  onClick={handleDownloadFullProject} 
+                  disabled={downloadFullProject.isPending}
+                  className="gap-2"
+                >
+                  {downloadFullProject.isPending ? (
+                    <LoaderIcon className="size-4 animate-spin" />
+                  ) : (
+                    <FileArchiveIcon className="size-4" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {downloadFullProject.isPending ? 'Preparing...' : 'Complete Project'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Full project from sandbox (ready to run locally)
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="gap-2">

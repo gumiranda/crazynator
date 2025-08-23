@@ -222,6 +222,171 @@ export const projectsRouter = createTRPCRouter({
       return createdProject;
     }),
 
+  downloadFullProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      // Find the latest fragment with sandbox
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.sandboxUrl,
+      );
+
+      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No active sandbox found for this project',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+
+      try {
+        // Extract sandboxId from E2B URL
+        const url = new URL(fragment.sandboxUrl);
+        const hostname = url.hostname;
+        const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+        if (!sandboxId || sandboxId === 'www' || sandboxId === 'https') {
+          throw new Error('Invalid sandbox ID extracted from URL');
+        }
+
+        // Connect to sandbox
+        const sandbox = await getSandbox(sandboxId);
+
+        // Define patterns to exclude (always exclude node_modules)
+        const excludePatterns = [
+          'node_modules/',
+          '.git/',
+          '.next/',
+          'dist/',
+          'build/',
+          '.cache/',
+          '.tmp/',
+          '.DS_Store',
+          'Thumbs.db',
+          '*.log',
+          '.env.local',
+          '.env.*.local',
+        ];
+
+        // Build find command to list all files excluding unwanted patterns
+        const excludeArgs = excludePatterns
+          .map(pattern => pattern.endsWith('/') 
+            ? `-path "*/${pattern}*" -prune -o` 
+            : `-name "${pattern}" -prune -o`
+          )
+          .join(' ');
+        
+        const findCommand = `find /home/user -type f ${excludeArgs} -print`;
+
+        // Get list of all files
+        const listBuffer = { stdout: '', stderr: '' };
+        await sandbox.commands.run(findCommand, {
+          onStdout: (data: string) => {
+            listBuffer.stdout += data;
+          },
+          onStderr: (data: string) => {
+            listBuffer.stderr += data;
+          },
+        });
+
+        if (listBuffer.stderr && listBuffer.stderr.trim()) {
+          console.warn('Find command warnings:', listBuffer.stderr);
+        }
+
+        const allFiles = listBuffer.stdout
+          .split('\n')
+          .filter(file => file.trim() && !file.includes('/.'))
+          .map(file => file.trim().replace('/home/user/', ''))
+          .filter(file => file.length > 0);
+
+        if (allFiles.length === 0) {
+          throw new Error('No files found in sandbox');
+        }
+
+        // Create ZIP file
+        const zip = new JSZip();
+        let processedFiles = 0;
+
+        // Read and add each file to ZIP
+        for (const filePath of allFiles) {
+          try {
+            const content = await sandbox.files.read(filePath);
+            zip.file(filePath, content);
+            processedFiles++;
+          } catch (readError) {
+            console.warn(`Failed to read file ${filePath}:`, readError);
+            // Skip files that can't be read (permissions, binary files, etc.)
+            continue;
+          }
+        }
+
+        // Generate ZIP buffer
+        const zipBuffer = await zip.generateAsync({ 
+          type: 'nodebuffer',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+
+        // Create filename with project name and timestamp
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+        const filename = `${project.name}-full-${timestamp}.zip`;
+
+        return {
+          filename,
+          data: zipBuffer.toString('base64'),
+          size: zipBuffer.length,
+          fileCount: processedFiles,
+          totalFoundFiles: allFiles.length,
+          skippedFiles: allFiles.length - processedFiles,
+        };
+      } catch (error) {
+        console.error('Failed to download full project:', error);
+        
+        if (error instanceof Error) {
+          if (error.message.includes('sandbox') || error.message.includes('connect')) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Sandbox is no longer available. Please generate the project again.',
+            });
+          }
+        }
+        
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to download full project from sandbox',
+        });
+      }
+    }),
+
   downloadZip: protectedProcedure
     .input(
       z.object({
