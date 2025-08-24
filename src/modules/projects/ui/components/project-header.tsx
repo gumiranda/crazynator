@@ -61,7 +61,15 @@ export const ProjectHeader = ({ projectId }: Props) => {
         triggerDownload(data);
         const sizeKB = Math.round(data.size / 1024);
         const sizeText = sizeKB > 1024 ? `${Math.round(sizeKB / 1024)}MB` : `${sizeKB}KB`;
-        toast.success(`Full Project Downloaded: ${data.fileCount} files (${sizeText})${data.skippedFiles ? ` - ${data.skippedFiles} files skipped` : ''}`);
+        
+        // Show different message based on whether it was a fallback
+        if (data.isFallback) {
+          toast.success(`Project Downloaded (Database Files): ${data.fileCount} files (${sizeText})`, {
+            description: 'Sandbox expired - downloaded saved files instead. For latest changes, regenerate the project.'
+          });
+        } else {
+          toast.success(`Full Project Downloaded: ${data.fileCount} files (${sizeText})${data.skippedFiles ? ` - ${data.skippedFiles} files skipped` : ''}`);
+        }
       },
       onError: (error) => {
         toast.error(error.message || 'Failed to download full project');

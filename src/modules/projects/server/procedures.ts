@@ -267,6 +267,14 @@ export const projectsRouter = createTRPCRouter({
       }
 
       const fragment = latestFragmentMessage.fragment;
+      
+      // Check if fragment is old (sandbox likely expired)
+      const fragmentAge = Date.now() - fragment.createdAt.getTime();
+      const isOldFragment = fragmentAge > 15 * 60 * 1000; // 15 minutes (E2B timeout)
+      
+      if (isOldFragment) {
+        console.log(`[DOWNLOAD] Fragment is ${Math.round(fragmentAge / 60000)} minutes old, sandbox likely expired`);
+      }
 
       try {
         // Extract sandboxId from E2B URL
@@ -278,10 +286,109 @@ export const projectsRouter = createTRPCRouter({
           throw new Error('Invalid sandbox ID extracted from URL');
         }
 
-        // Connect to sandbox
-        const sandbox = await getSandbox(sandboxId);
+        console.log(`[DOWNLOAD] Attempting to connect to sandbox: ${sandboxId}`);
 
-        // Define patterns to exclude (always exclude node_modules)
+        // Try to connect to sandbox
+        let sandbox;
+        try {
+          sandbox = await getSandbox(sandboxId);
+        } catch (sandboxError) {
+          console.error(`[DOWNLOAD] Sandbox connection failed:`, sandboxError);
+          
+          // If sandbox doesn't exist or is expired, fallback to database files
+          if (sandboxError instanceof Error && 
+              (sandboxError.message.includes('404') || 
+               sandboxError.message.includes("doesn't exist") ||
+               sandboxError.message.includes('not found'))) {
+            
+            console.log(`[DOWNLOAD] Sandbox expired/unavailable, falling back to database files`);
+            
+            // Use the source code download logic as fallback
+            const files = fragment.files as Record<string, string>;
+            
+            if (!files || Object.keys(files).length === 0) {
+              throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: 'Sandbox is no longer available and no files found in database. Please regenerate your project.',
+              });
+            }
+            
+            // Apply the same filtering logic to database files
+            const sourceExcludePatterns = [
+              'node_modules',
+              '.git',
+              '.next',
+              'dist',
+              'build',
+              '.cache',
+              '.tmp',
+              '.turbo',
+              '.vercel',
+              'out',
+              '.env',
+              '.DS_Store',
+              'Thumbs.db'
+            ];
+
+            console.log(`[DOWNLOAD] Processing ${Object.keys(files).length} files from database (fallback)`);
+
+            // Create ZIP from database files
+            const zip = new JSZip();
+            let includedFiles = 0;
+            let excludedFiles = 0;
+            
+            for (const [filePath, content] of Object.entries(files)) {
+              // Check if file should be excluded
+              const shouldExclude = sourceExcludePatterns.some(pattern => 
+                filePath.includes(pattern) || filePath.startsWith(pattern + '/')
+              );
+              
+              if (shouldExclude) {
+                console.log(`[DOWNLOAD] Excluding: ${filePath}`);
+                excludedFiles++;
+                continue;
+              }
+              
+              // CRITICAL: Never include node_modules
+              if (filePath.includes('node_modules')) {
+                console.error(`[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+                excludedFiles++;
+                continue;
+              }
+              
+              zip.file(filePath, content);
+              includedFiles++;
+            }
+            
+            // Generate ZIP buffer
+            const zipBuffer = await zip.generateAsync({ 
+              type: 'nodebuffer',
+              compression: 'DEFLATE',
+              compressionOptions: { level: 6 }
+            });
+
+            // Create filename with project name and timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+            const filename = `${project.name}-fallback-${timestamp}.zip`;
+
+            console.log(`[DOWNLOAD] Fallback ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
+            
+            return {
+              filename,
+              data: zipBuffer.toString('base64'),
+              size: zipBuffer.length,
+              fileCount: includedFiles,
+              totalFoundFiles: Object.keys(files).length,
+              skippedFiles: excludedFiles,
+              isFallback: true, // Indicate this came from database fallback
+            };
+          } else {
+            // Re-throw other sandbox errors
+            throw sandboxError;
+          }
+        }
+
+        // Define patterns to exclude (NEVER include node_modules or other unnecessary files)
         const excludePatterns = [
           'node_modules/',
           '.git/',
@@ -290,22 +397,43 @@ export const projectsRouter = createTRPCRouter({
           'build/',
           '.cache/',
           '.tmp/',
+          '.turbo/',
+          '.vercel/',
+          'out/',
           '.DS_Store',
           'Thumbs.db',
           '*.log',
+          '.env',
           '.env.local',
+          '.env.development',
+          '.env.production',
           '.env.*.local',
+          'coverage/',
+          '.nyc_output/',
+          '*.tsbuildinfo',
+          '.swc/',
         ];
 
         // Build find command to list all files excluding unwanted patterns
         const excludeArgs = excludePatterns
-          .map(pattern => pattern.endsWith('/') 
-            ? `-path "*/${pattern}*" -prune -o` 
-            : `-name "${pattern}" -prune -o`
-          )
+          .map(pattern => {
+            if (pattern.endsWith('/')) {
+              // For directories, exclude the entire directory tree
+              return `-path "*/${pattern}*" -prune -o`;
+            } else if (pattern.includes('*')) {
+              // For wildcard patterns
+              return `-name "${pattern}" -prune -o`;
+            } else {
+              // For specific files/directories
+              return `-name "${pattern}" -prune -o`;
+            }
+          })
           .join(' ');
         
         const findCommand = `find /home/user -type f ${excludeArgs} -print`;
+        
+        console.log(`[DOWNLOAD] Executing find command with exclusions: ${excludePatterns.join(', ')}`);
+        console.log(`[DOWNLOAD] Full command: ${findCommand}`);
 
         // Get list of all files
         const listBuffer = { stdout: '', stderr: '' };
@@ -326,24 +454,51 @@ export const projectsRouter = createTRPCRouter({
           .split('\n')
           .filter(file => file.trim() && !file.includes('/.'))
           .map(file => file.trim().replace('/home/user/', ''))
-          .filter(file => file.length > 0);
+          .filter(file => {
+            if (file.length === 0) return false;
+            
+            // CRITICAL: Double-check we NEVER include node_modules or other excluded patterns
+            const shouldExclude = excludePatterns.some(pattern => {
+              const cleanPattern = pattern.replace('/', '');
+              return file.includes(cleanPattern) || file.startsWith(cleanPattern + '/');
+            });
+            
+            if (shouldExclude) {
+              console.log(`[DOWNLOAD] Excluding file: ${file}`);
+              return false;
+            }
+            
+            return true;
+          });
 
         if (allFiles.length === 0) {
           throw new Error('No files found in sandbox');
         }
+        
+        console.log(`[DOWNLOAD] Found ${allFiles.length} files to include in ZIP`);
+        console.log(`[DOWNLOAD] Sample files:`, allFiles.slice(0, 10));
 
         // Create ZIP file
         const zip = new JSZip();
         let processedFiles = 0;
+        let skippedFiles = 0;
 
         // Read and add each file to ZIP
         for (const filePath of allFiles) {
           try {
+            // Final safety check - NEVER add node_modules
+            if (filePath.includes('node_modules')) {
+              console.error(`[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+              skippedFiles++;
+              continue;
+            }
+            
             const content = await sandbox.files.read(filePath);
             zip.file(filePath, content);
             processedFiles++;
           } catch (readError) {
-            console.warn(`Failed to read file ${filePath}:`, readError);
+            console.warn(`[DOWNLOAD] Failed to read file ${filePath}:`, readError);
+            skippedFiles++;
             // Skip files that can't be read (permissions, binary files, etc.)
             continue;
           }
@@ -360,13 +515,15 @@ export const projectsRouter = createTRPCRouter({
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const filename = `${project.name}-full-${timestamp}.zip`;
 
+        console.log(`[DOWNLOAD] ZIP created successfully: ${processedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
+        
         return {
           filename,
           data: zipBuffer.toString('base64'),
           size: zipBuffer.length,
           fileCount: processedFiles,
           totalFoundFiles: allFiles.length,
-          skippedFiles: allFiles.length - processedFiles,
+          skippedFiles: skippedFiles,
         };
       } catch (error) {
         console.error('Failed to download full project:', error);
@@ -437,11 +594,51 @@ export const projectsRouter = createTRPCRouter({
       try {
         // Create ZIP file
         const zip = new JSZip();
+        
+        // Patterns to exclude from source code download
+        const sourceExcludePatterns = [
+          'node_modules',
+          '.git',
+          '.next',
+          'dist',
+          'build',
+          '.cache',
+          '.tmp',
+          '.env',
+          '.DS_Store',
+          'Thumbs.db'
+        ];
 
-        // Add all files to the ZIP
+        console.log(`[DOWNLOAD-SOURCE] Processing ${Object.keys(files).length} files from database`);
+
+        // Add all files to the ZIP (with exclusion check)
+        let includedFiles = 0;
+        let excludedFiles = 0;
+        
         for (const [filePath, content] of Object.entries(files)) {
+          // Check if file should be excluded
+          const shouldExclude = sourceExcludePatterns.some(pattern => 
+            filePath.includes(pattern) || filePath.startsWith(pattern + '/')
+          );
+          
+          if (shouldExclude) {
+            console.log(`[DOWNLOAD-SOURCE] Excluding: ${filePath}`);
+            excludedFiles++;
+            continue;
+          }
+          
+          // CRITICAL: Never include node_modules
+          if (filePath.includes('node_modules')) {
+            console.error(`[DOWNLOAD-SOURCE] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+            excludedFiles++;
+            continue;
+          }
+          
           zip.file(filePath, content);
+          includedFiles++;
         }
+        
+        console.log(`[DOWNLOAD-SOURCE] Included ${includedFiles} files, excluded ${excludedFiles} files`);
 
         // Generate ZIP buffer
         const zipBuffer = await zip.generateAsync({ 
@@ -454,12 +651,15 @@ export const projectsRouter = createTRPCRouter({
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const filename = `${project.name}-${timestamp}.zip`;
 
+        console.log(`[DOWNLOAD-SOURCE] ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
+        
         // Return the ZIP data as base64 for client download
         return {
           filename,
           data: zipBuffer.toString('base64'),
           size: zipBuffer.length,
-          fileCount: Object.keys(files).length,
+          fileCount: includedFiles,
+          excludedFiles: excludedFiles,
         };
       } catch (error) {
         console.error('Failed to generate ZIP:', error);
