@@ -297,10 +297,19 @@ const codeAgentFunction = inngest.createFunction(
   },
 );
 
+import {
+  sandboxMaintenanceFunction,
+  recreateSandboxFunction,
+  batchRecreateSandboxesFunction,
+} from './sandbox-functions';
+
 // Export all functions
 export { 
   codeAgentFunction, 
   githubSyncFunction, 
   githubInitialSyncFunction, 
-  githubBatchSyncFunction 
+  githubBatchSyncFunction,
+  sandboxMaintenanceFunction,
+  recreateSandboxFunction,
+  batchRecreateSandboxesFunction,
 };
