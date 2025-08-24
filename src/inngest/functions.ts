@@ -300,7 +300,6 @@ const codeAgentFunction = inngest.createFunction(
 import {
   sandboxMaintenanceFunction,
   recreateSandboxFunction,
-  batchRecreateSandboxesFunction,
 } from './sandbox-functions';
 
 // Export all functions
@@ -311,5 +310,4 @@ export {
   githubBatchSyncFunction,
   sandboxMaintenanceFunction,
   recreateSandboxFunction,
-  batchRecreateSandboxesFunction,
 };

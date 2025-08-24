@@ -118,11 +118,3 @@ export async function scanForExpiredSandboxes(): Promise<{
   return { expired, active, errors };
 }
 
-/**
- * Mark fragments as expired in the database (add expiration tracking)
- */
-export async function markFragmentsAsExpired(fragmentIds: string[]): Promise<void> {
-  // For now, we could add an 'isExpired' field to Fragment model in a future migration
-  // For this implementation, we'll handle it in the recreation logic
-  console.log(`Marking ${fragmentIds.length} fragments as expired:`, fragmentIds);
-}
