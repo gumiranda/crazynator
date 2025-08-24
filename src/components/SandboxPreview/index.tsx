@@ -38,11 +38,9 @@ export default function SandboxPreview({
 
   const recreateSandbox = useCallback(async (): Promise<void> => {
     if (isRecreating) {
-      console.log(`[SandboxPreview] Recreation already in progress for fragment ${fragment.id}`);
       return;
     }
 
-    console.log(`[SandboxPreview] Starting sandbox recreation for fragment ${fragment.id}`);
     setIsRecreating(true);
     showRecreationProgress(fragment.id);
 
@@ -86,7 +84,6 @@ export default function SandboxPreview({
   useEffect(() => {
     const handleForceRecreation = (event: CustomEvent) => {
       if (event.detail.fragmentId === fragment.id) {
-        console.log(`[SandboxPreview] Force recreation event received for fragment ${fragment.id}`);
         recreateSandbox();
       }
     };

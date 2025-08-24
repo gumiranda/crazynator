@@ -14,18 +14,12 @@ export const sandboxMaintenanceFunction = inngest.createFunction(
   // Run every 30 minutes
   { cron: '*/30 * * * *' },
   async ({ step }) => {
-    console.log('Starting sandbox maintenance scan...');
-
     // Step 1: Scan for expired sandboxes
     const scanResults = await step.run('scan-expired-sandboxes', async () => {
       return await scanForExpiredSandboxes();
     });
 
     const { expired, active, errors } = scanResults;
-
-    console.log(
-      `Sandbox scan results: ${expired.length} expired, ${active.length} active, ${errors.length} errors`,
-    );
 
     // Step 2: Recreate expired sandboxes if any found
     if (expired.length > 0) {
@@ -34,21 +28,6 @@ export const sandboxMaintenanceFunction = inngest.createFunction(
       });
 
       const { successful, failed, summary } = recreationResults;
-
-      // Log results
-      console.log(
-        `Sandbox recreation completed: ${summary.successful}/${summary.total} successful`,
-      );
-
-      if (failed.length > 0) {
-        console.error(
-          'Failed sandbox recreations:',
-          failed.map((r) => ({
-            fragmentId: r.fragmentId,
-            error: r.error,
-          })),
-        );
-      }
 
       return {
         scanned: {
@@ -84,8 +63,6 @@ export const recreateSandboxFunction = inngest.createFunction(
   async ({ event, step }) => {
     const { fragmentId, retries = 3 } = event.data;
 
-    console.log(`Recreating sandbox for fragment: ${fragmentId}`);
-
     const result = await step.run('recreate-sandbox', async () => {
       const { prisma } = await import('@/lib/prisma');
       const { recreateSandboxWithRetries } = await import('@/lib/sandbox-recreation');
@@ -102,14 +79,6 @@ export const recreateSandboxFunction = inngest.createFunction(
       // Recreate with specified retries
       return await recreateSandboxWithRetries(fragment, retries);
     });
-
-    if (result.success) {
-      console.log(
-        `Successfully recreated sandbox for fragment ${fragmentId}: ${result.newSandboxUrl}`,
-      );
-    } else {
-      console.error(`Failed to recreate sandbox for fragment ${fragmentId}: ${result.error}`);
-    }
 
     return result;
   },
