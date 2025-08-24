@@ -85,7 +85,7 @@ export const projectsRouter = createTRPCRouter({
           const githubRepo = await prisma.gitHubRepository.findUnique({
             where: { projectId: fragment.message.project.id },
           });
-          
+
           if (githubRepo) {
             await inngest.send({
               name: 'github/sync',
@@ -267,13 +267,15 @@ export const projectsRouter = createTRPCRouter({
       }
 
       const fragment = latestFragmentMessage.fragment;
-      
+
       // Check if fragment is old (sandbox likely expired)
       const fragmentAge = Date.now() - fragment.createdAt.getTime();
       const isOldFragment = fragmentAge > 15 * 60 * 1000; // 15 minutes (E2B timeout)
-      
+
       if (isOldFragment) {
-        console.log(`[DOWNLOAD] Fragment is ${Math.round(fragmentAge / 60000)} minutes old, sandbox likely expired`);
+        console.log(
+          `[DOWNLOAD] Fragment is ${Math.round(fragmentAge / 60000)} minutes old, sandbox likely expired`,
+        );
       }
 
       try {
@@ -292,27 +294,39 @@ export const projectsRouter = createTRPCRouter({
         let sandbox;
         try {
           sandbox = await getSandbox(sandboxId);
+
+          // Quick test to see if layout.tsx exists
+          try {
+            const layoutTest = await sandbox.commands.run(
+              'find /home/user -name "layout.tsx" -type f',
+            );
+            console.log(`[DOWNLOAD] Layout.tsx search result:`, layoutTest);
+          } catch (testError) {
+            console.log(`[DOWNLOAD] Layout.tsx test failed:`, testError);
+          }
         } catch (sandboxError) {
           console.error(`[DOWNLOAD] Sandbox connection failed:`, sandboxError);
-          
+
           // If sandbox doesn't exist or is expired, fallback to database files
-          if (sandboxError instanceof Error && 
-              (sandboxError.message.includes('404') || 
-               sandboxError.message.includes("doesn't exist") ||
-               sandboxError.message.includes('not found'))) {
-            
+          if (
+            sandboxError instanceof Error &&
+            (sandboxError.message.includes('404') ||
+              sandboxError.message.includes("doesn't exist") ||
+              sandboxError.message.includes('not found'))
+          ) {
             console.log(`[DOWNLOAD] Sandbox expired/unavailable, falling back to database files`);
-            
+
             // Use the source code download logic as fallback
             const files = fragment.files as Record<string, string>;
-            
+
             if (!files || Object.keys(files).length === 0) {
               throw new TRPCError({
                 code: 'NOT_FOUND',
-                message: 'Sandbox is no longer available and no files found in database. Please regenerate your project.',
+                message:
+                  'Sandbox is no longer available and no files found in database. Please regenerate your project.',
               });
             }
-            
+
             // Apply the same filtering logic to database files
             const sourceExcludePatterns = [
               'node_modules',
@@ -327,52 +341,58 @@ export const projectsRouter = createTRPCRouter({
               'out',
               '.env',
               '.DS_Store',
-              'Thumbs.db'
+              'Thumbs.db',
             ];
 
-            console.log(`[DOWNLOAD] Processing ${Object.keys(files).length} files from database (fallback)`);
+            console.log(
+              `[DOWNLOAD] Processing ${Object.keys(files).length} files from database (fallback)`,
+            );
 
             // Create ZIP from database files
             const zip = new JSZip();
             let includedFiles = 0;
             let excludedFiles = 0;
-            
+
             for (const [filePath, content] of Object.entries(files)) {
               // Check if file should be excluded
-              const shouldExclude = sourceExcludePatterns.some(pattern => 
-                filePath.includes(pattern) || filePath.startsWith(pattern + '/')
+              const shouldExclude = sourceExcludePatterns.some(
+                (pattern) => filePath.includes(pattern) || filePath.startsWith(pattern + '/'),
               );
-              
+
               if (shouldExclude) {
                 console.log(`[DOWNLOAD] Excluding: ${filePath}`);
                 excludedFiles++;
                 continue;
               }
-              
+
               // CRITICAL: Never include node_modules
               if (filePath.includes('node_modules')) {
-                console.error(`[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+                console.error(
+                  `[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`,
+                );
                 excludedFiles++;
                 continue;
               }
-              
+
               zip.file(filePath, content);
               includedFiles++;
             }
-            
+
             // Generate ZIP buffer
-            const zipBuffer = await zip.generateAsync({ 
+            const zipBuffer = await zip.generateAsync({
               type: 'nodebuffer',
               compression: 'DEFLATE',
-              compressionOptions: { level: 6 }
+              compressionOptions: { level: 6 },
             });
 
             // Create filename with project name and timestamp
             const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
             const filename = `${project.name}-fallback-${timestamp}.zip`;
 
-            console.log(`[DOWNLOAD] Fallback ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
-            
+            console.log(
+              `[DOWNLOAD] Fallback ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`,
+            );
+
             return {
               filename,
               data: zipBuffer.toString('base64'),
@@ -390,6 +410,7 @@ export const projectsRouter = createTRPCRouter({
 
         // Define patterns to exclude (NEVER include node_modules or other unnecessary files)
         const excludePatterns = [
+          'nextjs-app',
           'node_modules/',
           '.git/',
           '.next/',
@@ -414,9 +435,9 @@ export const projectsRouter = createTRPCRouter({
           '.swc/',
         ];
 
-        // Build find command to list all files excluding unwanted patterns
+        // Build find command to list ONLY FILES excluding unwanted patterns
         const excludeArgs = excludePatterns
-          .map(pattern => {
+          .map((pattern) => {
             if (pattern.endsWith('/')) {
               // For directories, exclude the entire directory tree
               return `-path "*/${pattern}*" -prune -o`;
@@ -429,10 +450,14 @@ export const projectsRouter = createTRPCRouter({
             }
           })
           .join(' ');
-        
+
+        // CRITICAL: Use -type f to ensure we ONLY get files, not directories
+        // This will recursively find ALL files in the directory structure
         const findCommand = `find /home/user -type f ${excludeArgs} -print`;
-        
-        console.log(`[DOWNLOAD] Executing find command with exclusions: ${excludePatterns.join(', ')}`);
+
+        console.log(
+          `[DOWNLOAD] Executing find command with exclusions: ${excludePatterns.join(', ')}`,
+        );
         console.log(`[DOWNLOAD] Full command: ${findCommand}`);
 
         // Get list of all files
@@ -446,37 +471,107 @@ export const projectsRouter = createTRPCRouter({
           },
         });
 
+        console.log(
+          `[DOWNLOAD] Find command completed. Stdout length: ${listBuffer.stdout.length}, Stderr: ${listBuffer.stderr}`,
+        );
+
         if (listBuffer.stderr && listBuffer.stderr.trim()) {
           console.warn('Find command warnings:', listBuffer.stderr);
         }
 
-        const allFiles = listBuffer.stdout
+        // Parse the raw output first
+        const rawFiles = listBuffer.stdout
           .split('\n')
-          .filter(file => file.trim() && !file.includes('/.'))
-          .map(file => file.trim().replace('/home/user/', ''))
-          .filter(file => {
+          .filter((file) => file.trim())
+          .map((file) => file.trim().replace('/home/user/', ''));
+
+        console.log(`[DOWNLOAD] Raw files from find command (first 10):`, rawFiles.slice(0, 10));
+
+        // Check if layout.tsx was found by find command
+        const rawLayoutFiles = rawFiles.filter((f) => f.includes('layout.tsx'));
+        console.log(`[DOWNLOAD] Raw layout.tsx files from find:`, rawLayoutFiles);
+
+        const allFiles = rawFiles
+          .filter((file) => !file.includes('/.')) // Remove hidden files
+          .filter((file) => {
             if (file.length === 0) return false;
-            
-            // CRITICAL: Double-check we NEVER include node_modules or other excluded patterns
-            const shouldExclude = excludePatterns.some(pattern => {
-              const cleanPattern = pattern.replace('/', '');
-              return file.includes(cleanPattern) || file.startsWith(cleanPattern + '/');
-            });
-            
-            if (shouldExclude) {
-              console.log(`[DOWNLOAD] Excluding file: ${file}`);
+
+            // Since we're using `find -type f`, we should only get files
+            // But let's keep a basic check for obviously problematic paths
+            if (!file || file === '.' || file === '..' || file.endsWith('/')) {
+              console.log(`[DOWNLOAD] Skipping invalid path: ${file}`);
               return false;
             }
-            
+
+            // CRITICAL: Double-check we NEVER include node_modules or other excluded patterns
+            const matchingPatterns = excludePatterns.filter((pattern) => {
+              const cleanPattern = pattern.replace('/', '');
+
+              // More precise matching - avoid false positives like "app" matching "out"
+              if (pattern.endsWith('/')) {
+                // For directory patterns like 'out/', 'node_modules/', match only directory paths
+                const segments = file.split('/');
+                return segments.includes(cleanPattern);
+              } else if (pattern.startsWith('*.')) {
+                // For file extension patterns like '*.log'
+                return file.endsWith(pattern.substring(1));
+              } else {
+                // For specific file names
+                return file.includes(cleanPattern);
+              }
+            });
+
+            if (matchingPatterns.length > 0) {
+              // Special alert if we're excluding a layout file
+              if (file.includes('layout.tsx')) {
+                console.warn(
+                  `[DOWNLOAD] ⚠️ EXCLUDING LAYOUT FILE: ${file} - matches patterns: ${matchingPatterns.join(', ')}`,
+                );
+              } else if (!file?.includes('node_modules')) {
+                console.log(
+                  `[DOWNLOAD] Excluding file: ${file} - matches patterns: ${matchingPatterns.join(', ')}`,
+                );
+              }
+              return false;
+            }
+
             return true;
           });
 
         if (allFiles.length === 0) {
           throw new Error('No files found in sandbox');
         }
-        
+
         console.log(`[DOWNLOAD] Found ${allFiles.length} files to include in ZIP`);
         console.log(`[DOWNLOAD] Sample files:`, allFiles.slice(0, 10));
+
+        // Check specifically for layout.tsx files
+        const layoutFiles = allFiles.filter((f) => f.includes('layout.tsx'));
+        console.log(`[DOWNLOAD] Layout.tsx files found:`, layoutFiles);
+
+        // Check for all .tsx files to see what we're getting
+        const tsxFiles = allFiles.filter((f) => f.endsWith('.tsx'));
+        console.log(`[DOWNLOAD] All .tsx files found (${tsxFiles.length}):`, tsxFiles.slice(0, 20));
+        
+        // Debug: Test our filtering logic with the problematic files
+        console.log('\n[DOWNLOAD] === FILTER DEBUG ===');
+        const testFiles = ['app/layout.tsx', 'nextjs-app/app/layout.tsx', 'out/test.js', 'node_modules/test.js'];
+        testFiles.forEach(testFile => {
+          const matchingPatterns = excludePatterns.filter((pattern) => {
+            const cleanPattern = pattern.replace('/', '');
+            
+            if (pattern.endsWith('/')) {
+              const segments = testFile.split('/');
+              return segments.includes(cleanPattern);
+            } else if (pattern.startsWith('*.')) {
+              return testFile.endsWith(pattern.substring(1));
+            } else {
+              return testFile.includes(cleanPattern);
+            }
+          });
+          console.log(`[DOWNLOAD] ${testFile} -> matches: [${matchingPatterns.join(', ')}] -> ${matchingPatterns.length > 0 ? 'EXCLUDED' : 'INCLUDED'}`);
+        });
+        console.log('[DOWNLOAD] === END FILTER DEBUG ===\n');
 
         // Create ZIP file
         const zip = new JSZip();
@@ -488,35 +583,86 @@ export const projectsRouter = createTRPCRouter({
           try {
             // Final safety check - NEVER add node_modules
             if (filePath.includes('node_modules')) {
-              console.error(`[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+              console.error(
+                `[DOWNLOAD] CRITICAL: Attempted to include node_modules file: ${filePath}`,
+              );
               skippedFiles++;
               continue;
             }
-            
-            const content = await sandbox.files.read(filePath);
-            zip.file(filePath, content);
-            processedFiles++;
-          } catch (readError) {
-            console.warn(`[DOWNLOAD] Failed to read file ${filePath}:`, readError);
+
+            // Special logging for layout.tsx files
+            if (filePath.includes('layout.tsx')) {
+              console.log(`[DOWNLOAD] Processing layout file: ${filePath}`);
+            }
+
+            // Try to read the file
+            try {
+              const content = await sandbox.files.read(filePath);
+
+              // Successfully read file, add to ZIP maintaining directory structure
+              zip.file(filePath, content);
+              processedFiles++;
+
+              // Special confirmation for layout.tsx files
+              if (filePath.includes('layout.tsx')) {
+                console.log(
+                  `[DOWNLOAD] ✅ Successfully added layout file: ${filePath} (${content.length} bytes)`,
+                );
+              }
+            } catch (readError) {
+              // Check if it's specifically a directory error
+              if (readError instanceof Error) {
+                const errorMsg = readError.message.toLowerCase();
+
+                if (
+                  errorMsg.includes('is a directory') ||
+                  errorMsg.includes('eisdir') ||
+                  (errorMsg.includes('invalidargument') && errorMsg.includes('directory'))
+                ) {
+                  console.log(`[DOWNLOAD] Path is directory (skipping): ${filePath}`);
+                  skippedFiles++;
+                  continue;
+                }
+
+                // For permission errors, binary files, etc.
+                if (
+                  errorMsg.includes('permission') ||
+                  errorMsg.includes('binary') ||
+                  errorMsg.includes('not found')
+                ) {
+                  console.warn(`[DOWNLOAD] Cannot read ${filePath}: ${readError.message}`);
+                  skippedFiles++;
+                  continue;
+                }
+              }
+
+              // For unexpected errors, log details but continue
+              console.warn(`[DOWNLOAD] Unexpected error reading ${filePath}:`, readError);
+              skippedFiles++;
+              continue;
+            }
+          } catch (outerError) {
+            console.warn(`[DOWNLOAD] Outer error processing ${filePath}:`, outerError);
             skippedFiles++;
-            // Skip files that can't be read (permissions, binary files, etc.)
             continue;
           }
         }
 
         // Generate ZIP buffer
-        const zipBuffer = await zip.generateAsync({ 
+        const zipBuffer = await zip.generateAsync({
           type: 'nodebuffer',
           compression: 'DEFLATE',
-          compressionOptions: { level: 6 }
+          compressionOptions: { level: 6 },
         });
 
         // Create filename with project name and timestamp
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const filename = `${project.name}-full-${timestamp}.zip`;
 
-        console.log(`[DOWNLOAD] ZIP created successfully: ${processedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
-        
+        console.log(
+          `[DOWNLOAD] ZIP created successfully: ${processedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`,
+        );
+
         return {
           filename,
           data: zipBuffer.toString('base64'),
@@ -527,7 +673,7 @@ export const projectsRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error('Failed to download full project:', error);
-        
+
         if (error instanceof Error) {
           if (error.message.includes('sandbox') || error.message.includes('connect')) {
             throw new TRPCError({
@@ -536,7 +682,7 @@ export const projectsRouter = createTRPCRouter({
             });
           }
         }
-        
+
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to download full project from sandbox',
@@ -594,10 +740,11 @@ export const projectsRouter = createTRPCRouter({
       try {
         // Create ZIP file
         const zip = new JSZip();
-        
+
         // Patterns to exclude from source code download
         const sourceExcludePatterns = [
           'node_modules',
+          'nexts-app',
           '.git',
           '.next',
           'dist',
@@ -606,53 +753,61 @@ export const projectsRouter = createTRPCRouter({
           '.tmp',
           '.env',
           '.DS_Store',
-          'Thumbs.db'
+          'Thumbs.db',
         ];
 
-        console.log(`[DOWNLOAD-SOURCE] Processing ${Object.keys(files).length} files from database`);
+        console.log(
+          `[DOWNLOAD-SOURCE] Processing ${Object.keys(files).length} files from database`,
+        );
 
         // Add all files to the ZIP (with exclusion check)
         let includedFiles = 0;
         let excludedFiles = 0;
-        
+
         for (const [filePath, content] of Object.entries(files)) {
           // Check if file should be excluded
-          const shouldExclude = sourceExcludePatterns.some(pattern => 
-            filePath.includes(pattern) || filePath.startsWith(pattern + '/')
+          const shouldExclude = sourceExcludePatterns.some(
+            (pattern) => filePath.includes(pattern) || filePath.startsWith(pattern + '/'),
           );
-          
+
           if (shouldExclude) {
             console.log(`[DOWNLOAD-SOURCE] Excluding: ${filePath}`);
             excludedFiles++;
             continue;
           }
-          
+
           // CRITICAL: Never include node_modules
           if (filePath.includes('node_modules')) {
-            console.error(`[DOWNLOAD-SOURCE] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+            console.error(
+              `[DOWNLOAD-SOURCE] CRITICAL: Attempted to include node_modules file: ${filePath}`,
+            );
             excludedFiles++;
             continue;
           }
-          
+
           zip.file(filePath, content);
           includedFiles++;
         }
-        
-        console.log(`[DOWNLOAD-SOURCE] Included ${includedFiles} files, excluded ${excludedFiles} files`);
+
+        console.log(
+          `[DOWNLOAD-SOURCE] Included ${includedFiles} files, excluded ${excludedFiles} files`,
+        );
 
         // Generate ZIP buffer
-        const zipBuffer = await zip.generateAsync({ 
+        const zipBuffer = await zip.generateAsync({
           type: 'nodebuffer',
           compression: 'DEFLATE',
-          compressionOptions: { level: 6 }
+          compressionOptions: { level: 6 },
         });
 
         // Create filename with project name and timestamp
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const filename = `${project.name}-${timestamp}.zip`;
 
-        console.log(`[DOWNLOAD-SOURCE] ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`);
-        
+        console.log(
+          `[DOWNLOAD-SOURCE] ZIP created: ${includedFiles} files, ${Math.round(zipBuffer.length / 1024)}KB`,
+        );
+
         // Return the ZIP data as base64 for client download
         return {
           filename,
