@@ -433,6 +433,7 @@ export const projectsRouter = createTRPCRouter({
           '.nyc_output/',
           '*.tsbuildinfo',
           '.swc/',
+          'app/favicon.ico',
         ];
 
         // Build find command to list ONLY FILES excluding unwanted patterns
@@ -515,6 +516,9 @@ export const projectsRouter = createTRPCRouter({
               } else if (pattern.startsWith('*.')) {
                 // For file extension patterns like '*.log'
                 return file.endsWith(pattern.substring(1));
+              } else if (pattern.includes('/')) {
+                // For specific file paths like 'app/favicon.ico'
+                return file === pattern || file.endsWith('/' + pattern);
               } else {
                 // For specific file names
                 return file.includes(cleanPattern);
@@ -555,7 +559,7 @@ export const projectsRouter = createTRPCRouter({
         
         // Debug: Test our filtering logic with the problematic files
         console.log('\n[DOWNLOAD] === FILTER DEBUG ===');
-        const testFiles = ['app/layout.tsx', 'nextjs-app/app/layout.tsx', 'out/test.js', 'node_modules/test.js'];
+        const testFiles = ['app/layout.tsx', 'app/favicon.ico', 'nextjs-app/app/layout.tsx', 'out/test.js', 'node_modules/test.js'];
         testFiles.forEach(testFile => {
           const matchingPatterns = excludePatterns.filter((pattern) => {
             const cleanPattern = pattern.replace('/', '');
@@ -565,6 +569,9 @@ export const projectsRouter = createTRPCRouter({
               return segments.includes(cleanPattern);
             } else if (pattern.startsWith('*.')) {
               return testFile.endsWith(pattern.substring(1));
+            } else if (pattern.includes('/')) {
+              // For specific file paths like 'app/favicon.ico'
+              return testFile === pattern || testFile.endsWith('/' + pattern);
             } else {
               return testFile.includes(cleanPattern);
             }
