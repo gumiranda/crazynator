@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
 import { useTRPC } from '@/trpc/client';
 import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { GitHubSettings } from '@/modules/github/ui/components/github-settings';
 import { toast } from 'sonner';
 
 // Interface is no longer needed as we use Prisma type directly
@@ -125,8 +124,6 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* GitHub Integration Section */}
-        <GitHubSettings />
       </div>
     </div>
   );
