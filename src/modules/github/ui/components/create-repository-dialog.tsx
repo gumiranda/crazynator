@@ -190,7 +190,7 @@ export function CreateRepositoryDialog({
           {trigger || (
             <Button variant="outline" size="sm">
               <Github className="h-4 w-4 mr-2" />
-              Create Repository3
+              Create Repository
             </Button>
           )}
         </DialogTrigger>
@@ -288,7 +288,7 @@ export function CreateRepositoryDialog({
         {trigger || (
           <Button variant="outline" size="sm">
             <Github className="h-4 w-4 mr-2" />
-            Create Repository2
+            Create Repository
           </Button>
         )}
       </DialogTrigger>
@@ -303,7 +303,7 @@ export function CreateRepositoryDialog({
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="border rounded-lg p-4 space-y-2 bg-primary">
+              <div className="border rounded-lg p-4 space-y-2 bg-background">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-green-900">{createdRepository.name}</h4>
                   <Badge variant={createdRepository.isPrivate ? 'secondary' : 'outline'}>
@@ -432,7 +432,7 @@ export function CreateRepositoryDialog({
                     {createRepositoryMutation.isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Create Repository1
+                    Create Repository
                   </Button>
                 </div>
               </form>
