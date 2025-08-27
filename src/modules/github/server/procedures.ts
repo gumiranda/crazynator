@@ -64,7 +64,7 @@ export const githubRouter = createTRPCRouter({
     }
   }),
   
-  // Create a new repository for a project
+  // Create a new repository for a project using all files from sandbox
   createRepository: protectedProcedure
     .input(
       z.object({
@@ -75,106 +75,19 @@ export const githubRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      // Import the projects router to use createGitHubRepoWithFullProject
+      const { projectsRouter } = await import('@/modules/projects/server/procedures');
+      
       try {
-        // Check if user has a GitHub connection
-        const connection = await prisma.gitHubConnection.findUnique({
-          where: { userId: ctx.auth.userId },
-        });
-        
-        if (!connection) {
-          throw new TRPCError({
-            code: 'PRECONDITION_FAILED',
-            message: 'GitHub account not connected',
-          });
-        }
-        
-        // Check if project exists and belongs to user
-        const project = await prisma.project.findFirst({
-          where: {
-            id: input.projectId,
-            userId: ctx.auth.userId,
-          },
-          include: {
-            githubRepository: true,
-            messages: {
-              include: {
-                fragment: true,
-              },
-            },
-          },
-        });
-        
-        if (!project) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Project not found',
-          });
-        }
-        
-        // Check if project already has a GitHub repository
-        if (project.githubRepository) {
-          throw new TRPCError({
-            code: 'CONFLICT',
-            message: 'Project already has a GitHub repository',
-          });
-        }
-        
-        // Decrypt access token
-        const accessToken = decryptToken(connection.accessToken);
-        
-        // Create repository on GitHub
-        const githubRepo = await createGitHubRepo(accessToken, {
-          name: input.name,
+        // Use the new createGitHubRepoWithFullProject function that collects all files from sandbox
+        const result = await projectsRouter.createCaller(ctx).createGitHubRepoWithFullProject({
+          projectId: input.projectId,
+          repositoryName: input.name,
           description: input.description,
-          private: input.isPrivate,
-          auto_init: true,
+          isPrivate: input.isPrivate,
         });
         
-        // Store repository in database
-        const dbRepository = await prisma.gitHubRepository.create({
-          data: {
-            projectId: input.projectId,
-            githubConnectionId: connection.id,
-            githubRepoId: githubRepo.id,
-            name: githubRepo.name,
-            fullName: githubRepo.full_name,
-            description: githubRepo.description,
-            isPrivate: githubRepo.private,
-            defaultBranch: githubRepo.default_branch,
-            htmlUrl: githubRepo.html_url,
-            cloneUrl: githubRepo.clone_url,
-            syncStatus: 'PENDING',
-          },
-        });
-        
-        // Trigger initial sync using background job
-        try {
-          await inngest.send({
-            name: 'github/initial-sync',
-            data: {
-              repositoryId: dbRepository.id,
-            },
-          });
-        } catch (syncError) {
-          console.error('Failed to trigger initial sync:', syncError);
-          // Update sync status to failed
-          await prisma.gitHubRepository.update({
-            where: { id: dbRepository.id },
-            data: {
-              syncStatus: 'FAILED',
-              syncError: syncError instanceof Error ? syncError.message : 'Failed to trigger sync',
-            },
-          });
-        }
-        
-        return {
-          id: dbRepository.id,
-          name: githubRepo.name,
-          fullName: githubRepo.full_name,
-          htmlUrl: githubRepo.html_url,
-          isPrivate: githubRepo.private,
-          syncStatus: dbRepository.syncStatus,
-        };
+        return result.repository;
         
       } catch (error) {
         console.error('GitHub repository creation error:', error);

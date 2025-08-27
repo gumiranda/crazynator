@@ -434,6 +434,12 @@ export const projectsRouter = createTRPCRouter({
           '*.tsbuildinfo',
           '.swc/',
           'app/favicon.ico',
+          // E2B sandbox specific files - NEVER include these
+          '.bash_logout',
+          '.bashrc',
+          '.e2b',
+          '.profile',
+          'compile_page.sh',
         ];
 
         // Build find command to list ONLY FILES excluding unwanted patterns
@@ -556,14 +562,20 @@ export const projectsRouter = createTRPCRouter({
         // Check for all .tsx files to see what we're getting
         const tsxFiles = allFiles.filter((f) => f.endsWith('.tsx'));
         console.log(`[DOWNLOAD] All .tsx files found (${tsxFiles.length}):`, tsxFiles.slice(0, 20));
-        
+
         // Debug: Test our filtering logic with the problematic files
         console.log('\n[DOWNLOAD] === FILTER DEBUG ===');
-        const testFiles = ['app/layout.tsx', 'app/favicon.ico', 'nextjs-app/app/layout.tsx', 'out/test.js', 'node_modules/test.js'];
-        testFiles.forEach(testFile => {
+        const testFiles = [
+          'app/layout.tsx',
+          'app/favicon.ico',
+          'nextjs-app/app/layout.tsx',
+          'out/test.js',
+          'node_modules/test.js',
+        ];
+        testFiles.forEach((testFile) => {
           const matchingPatterns = excludePatterns.filter((pattern) => {
             const cleanPattern = pattern.replace('/', '');
-            
+
             if (pattern.endsWith('/')) {
               const segments = testFile.split('/');
               return segments.includes(cleanPattern);
@@ -576,7 +588,9 @@ export const projectsRouter = createTRPCRouter({
               return testFile.includes(cleanPattern);
             }
           });
-          console.log(`[DOWNLOAD] ${testFile} -> matches: [${matchingPatterns.join(', ')}] -> ${matchingPatterns.length > 0 ? 'EXCLUDED' : 'INCLUDED'}`);
+          console.log(
+            `[DOWNLOAD] ${testFile} -> matches: [${matchingPatterns.join(', ')}] -> ${matchingPatterns.length > 0 ? 'EXCLUDED' : 'INCLUDED'}`,
+          );
         });
         console.log('[DOWNLOAD] === END FILTER DEBUG ===\n');
 
@@ -697,6 +711,917 @@ export const projectsRouter = createTRPCRouter({
       }
     }),
 
+  syncFullProjectToGitHub: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+        commitMessage: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+          githubRepository: {
+            include: {
+              githubConnection: true,
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      if (!project.githubRepository) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project does not have a GitHub repository configured',
+        });
+      }
+
+      // Find the latest fragment with sandbox
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.sandboxUrl,
+      );
+
+      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No active sandbox found for this project',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+
+      // Check if fragment is old (sandbox likely expired)
+      const fragmentAge = Date.now() - fragment.createdAt.getTime();
+      const isOldFragment = fragmentAge > 15 * 60 * 1000; // 15 minutes (E2B timeout)
+
+      if (isOldFragment) {
+        console.log(
+          `[GITHUB_SYNC] Fragment is ${Math.round(fragmentAge / 60000)} minutes old, sandbox likely expired`,
+        );
+      }
+
+      try {
+        // Extract sandboxId from E2B URL
+        const url = new URL(fragment.sandboxUrl);
+        const hostname = url.hostname;
+        const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+        if (!sandboxId || sandboxId === 'www' || sandboxId === 'https') {
+          throw new Error('Invalid sandbox ID extracted from URL');
+        }
+
+        console.log(`[GITHUB_SYNC] Attempting to connect to sandbox: ${sandboxId}`);
+
+        // Try to connect to sandbox
+        let sandbox;
+        const allFiles: Record<string, string> = {};
+
+        try {
+          sandbox = await getSandbox(sandboxId);
+
+          // Use the same exclusion patterns as downloadFullProject
+          const excludePatterns = [
+            'nextjs-app',
+            'node_modules/',
+            '.git/',
+            '.next/',
+            'dist/',
+            'build/',
+            '.cache/',
+            '.tmp/',
+            '.turbo/',
+            '.vercel/',
+            'out/',
+            '.DS_Store',
+            'Thumbs.db',
+            '*.log',
+            '.env',
+            '.env.local',
+            '.env.development',
+            '.env.production',
+            '.env.*.local',
+            'coverage/',
+            '.nyc_output/',
+            '*.tsbuildinfo',
+            '.swc/',
+            'app/favicon.ico',
+            // E2B sandbox specific files - NEVER include these in GitHub
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
+          ];
+
+          // Build find command to list ONLY FILES excluding unwanted patterns
+          const excludeArgs = excludePatterns
+            .map((pattern) => {
+              if (pattern.endsWith('/')) {
+                return `-path "*/${pattern}*" -prune -o`;
+              } else if (pattern.includes('*')) {
+                return `-name "${pattern}" -prune -o`;
+              } else {
+                return `-name "${pattern}" -prune -o`;
+              }
+            })
+            .join(' ');
+
+          const findCommand = `find /home/user -type f ${excludeArgs} -print`;
+
+          console.log(`[GITHUB_SYNC] Executing find command with exclusions`);
+
+          // Get list of all files
+          const listBuffer = { stdout: '', stderr: '' };
+          await sandbox.commands.run(findCommand, {
+            onStdout: (data: string) => {
+              listBuffer.stdout += data;
+            },
+            onStderr: (data: string) => {
+              listBuffer.stderr += data;
+            },
+          });
+
+          // Parse the raw output
+          const rawFiles = listBuffer.stdout
+            .split('\n')
+            .filter((file) => file.trim())
+            .map((file) => file.trim().replace('/home/user/', ''));
+
+          const validFiles = rawFiles
+            .filter((file) => !file.includes('/.')) // Remove hidden files
+            .filter((file) => {
+              if (file.length === 0) return false;
+
+              // Since we're using `find -type f`, we should only get files
+              // But let's keep a basic check for obviously problematic paths
+              if (!file || file === '.' || file === '..' || file.endsWith('/')) {
+                console.log(`[GITHUB_SYNC] Skipping invalid path: ${file}`);
+                return false;
+              }
+
+              // CRITICAL: Double-check we NEVER include node_modules or other excluded patterns
+              const matchingPatterns = excludePatterns.filter((pattern) => {
+                const cleanPattern = pattern.replace('/', '');
+
+                // More precise matching - avoid false positives like "app" matching "out"
+                if (pattern.endsWith('/')) {
+                  // For directory patterns like 'out/', 'node_modules/', match only directory paths
+                  const segments = file.split('/');
+                  return segments.includes(cleanPattern);
+                } else if (pattern.startsWith('*.')) {
+                  // For file extension patterns like '*.log'
+                  return file.endsWith(pattern.substring(1));
+                } else if (pattern.includes('/')) {
+                  // For specific file paths like 'app/favicon.ico'
+                  return file === pattern || file.endsWith('/' + pattern);
+                } else {
+                  // For specific file names
+                  return file.includes(cleanPattern);
+                }
+              });
+
+              if (matchingPatterns.length > 0) {
+                console.log(
+                  `[GITHUB_SYNC] Excluding file: ${file} - matches patterns: ${matchingPatterns.join(', ')}`,
+                );
+                return false;
+              }
+
+              return true;
+            });
+
+          console.log(`[GITHUB_SYNC] Found ${validFiles.length} files to sync`);
+
+          // Read all files and build the files object
+          for (const filePath of validFiles) {
+            try {
+              // CRITICAL: Never include node_modules
+              if (filePath.includes('node_modules')) {
+                console.error(
+                  `[GITHUB_SYNC] CRITICAL: Attempted to include node_modules file: ${filePath}`,
+                );
+                continue;
+              }
+
+              // Try to read the file
+              try {
+                const content = await sandbox.files.read(filePath);
+                allFiles[filePath] = content;
+              } catch (readError) {
+                // Check if it's specifically a directory error
+                if (readError instanceof Error) {
+                  const errorMsg = readError.message.toLowerCase();
+
+                  if (
+                    errorMsg.includes('is a directory') ||
+                    errorMsg.includes('eisdir') ||
+                    (errorMsg.includes('invalidargument') && errorMsg.includes('directory'))
+                  ) {
+                    console.log(`[GITHUB_SYNC] Path is directory (skipping): ${filePath}`);
+                    continue;
+                  }
+
+                  // For permission errors, binary files, etc.
+                  if (
+                    errorMsg.includes('permission') ||
+                    errorMsg.includes('binary') ||
+                    errorMsg.includes('not found')
+                  ) {
+                    console.warn(`[GITHUB_SYNC] Cannot read ${filePath}: ${readError.message}`);
+                    continue;
+                  }
+                }
+
+                // For unexpected errors, log details but continue
+                console.warn(`[GITHUB_SYNC] Unexpected error reading ${filePath}:`, readError);
+                continue;
+              }
+            } catch (outerError) {
+              console.warn(`[GITHUB_SYNC] Outer error processing ${filePath}:`, outerError);
+              continue;
+            }
+          }
+        } catch (sandboxError) {
+          console.error(`[GITHUB_SYNC] Sandbox connection failed:`, sandboxError);
+
+          // Fallback to database files if sandbox is expired
+          if (
+            sandboxError instanceof Error &&
+            (sandboxError.message.includes('404') ||
+              sandboxError.message.includes("doesn't exist") ||
+              sandboxError.message.includes('not found'))
+          ) {
+            console.log(`[GITHUB_SYNC] Sandbox expired, falling back to database files`);
+
+            const files = fragment.files as Record<string, string>;
+            if (!files || Object.keys(files).length === 0) {
+              throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: 'Sandbox is no longer available and no files found in database.',
+              });
+            }
+
+            // Apply exclusion patterns to database files
+            const sourceExcludePatterns = [
+              'node_modules',
+              '.git',
+              '.next',
+              'dist',
+              'build',
+              '.cache',
+              '.tmp',
+              '.turbo',
+              '.vercel',
+              'out',
+              '.env',
+              '.DS_Store',
+              'Thumbs.db',
+              '.bash_logout',
+              '.bashrc',
+              '.e2b',
+              '.profile',
+              'compile_page.sh',
+            ];
+
+            for (const [filePath, content] of Object.entries(files)) {
+              const shouldExclude = sourceExcludePatterns.some(
+                (pattern) => filePath.includes(pattern) || filePath.startsWith(pattern + '/'),
+              );
+
+              if (!shouldExclude && !filePath.includes('node_modules')) {
+                allFiles[filePath] = content;
+              }
+            }
+          } else {
+            throw sandboxError;
+          }
+        }
+
+        if (Object.keys(allFiles).length === 0) {
+          throw new Error('No files found to sync');
+        }
+
+        console.log(`[GITHUB_SYNC] Syncing ${Object.keys(allFiles).length} files to GitHub`);
+
+        // Update the fragment with all the collected files
+        await prisma.fragment.update({
+          where: { id: fragment.id },
+          data: {
+            files: allFiles,
+          },
+        });
+
+        // Trigger GitHub sync
+        await inngest.send({
+          name: 'github/sync',
+          data: {
+            fragmentId: fragment.id,
+            projectId: input.projectId,
+            commitMessage:
+              input.commitMessage || `Sync all files from sandbox - ${new Date().toISOString()}`,
+          },
+        });
+
+        return {
+          success: true,
+          message: `Started sync of ${Object.keys(allFiles).length} files to GitHub repository`,
+          fileCount: Object.keys(allFiles).length,
+          repository: project.githubRepository.fullName,
+        };
+      } catch (error) {
+        console.error('Failed to sync full project to GitHub:', error);
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to sync full project to GitHub',
+        });
+      }
+    }),
+
+  createGitHubRepoWithFullProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+        repositoryName: z.string().min(1, 'Repository name is required'),
+        description: z.string().optional(),
+        isPrivate: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+          githubRepository: true,
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      if (project.githubRepository) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Project already has a GitHub repository',
+        });
+      }
+
+      // Check if user has GitHub connection
+      const githubConnection = await prisma.gitHubConnection.findUnique({
+        where: { userId: ctx.auth.userId },
+      });
+
+      if (!githubConnection) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No GitHub connection found. Please connect your GitHub account first.',
+        });
+      }
+
+      // Find the latest fragment with sandbox
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.sandboxUrl,
+      );
+
+      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No active sandbox found for this project',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+
+      try {
+        // Extract sandboxId from E2B URL and collect all files (same logic as above)
+        const url = new URL(fragment.sandboxUrl);
+        const hostname = url.hostname;
+        const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+        if (!sandboxId || sandboxId === 'www' || sandboxId === 'https') {
+          throw new Error('Invalid sandbox ID extracted from URL');
+        }
+
+        console.log(`[CREATE_GITHUB_REPO] Collecting files from sandbox: ${sandboxId}`);
+
+        const allFiles: Record<string, string> = {};
+
+        try {
+          const sandbox = await getSandbox(sandboxId);
+
+          // Same exclusion logic as above
+          const excludePatterns = [
+            'nextjs-app',
+            'node_modules/',
+            '.git/',
+            '.next/',
+            'dist/',
+            'build/',
+            '.cache/',
+            '.tmp/',
+            '.turbo/',
+            '.vercel/',
+            'out/',
+            '.DS_Store',
+            'Thumbs.db',
+            '*.log',
+            '.env',
+            '.env.local',
+            '.env.development',
+            '.env.production',
+            '.env.*.local',
+            'coverage/',
+            '.nyc_output/',
+            '*.tsbuildinfo',
+            '.swc/',
+            'app/favicon.ico',
+            // E2B sandbox specific files - NEVER include these in GitHub
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
+          ];
+
+          const excludeArgs = excludePatterns
+            .map((pattern) => {
+              if (pattern.endsWith('/')) {
+                return `-path "*/${pattern}*" -prune -o`;
+              } else if (pattern.includes('*')) {
+                return `-name "${pattern}" -prune -o`;
+              } else {
+                return `-name "${pattern}" -prune -o`;
+              }
+            })
+            .join(' ');
+
+          const findCommand = `find /home/user -type f ${excludeArgs} -print`;
+
+          const listBuffer = { stdout: '', stderr: '' };
+          await sandbox.commands.run(findCommand, {
+            onStdout: (data: string) => {
+              listBuffer.stdout += data;
+            },
+            onStderr: (data: string) => {
+              listBuffer.stderr += data;
+            },
+          });
+
+          const rawFiles = listBuffer.stdout
+            .split('\n')
+            .filter((file) => file.trim())
+            .map((file) => file.trim().replace('/home/user/', ''));
+
+          const validFiles = rawFiles
+            .filter((file) => !file.includes('/.')) // Remove hidden files
+            .filter((file) => {
+              if (file.length === 0) return false;
+
+              // Since we're using `find -type f`, we should only get files
+              // But let's keep a basic check for obviously problematic paths
+              if (!file || file === '.' || file === '..' || file.endsWith('/')) {
+                console.log(`[CREATE_GITHUB_REPO] Skipping invalid path: ${file}`);
+                return false;
+              }
+
+              // CRITICAL: Double-check we NEVER include node_modules or other excluded patterns
+              const matchingPatterns = excludePatterns.filter((pattern) => {
+                const cleanPattern = pattern.replace('/', '');
+
+                // More precise matching - avoid false positives like "app" matching "out"
+                if (pattern.endsWith('/')) {
+                  // For directory patterns like 'out/', 'node_modules/', match only directory paths
+                  const segments = file.split('/');
+                  return segments.includes(cleanPattern);
+                } else if (pattern.startsWith('*.')) {
+                  // For file extension patterns like '*.log'
+                  return file.endsWith(pattern.substring(1));
+                } else if (pattern.includes('/')) {
+                  // For specific file paths like 'app/favicon.ico'
+                  return file === pattern || file.endsWith('/' + pattern);
+                } else {
+                  // For specific file names
+                  return file.includes(cleanPattern);
+                }
+              });
+
+              if (matchingPatterns.length > 0) {
+                console.log(
+                  `[CREATE_GITHUB_REPO] Excluding file: ${file} - matches patterns: ${matchingPatterns.join(', ')}`,
+                );
+                return false;
+              }
+
+              return true;
+            });
+
+          console.log(`[CREATE_GITHUB_REPO] Found ${validFiles.length} files to include`);
+
+          // Read all files
+          for (const filePath of validFiles) {
+            try {
+              // CRITICAL: Never include node_modules
+              if (filePath.includes('node_modules')) {
+                console.error(
+                  `[CREATE_GITHUB_REPO] CRITICAL: Skipping node_modules file: ${filePath}`,
+                );
+                continue;
+              }
+
+              // Try to read the file
+              try {
+                const content = await sandbox.files.read(filePath);
+                allFiles[filePath] = content;
+              } catch (readError) {
+                // Check if it's specifically a directory error
+                if (readError instanceof Error) {
+                  const errorMsg = readError.message.toLowerCase();
+
+                  if (
+                    errorMsg.includes('is a directory') ||
+                    errorMsg.includes('eisdir') ||
+                    (errorMsg.includes('invalidargument') && errorMsg.includes('directory'))
+                  ) {
+                    console.log(`[CREATE_GITHUB_REPO] Path is directory (skipping): ${filePath}`);
+                    continue;
+                  }
+
+                  // For permission errors, binary files, etc.
+                  if (
+                    errorMsg.includes('permission') ||
+                    errorMsg.includes('binary') ||
+                    errorMsg.includes('not found')
+                  ) {
+                    console.warn(
+                      `[CREATE_GITHUB_REPO] Cannot read ${filePath}: ${readError.message}`,
+                    );
+                    continue;
+                  }
+                }
+
+                // For unexpected errors, log details but continue
+                console.warn(
+                  `[CREATE_GITHUB_REPO] Unexpected error reading ${filePath}:`,
+                  readError,
+                );
+                continue;
+              }
+            } catch (outerError) {
+              console.warn(`[CREATE_GITHUB_REPO] Outer error processing ${filePath}:`, outerError);
+              continue;
+            }
+          }
+        } catch (sandboxError) {
+          console.error(
+            `[CREATE_GITHUB_REPO] Sandbox connection failed, using database files:`,
+            sandboxError,
+          );
+
+          // Fallback to database files
+          const files = fragment.files as Record<string, string>;
+          if (!files || Object.keys(files).length === 0) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'No files found to create repository with.',
+            });
+          }
+
+          const sourceExcludePatterns = [
+            'node_modules',
+            '.git',
+            '.next',
+            'dist',
+            'build',
+            '.cache',
+            '.tmp',
+            '.turbo',
+            '.vercel',
+            'out',
+            '.env',
+            '.DS_Store',
+            'Thumbs.db',
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
+          ];
+
+          for (const [filePath, content] of Object.entries(files)) {
+            const shouldExclude = sourceExcludePatterns.some(
+              (pattern) => filePath.includes(pattern) || filePath.startsWith(pattern + '/'),
+            );
+
+            if (!shouldExclude && !filePath.includes('node_modules')) {
+              allFiles[filePath] = content;
+            }
+          }
+        }
+
+        if (Object.keys(allFiles).length === 0) {
+          throw new Error('No files found to create repository with');
+        }
+
+        console.log(
+          `[CREATE_GITHUB_REPO] Creating repository with ${Object.keys(allFiles).length} files`,
+        );
+
+        // Update fragment with collected files
+        await prisma.fragment.update({
+          where: { id: fragment.id },
+          data: {
+            files: allFiles,
+          },
+        });
+
+        // Create GitHub repository using the existing GitHub library
+        const { decryptToken, createRepository } = await import('@/lib/github');
+        const accessToken = decryptToken(githubConnection.accessToken);
+
+        const githubRepo = await createRepository(accessToken, {
+          name: input.repositoryName,
+          description: input.description || `Generated project: ${project.name}`,
+          private: input.isPrivate,
+          auto_init: true,
+        });
+
+        // Create GitHub repository record in database
+        const createdRepository = await prisma.gitHubRepository.create({
+          data: {
+            githubRepoId: githubRepo.id,
+            name: githubRepo.name,
+            fullName: githubRepo.full_name,
+            description: githubRepo.description,
+            isPrivate: githubRepo.private,
+            htmlUrl: githubRepo.html_url,
+            cloneUrl: githubRepo.clone_url,
+            defaultBranch: githubRepo.default_branch,
+            projectId: input.projectId,
+            githubConnectionId: githubConnection.id,
+            syncStatus: 'PENDING',
+          },
+        });
+
+        // Trigger initial sync to push all files
+        await inngest.send({
+          name: 'github/initial-sync',
+          data: {
+            repositoryId: createdRepository.id,
+          },
+        });
+
+        return {
+          success: true,
+          message: `Created GitHub repository and started sync of ${Object.keys(allFiles).length} files`,
+          repository: {
+            id: createdRepository.id,
+            name: githubRepo.name,
+            fullName: githubRepo.full_name,
+            htmlUrl: githubRepo.html_url,
+            fileCount: Object.keys(allFiles).length,
+          },
+        };
+      } catch (error) {
+        console.error('Failed to create GitHub repository with full project:', error);
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create GitHub repository with full project',
+        });
+      }
+    }),
+
+  pullFromGitHub: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+          githubRepository: {
+            include: {
+              githubConnection: true,
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      if (!project.githubRepository) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project does not have a GitHub repository configured',
+        });
+      }
+
+      // Find the latest fragment with sandbox
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.sandboxUrl,
+      );
+
+      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No active sandbox found for this project',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+      const repository = project.githubRepository;
+
+      console.log(`[PULL_FROM_GITHUB] Starting pull from ${repository.fullName}`);
+
+      try {
+        // Import GitHub functions
+        const { decryptToken, createGitHubClient } = await import('@/lib/github');
+        const accessToken = decryptToken(repository.githubConnection.accessToken);
+        const octokit = createGitHubClient(accessToken);
+
+        const [owner, repo] = repository.fullName.split('/');
+
+        // Get all files from GitHub repository
+        console.log(`[PULL_FROM_GITHUB] Fetching files from GitHub repository`);
+        
+        // Get the repository tree (all files)
+        const { data: tree } = await octokit.rest.git.getTree({
+          owner,
+          repo,
+          tree_sha: repository.defaultBranch,
+          recursive: 'true',
+        });
+
+        const githubFiles: Record<string, string> = {};
+        let updatedFiles = 0;
+        let newFiles = 0;
+        let processedFiles = 0;
+
+        // Filter only files (not directories/submodules)
+        const fileEntries = tree.tree.filter(item => item.type === 'blob' && item.path);
+
+        console.log(`[PULL_FROM_GITHUB] Found ${fileEntries.length} files in GitHub repository`);
+
+        // Get content for each file
+        for (const file of fileEntries) {
+          if (!file.path || !file.sha) continue;
+
+          try {
+            // Get file content from GitHub
+            const { data: fileData } = await octokit.rest.git.getBlob({
+              owner,
+              repo,
+              file_sha: file.sha,
+            });
+
+            // Decode base64 content
+            const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+            githubFiles[file.path] = content;
+            processedFiles++;
+
+            // Check if file exists in current fragment and if content is different
+            const currentFiles = fragment.files as Record<string, string> || {};
+            const currentContent = currentFiles[file.path];
+
+            if (!currentContent) {
+              newFiles++;
+              console.log(`[PULL_FROM_GITHUB] New file from GitHub: ${file.path}`);
+            } else if (currentContent !== content) {
+              updatedFiles++;
+              console.log(`[PULL_FROM_GITHUB] Updated file from GitHub: ${file.path}`);
+            }
+
+          } catch (fileError) {
+            console.warn(`[PULL_FROM_GITHUB] Failed to fetch file ${file.path}:`, fileError);
+            continue;
+          }
+        }
+
+        // Update fragment with GitHub files
+        const mergedFiles = {
+          ...(fragment.files as Record<string, string> || {}),
+          ...githubFiles,
+        };
+
+        await prisma.fragment.update({
+          where: { id: fragment.id },
+          data: {
+            files: mergedFiles,
+          },
+        });
+
+        // Try to update sandbox if available
+        let sandboxUpdated = false;
+        try {
+          // Extract sandboxId from E2B URL
+          const url = new URL(fragment.sandboxUrl);
+          const hostname = url.hostname;
+          const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+          if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
+            console.log(`[PULL_FROM_GITHUB] Attempting to update sandbox: ${sandboxId}`);
+            
+            const sandbox = await getSandbox(sandboxId);
+
+            // Update changed/new files in sandbox
+            for (const [filePath, content] of Object.entries(githubFiles)) {
+              const currentFiles = fragment.files as Record<string, string> || {};
+              const currentContent = currentFiles[filePath];
+
+              // Only update if file is new or changed
+              if (!currentContent || currentContent !== content) {
+                try {
+                  await sandbox.files.write(filePath, content);
+                  console.log(`[PULL_FROM_GITHUB] Updated in sandbox: ${filePath}`);
+                } catch (writeError) {
+                  console.warn(`[PULL_FROM_GITHUB] Failed to write to sandbox ${filePath}:`, writeError);
+                }
+              }
+            }
+            sandboxUpdated = true;
+          }
+        } catch (sandboxError) {
+          console.warn(`[PULL_FROM_GITHUB] Sandbox update failed (continuing):`, sandboxError);
+        }
+
+        console.log(`[PULL_FROM_GITHUB] Pull completed: ${processedFiles} processed, ${newFiles} new, ${updatedFiles} updated`);
+
+        return {
+          success: true,
+          message: `Pulled ${processedFiles} files from GitHub`,
+          stats: {
+            processedFiles,
+            newFiles,
+            updatedFiles,
+            sandboxUpdated,
+          },
+          repository: repository.fullName,
+        };
+
+      } catch (error) {
+        console.error('Failed to pull from GitHub:', error);
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to pull changes from GitHub',
+        });
+      }
+    }),
+
   downloadZip: protectedProcedure
     .input(
       z.object({
@@ -761,6 +1686,11 @@ export const projectsRouter = createTRPCRouter({
           '.env',
           '.DS_Store',
           'Thumbs.db',
+          '.bash_logout',
+          '.bashrc',
+          '.e2b',
+          '.profile',
+          'compile_page.sh',
         ];
 
         console.log(

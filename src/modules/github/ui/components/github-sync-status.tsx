@@ -3,9 +3,19 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertCircle, CheckCircle2, Clock, GitBranch, Github, Loader2, ExternalLink, RefreshCw } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  GitBranch,
+  Loader2,
+  ExternalLink,
+  RefreshCw,
+  Upload,
+  Github,
+} from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface GitHubSyncStatusProps {
@@ -14,7 +24,51 @@ interface GitHubSyncStatusProps {
 
 export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
   const trpc = useTRPC();
-  const { data: repository, refetch } = useQuery(trpc.github.getRepositoryByProject.queryOptions({ projectId }));
+  const { data: repository, refetch } = useQuery(
+    trpc.github.getRepositoryByProject.queryOptions({ projectId }),
+  );
+
+  // Sync all files from sandbox mutation
+  const syncFullProject = useMutation(
+    trpc.projects.syncFullProjectToGitHub.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`Started sync of ${data.fileCount} files to ${data.repository}`, {
+          description: 'GitHub sync is running in the background. Check status for updates.',
+        });
+        // Refresh repository status after a short delay
+        setTimeout(() => refetch(), 1000);
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to sync full project to GitHub');
+      },
+    }),
+  );
+
+  // Pull changes from GitHub mutation
+  const pullFromGitHub = useMutation(
+    trpc.projects.pullFromGitHub.mutationOptions({
+      onSuccess: (data) => {
+        const { stats } = data;
+        if (stats.newFiles > 0 || stats.updatedFiles > 0) {
+          toast.success(
+            `Pulled ${stats.processedFiles} files from GitHub`,
+            {
+              description: `${stats.newFiles} new files, ${stats.updatedFiles} updated files${stats.sandboxUpdated ? ' (sandbox updated)' : ' (fragment updated)'}`,
+            }
+          );
+        } else {
+          toast.success('Repository is up to date', {
+            description: 'No changes found in GitHub repository',
+          });
+        }
+        // Refresh repository status
+        refetch();
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to pull changes from GitHub');
+      },
+    }),
+  );
 
   if (!repository) {
     return null;
@@ -66,8 +120,12 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
   };
 
   const handleRefresh = () => {
-    refetch();
-    toast.success('Repository status refreshed');
+    // Pull changes from GitHub instead of just refreshing status
+    pullFromGitHub.mutate({ projectId });
+  };
+
+  const handleSyncFullProject = () => {
+    syncFullProject.mutate({ projectId });
   };
 
   return (
@@ -77,8 +135,8 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
           <TooltipTrigger asChild>
             <div className="flex items-center gap-2">
               <Github className="h-4 w-4 text-muted-foreground" />
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className={`${getSyncStatusColor(repository.syncStatus)} flex items-center gap-1`}
               >
                 {getSyncStatusIcon(repository.syncStatus)}
@@ -96,9 +154,7 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
                 </p>
               )}
               {repository.syncError && (
-                <p className="text-xs text-red-600">
-                  Error: {repository.syncError}
-                </p>
+                <p className="text-xs text-red-600">Error: {repository.syncError}</p>
               )}
               <div className="flex items-center gap-1 pt-1">
                 <GitBranch className="h-3 w-3" />
@@ -118,14 +174,40 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleRefresh}
+                onClick={handleSyncFullProject}
+                disabled={syncFullProject.isPending || repository.syncStatus === 'IN_PROGRESS'}
                 className="h-6 w-6 p-0"
               >
-                <RefreshCw className="h-3 w-3" />
+                {syncFullProject.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Upload className="h-3 w-3" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Sync all files from sandbox</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRefresh} 
+                disabled={pullFromGitHub.isPending}
+                className="h-6 w-6 p-0"
+              >
+                {pullFromGitHub.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              Refresh sync status
+              Pull changes from GitHub to sandbox and fragment
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -142,9 +224,7 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
                 <ExternalLink className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              Open repository on GitHub
-            </TooltipContent>
+            <TooltipContent>Open repository on GitHub</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
@@ -158,7 +238,9 @@ interface CompactGitHubSyncStatusProps {
 
 export function CompactGitHubSyncStatus({ projectId }: CompactGitHubSyncStatusProps) {
   const trpc = useTRPC();
-  const { data: repository } = useQuery(trpc.github.getRepositoryByProject.queryOptions({ projectId }));
+  const { data: repository } = useQuery(
+    trpc.github.getRepositoryByProject.queryOptions({ projectId }),
+  );
 
   if (!repository) {
     return null;
@@ -199,7 +281,7 @@ export function CompactGitHubSyncStatus({ projectId }: CompactGitHubSyncStatusPr
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={`flex items-center gap-1 ${getSyncStatusColor(repository.syncStatus)}`}>
-            <Github className="h-3 w-3" />
+            <Github className="h-4 w-4" />
             {getSyncStatusIcon(repository.syncStatus)}
           </div>
         </TooltipTrigger>
@@ -209,13 +291,10 @@ export function CompactGitHubSyncStatus({ projectId }: CompactGitHubSyncStatusPr
             <p className="text-xs text-muted-foreground">
               {repository.syncStatus === 'SUCCESS' && repository.lastSyncAt
                 ? `Synced ${new Date(repository.lastSyncAt).toLocaleString()}`
-                : `Status: ${repository.syncStatus}`
-              }
+                : `Status: ${repository.syncStatus}`}
             </p>
             {repository.syncError && (
-              <p className="text-xs text-red-600">
-                Error: {repository.syncError}
-              </p>
+              <p className="text-xs text-red-600">Error: {repository.syncError}</p>
             )}
           </div>
         </TooltipContent>
