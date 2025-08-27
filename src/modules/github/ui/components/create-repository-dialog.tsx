@@ -303,7 +303,7 @@ export function CreateRepositoryDialog({
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="border rounded-lg p-4 space-y-2 bg-green-50 border-green-200">
+              <div className="border rounded-lg p-4 space-y-2 bg-primary">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-green-900">{createdRepository.name}</h4>
                   <Badge variant={createdRepository.isPrivate ? 'secondary' : 'outline'}>
@@ -428,11 +428,7 @@ export function CreateRepositoryDialog({
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={createRepositoryMutation.isPending}
-                    className="bg-gray-900 hover:bg-gray-800"
-                  >
+                  <Button type="submit" disabled={createRepositoryMutation.isPending}>
                     {createRepositoryMutation.isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}

@@ -556,14 +556,20 @@ export const projectsRouter = createTRPCRouter({
         // Check for all .tsx files to see what we're getting
         const tsxFiles = allFiles.filter((f) => f.endsWith('.tsx'));
         console.log(`[DOWNLOAD] All .tsx files found (${tsxFiles.length}):`, tsxFiles.slice(0, 20));
-        
+
         // Debug: Test our filtering logic with the problematic files
         console.log('\n[DOWNLOAD] === FILTER DEBUG ===');
-        const testFiles = ['app/layout.tsx', 'app/favicon.ico', 'nextjs-app/app/layout.tsx', 'out/test.js', 'node_modules/test.js'];
-        testFiles.forEach(testFile => {
+        const testFiles = [
+          'app/layout.tsx',
+          'app/favicon.ico',
+          'nextjs-app/app/layout.tsx',
+          'out/test.js',
+          'node_modules/test.js',
+        ];
+        testFiles.forEach((testFile) => {
           const matchingPatterns = excludePatterns.filter((pattern) => {
             const cleanPattern = pattern.replace('/', '');
-            
+
             if (pattern.endsWith('/')) {
               const segments = testFile.split('/');
               return segments.includes(cleanPattern);
@@ -576,7 +582,9 @@ export const projectsRouter = createTRPCRouter({
               return testFile.includes(cleanPattern);
             }
           });
-          console.log(`[DOWNLOAD] ${testFile} -> matches: [${matchingPatterns.join(', ')}] -> ${matchingPatterns.length > 0 ? 'EXCLUDED' : 'INCLUDED'}`);
+          console.log(
+            `[DOWNLOAD] ${testFile} -> matches: [${matchingPatterns.join(', ')}] -> ${matchingPatterns.length > 0 ? 'EXCLUDED' : 'INCLUDED'}`,
+          );
         });
         console.log('[DOWNLOAD] === END FILTER DEBUG ===\n');
 
@@ -897,7 +905,9 @@ export const projectsRouter = createTRPCRouter({
             try {
               // CRITICAL: Never include node_modules
               if (filePath.includes('node_modules')) {
-                console.error(`[GITHUB_SYNC] CRITICAL: Attempted to include node_modules file: ${filePath}`);
+                console.error(
+                  `[GITHUB_SYNC] CRITICAL: Attempted to include node_modules file: ${filePath}`,
+                );
                 continue;
               }
 
@@ -939,7 +949,6 @@ export const projectsRouter = createTRPCRouter({
               continue;
             }
           }
-
         } catch (sandboxError) {
           console.error(`[GITHUB_SYNC] Sandbox connection failed:`, sandboxError);
 
@@ -975,6 +984,11 @@ export const projectsRouter = createTRPCRouter({
               '.env',
               '.DS_Store',
               'Thumbs.db',
+              '.bash_logout',
+              '.bashrc',
+              '.e2b',
+              '.profile',
+              'compile_page.sh',
             ];
 
             for (const [filePath, content] of Object.entries(files)) {
@@ -1011,7 +1025,8 @@ export const projectsRouter = createTRPCRouter({
           data: {
             fragmentId: fragment.id,
             projectId: input.projectId,
-            commitMessage: input.commitMessage || `Sync all files from sandbox - ${new Date().toISOString()}`,
+            commitMessage:
+              input.commitMessage || `Sync all files from sandbox - ${new Date().toISOString()}`,
           },
         });
 
@@ -1021,7 +1036,6 @@ export const projectsRouter = createTRPCRouter({
           fileCount: Object.keys(allFiles).length,
           repository: project.githubRepository.fullName,
         };
-
       } catch (error) {
         console.error('Failed to sync full project to GitHub:', error);
 
@@ -1225,7 +1239,9 @@ export const projectsRouter = createTRPCRouter({
             try {
               // CRITICAL: Never include node_modules
               if (filePath.includes('node_modules')) {
-                console.error(`[CREATE_GITHUB_REPO] CRITICAL: Skipping node_modules file: ${filePath}`);
+                console.error(
+                  `[CREATE_GITHUB_REPO] CRITICAL: Skipping node_modules file: ${filePath}`,
+                );
                 continue;
               }
 
@@ -1253,13 +1269,18 @@ export const projectsRouter = createTRPCRouter({
                     errorMsg.includes('binary') ||
                     errorMsg.includes('not found')
                   ) {
-                    console.warn(`[CREATE_GITHUB_REPO] Cannot read ${filePath}: ${readError.message}`);
+                    console.warn(
+                      `[CREATE_GITHUB_REPO] Cannot read ${filePath}: ${readError.message}`,
+                    );
                     continue;
                   }
                 }
 
                 // For unexpected errors, log details but continue
-                console.warn(`[CREATE_GITHUB_REPO] Unexpected error reading ${filePath}:`, readError);
+                console.warn(
+                  `[CREATE_GITHUB_REPO] Unexpected error reading ${filePath}:`,
+                  readError,
+                );
                 continue;
               }
             } catch (outerError) {
@@ -1267,10 +1288,12 @@ export const projectsRouter = createTRPCRouter({
               continue;
             }
           }
-
         } catch (sandboxError) {
-          console.error(`[CREATE_GITHUB_REPO] Sandbox connection failed, using database files:`, sandboxError);
-          
+          console.error(
+            `[CREATE_GITHUB_REPO] Sandbox connection failed, using database files:`,
+            sandboxError,
+          );
+
           // Fallback to database files
           const files = fragment.files as Record<string, string>;
           if (!files || Object.keys(files).length === 0) {
@@ -1294,6 +1317,11 @@ export const projectsRouter = createTRPCRouter({
             '.env',
             '.DS_Store',
             'Thumbs.db',
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
           ];
 
           for (const [filePath, content] of Object.entries(files)) {
@@ -1311,7 +1339,9 @@ export const projectsRouter = createTRPCRouter({
           throw new Error('No files found to create repository with');
         }
 
-        console.log(`[CREATE_GITHUB_REPO] Creating repository with ${Object.keys(allFiles).length} files`);
+        console.log(
+          `[CREATE_GITHUB_REPO] Creating repository with ${Object.keys(allFiles).length} files`,
+        );
 
         // Update fragment with collected files
         await prisma.fragment.update({
@@ -1368,7 +1398,6 @@ export const projectsRouter = createTRPCRouter({
             fileCount: Object.keys(allFiles).length,
           },
         };
-
       } catch (error) {
         console.error('Failed to create GitHub repository with full project:', error);
 
@@ -1443,6 +1472,11 @@ export const projectsRouter = createTRPCRouter({
           '.env',
           '.DS_Store',
           'Thumbs.db',
+          '.bash_logout',
+          '.bashrc',
+          '.e2b',
+          '.profile',
+          'compile_page.sh',
         ];
 
         console.log(
