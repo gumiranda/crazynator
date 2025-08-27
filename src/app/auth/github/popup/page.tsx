@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function GitHubPopupPage() {
+function GitHubPopupContent() {
   const searchParams = useSearchParams();
   
   useEffect(() => {
@@ -38,5 +38,20 @@ export default function GitHubPopupPage() {
         <p className="text-muted-foreground">Completing GitHub authentication...</p>
       </div>
     </div>
+  );
+}
+
+export default function GitHubPopupPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <GitHubPopupContent />
+    </Suspense>
   );
 }
