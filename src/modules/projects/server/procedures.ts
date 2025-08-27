@@ -46,12 +46,26 @@ export const projectsRouter = createTRPCRouter({
       }
 
       try {
+        // Debug: Log fragment info before manual update
+        console.log(`[MANUAL_UPDATE] Fragment before update:`, {
+          id: input.fragmentId,
+          inputFilesCount: Object.keys(input.files).length,
+          sampleFiles: Object.keys(input.files).slice(0, 3)
+        });
+        
         // Update files in the database
         const updatedFragment = await prisma.fragment.update({
           where: { id: input.fragmentId },
           data: {
             files: input.files,
           },
+        });
+        
+        // Debug: Verify the manual update worked
+        console.log(`[MANUAL_UPDATE] Fragment after update:`, {
+          id: updatedFragment.id,
+          savedFilesCount: updatedFragment.files ? Object.keys(updatedFragment.files as Record<string, string>).length : 0,
+          updateSuccessful: !!updatedFragment.files
         });
 
         // Try to update files in E2B sandbox (if still active)
@@ -1033,12 +1047,41 @@ export const projectsRouter = createTRPCRouter({
         console.log(`[GITHUB_SYNC] Syncing ${Object.keys(allFiles).length} files to GitHub`);
         console.log(`[GITHUB_SYNC] File processing summary: ${processedCount} successful, ${errorCount} errors`);
 
+        // Debug: Log fragment info before update
+        console.log(`[GITHUB_SYNC] Fragment before update:`, {
+          id: fragment.id,
+          currentFilesCount: fragment.files ? Object.keys(fragment.files as Record<string, string>).length : 0,
+          newFilesCount: Object.keys(allFiles).length
+        });
+        
+        // Debug: Log some file names being saved
+        console.log(`[GITHUB_SYNC] Sample files being saved:`, Object.keys(allFiles).slice(0, 5));
+
         // Update the fragment with all the collected files
-        await prisma.fragment.update({
+        const updatedFragment = await prisma.fragment.update({
           where: { id: fragment.id },
           data: {
             files: allFiles,
           },
+        });
+        
+        // Debug: Verify the update worked
+        console.log(`[GITHUB_SYNC] Fragment after update:`, {
+          id: updatedFragment.id,
+          savedFilesCount: updatedFragment.files ? Object.keys(updatedFragment.files as Record<string, string>).length : 0,
+          updateSuccessful: !!updatedFragment.files
+        });
+        
+        // Additional verification - fetch the fragment again to double-check
+        const verificationFragment = await prisma.fragment.findUnique({
+          where: { id: fragment.id },
+          select: { id: true, files: true }
+        });
+        
+        console.log(`[GITHUB_SYNC] Verification fetch:`, {
+          id: verificationFragment?.id,
+          verificationFilesCount: verificationFragment?.files ? Object.keys(verificationFragment.files as Record<string, string>).length : 0,
+          dataIntegrity: verificationFragment?.files === updatedFragment.files
         });
 
         // Trigger GitHub sync
@@ -1704,12 +1747,27 @@ export const projectsRouter = createTRPCRouter({
           ...(fragment.files as Record<string, string> || {}),
           ...githubFiles,
         };
+        
+        // Debug: Log fragment info before GitHub pull update
+        console.log(`[PULL_FROM_GITHUB] Fragment before update:`, {
+          id: fragment.id,
+          currentFilesCount: fragment.files ? Object.keys(fragment.files as Record<string, string>).length : 0,
+          githubFilesCount: Object.keys(githubFiles).length,
+          mergedFilesCount: Object.keys(mergedFiles).length
+        });
 
-        await prisma.fragment.update({
+        const updatedFragment = await prisma.fragment.update({
           where: { id: fragment.id },
           data: {
             files: mergedFiles,
           },
+        });
+        
+        // Debug: Verify the GitHub pull update worked
+        console.log(`[PULL_FROM_GITHUB] Fragment after update:`, {
+          id: updatedFragment.id,
+          savedFilesCount: updatedFragment.files ? Object.keys(updatedFragment.files as Record<string, string>).length : 0,
+          updateSuccessful: !!updatedFragment.files
         });
 
         // Try to update sandbox if available
