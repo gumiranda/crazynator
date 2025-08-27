@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { getGitHubAuthUrl } from '@/lib/github';
 import crypto from 'crypto';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
     const { userId } = await auth();
@@ -14,6 +14,10 @@ export async function GET() {
         { status: 401 }
       );
     }
+    
+    // Get the redirect URL from query parameters
+    const searchParams = request.nextUrl.searchParams;
+    const redirectUrl = searchParams.get('redirect_url') || '/';
     
     // Generate a random state parameter for security
     const state = crypto.randomBytes(32).toString('hex');
@@ -32,6 +36,15 @@ export async function GET() {
     
     // Also store the user ID to associate with the callback
     response.cookies.set('github_oauth_user', userId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 600, // 10 minutes
+      path: '/',
+    });
+    
+    // Store the redirect URL for post-auth redirect
+    response.cookies.set('github_oauth_redirect', redirectUrl, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

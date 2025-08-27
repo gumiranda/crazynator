@@ -11,32 +11,35 @@ export async function GET(request: NextRequest) {
   // Handle OAuth errors
   if (error) {
     console.error('GitHub OAuth error:', error);
+    const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
     return NextResponse.redirect(
-      new URL('/dashboard?github_error=' + encodeURIComponent(error), request.url)
+      new URL(redirectUrl + '?github_error=' + encodeURIComponent(error), request.url)
     );
   }
   
   if (!code || !state) {
+    const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
     return NextResponse.redirect(
-      new URL('/dashboard?github_error=missing_parameters', request.url)
+      new URL(redirectUrl + '?github_error=missing_parameters', request.url)
     );
   }
   
   try {
-    // Get state and user from cookies
+    // Get state, user, and redirect URL from cookies
     const storedState = request.cookies.get('github_oauth_state')?.value;
     const userId = request.cookies.get('github_oauth_user')?.value;
+    const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
     
     if (!storedState || !userId) {
       return NextResponse.redirect(
-        new URL('/dashboard?github_error=invalid_session', request.url)
+        new URL(redirectUrl + '?github_error=invalid_session', request.url)
       );
     }
     
     // Verify state parameter
     if (state !== storedState) {
       return NextResponse.redirect(
-        new URL('/dashboard?github_error=invalid_state', request.url)
+        new URL(redirectUrl + '?github_error=invalid_state', request.url)
       );
     }
     
@@ -74,18 +77,20 @@ export async function GET(request: NextRequest) {
     
     // Clear OAuth cookies
     const response = NextResponse.redirect(
-      new URL('/dashboard?github_success=connected', request.url)
+      new URL(redirectUrl + '?github_success=connected', request.url)
     );
     
     response.cookies.delete('github_oauth_state');
     response.cookies.delete('github_oauth_user');
+    response.cookies.delete('github_oauth_redirect');
     
     return response;
     
   } catch (error) {
     console.error('GitHub OAuth callback error:', error);
+    const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
     return NextResponse.redirect(
-      new URL('/dashboard?github_error=callback_failed', request.url)
+      new URL(redirectUrl + '?github_error=callback_failed', request.url)
     );
   }
 }

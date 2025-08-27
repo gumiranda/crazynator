@@ -4,12 +4,27 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { GitBranch, Github, Loader2, Lock, Unlock, ExternalLink } from 'lucide-react';
 import { useTRPC } from '@/trpc/client';
@@ -21,7 +36,10 @@ const createRepositorySchema = z.object({
     .string()
     .min(1, 'Repository name is required')
     .max(100, 'Repository name is too long')
-    .regex(/^[a-zA-Z0-9._-]+$/, 'Repository name can only contain letters, numbers, dots, hyphens, and underscores'),
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      'Repository name can only contain letters, numbers, dots, hyphens, and underscores',
+    ),
   description: z.string().max(500, 'Description is too long').optional(),
   isPrivate: z.boolean(),
 });
@@ -35,19 +53,22 @@ interface CreateRepositoryDialogProps {
   onSuccess?: (repository: any) => void;
 }
 
-export function CreateRepositoryDialog({ 
-  projectId, 
-  projectName, 
+export function CreateRepositoryDialog({
+  projectId,
+  projectName,
   trigger,
-  onSuccess 
+  onSuccess,
 }: CreateRepositoryDialogProps) {
   const [open, setOpen] = useState(false);
   const [createdRepository, setCreatedRepository] = useState<any>(null);
-  
+
   const trpc = useTRPC();
   const { data: connection } = useQuery(trpc.github.getConnection.queryOptions());
-  const { data: existingRepo } = useQuery(trpc.github.getRepositoryByProject.queryOptions({ projectId }));
-  
+  console.log({ connection });
+  const { data: existingRepo } = useQuery(
+    trpc.github.getRepositoryByProject.queryOptions({ projectId }),
+  );
+
   const createRepositoryMutation = useMutation({
     ...trpc.github.createRepository.mutationOptions(),
     onSuccess: (repository) => {
@@ -118,10 +139,12 @@ export function CreateRepositoryDialog({
           <div className="flex flex-col items-center gap-4 py-6">
             <Github className="h-12 w-12 text-muted-foreground" />
             <p className="text-sm text-muted-foreground text-center">
-              Connect your GitHub account in settings to start creating repositories.
+              Connect your GitHub account to create a repository for this project and sync your code
+              automatically.
             </p>
-            <Button onClick={() => window.location.href = '/dashboard'} className="w-full">
-              Go to Settings
+            <Button onClick={() => (window.location.href = '/api/auth/github')} className="w-full">
+              <Github className="h-4 w-4 mr-2" />
+              Connect GitHub
             </Button>
           </div>
         </DialogContent>
@@ -144,15 +167,13 @@ export function CreateRepositoryDialog({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Repository Already Exists</DialogTitle>
-            <DialogDescription>
-              This project already has a GitHub repository.
-            </DialogDescription>
+            <DialogDescription>This project already has a GitHub repository.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">{existingRepo.name}</h4>
-                <Badge variant={existingRepo.isPrivate ? "secondary" : "outline"}>
+                <Badge variant={existingRepo.isPrivate ? 'secondary' : 'outline'}>
                   {existingRepo.isPrivate ? (
                     <>
                       <Lock className="h-3 w-3 mr-1" />
@@ -167,9 +188,7 @@ export function CreateRepositoryDialog({
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">{existingRepo.fullName}</p>
-              {existingRepo.description && (
-                <p className="text-sm">{existingRepo.description}</p>
-              )}
+              {existingRepo.description && <p className="text-sm">{existingRepo.description}</p>}
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <GitBranch className="h-3 w-3" />
                 {existingRepo.defaultBranch}
@@ -179,10 +198,7 @@ export function CreateRepositoryDialog({
                 </Badge>
               </div>
             </div>
-            <Button 
-              onClick={() => window.open(existingRepo.htmlUrl, '_blank')} 
-              className="w-full"
-            >
+            <Button onClick={() => window.open(existingRepo.htmlUrl, '_blank')} className="w-full">
               <ExternalLink className="h-4 w-4 mr-2" />
               Open on GitHub
             </Button>
@@ -216,7 +232,7 @@ export function CreateRepositoryDialog({
               <div className="border rounded-lg p-4 space-y-2 bg-green-50 border-green-200">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-green-900">{createdRepository.name}</h4>
-                  <Badge variant={createdRepository.isPrivate ? "secondary" : "outline"}>
+                  <Badge variant={createdRepository.isPrivate ? 'secondary' : 'outline'}>
                     {createdRepository.isPrivate ? (
                       <>
                         <Lock className="h-3 w-3 mr-1" />
@@ -238,8 +254,8 @@ export function CreateRepositoryDialog({
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  onClick={() => window.open(createdRepository.htmlUrl, '_blank')} 
+                <Button
+                  onClick={() => window.open(createdRepository.htmlUrl, '_blank')}
                   className="flex-1"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -257,7 +273,7 @@ export function CreateRepositoryDialog({
             <DialogHeader>
               <DialogTitle>Create GitHub Repository</DialogTitle>
               <DialogDescription>
-                Create a new repository for your project "{projectName}".
+                Create a new repository for your project &quot;{projectName}&quot;.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -273,10 +289,10 @@ export function CreateRepositoryDialog({
                           <div className="flex items-center px-3 py-2 bg-muted border border-r-0 rounded-l-md text-sm text-muted-foreground">
                             {connection.githubUsername}/
                           </div>
-                          <Input 
-                            placeholder="my-awesome-project" 
+                          <Input
+                            placeholder="my-awesome-project"
                             className="rounded-l-none"
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
@@ -295,11 +311,11 @@ export function CreateRepositoryDialog({
                     <FormItem>
                       <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="A brief description of your project..."
                           className="resize-none"
                           rows={3}
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -314,21 +330,21 @@ export function CreateRepositoryDialog({
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                       <div className="space-y-0.5">
                         <FormLabel className="flex items-center gap-2">
-                          {field.value ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                          {field.value ? (
+                            <Lock className="h-4 w-4" />
+                          ) : (
+                            <Unlock className="h-4 w-4" />
+                          )}
                           Private Repository
                         </FormLabel>
                         <FormDescription>
-                          {field.value 
-                            ? "Only you can see and clone this repository."
-                            : "Anyone can see and clone this repository."
-                          }
+                          {field.value
+                            ? 'Only you can see and clone this repository.'
+                            : 'Anyone can see and clone this repository.'}
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -338,8 +354,8 @@ export function CreateRepositoryDialog({
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={createRepositoryMutation.isPending}
                     className="bg-gray-900 hover:bg-gray-800"
                   >
