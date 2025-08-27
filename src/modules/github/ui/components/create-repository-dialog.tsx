@@ -61,13 +61,15 @@ export function CreateRepositoryDialog({
 }: CreateRepositoryDialogProps) {
   // Feature flag to control if GitHub repository creation is enabled
   const isGitHubRepoEnabled = process.env.NEXT_PUBLIC_ENABLE_GITHUB_REPOSITORY_CREATION === 'true';
-  
+
   const [open, setOpen] = useState(false);
   const [createdRepository, setCreatedRepository] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   const trpc = useTRPC();
-  const { data: connection, refetch: refetchConnection } = useQuery(trpc.github.getConnection.queryOptions());
+  const { data: connection, refetch: refetchConnection } = useQuery(
+    trpc.github.getConnection.queryOptions(),
+  );
   console.log({ connection });
   const { data: existingRepo } = useQuery(
     trpc.github.getRepositoryByProject.queryOptions({ projectId }),
@@ -118,24 +120,26 @@ export function CreateRepositoryDialog({
   // Handle GitHub connection via popup
   const handleGitHubConnect = useCallback(() => {
     setIsConnecting(true);
-    
+
     const authUrl = `/api/auth/github?redirect_url=${encodeURIComponent(window.location.origin + '/auth/github/popup')}`;
     const popup = window.open(
       authUrl,
       'github-auth',
-      'width=600,height=700,scrollbars=yes,resizable=yes'
+      'width=600,height=700,scrollbars=yes,resizable=yes',
     );
 
     if (!popup) {
       setIsConnecting(false);
-      toast.error('Failed to open GitHub authentication window. Please check if popups are blocked.');
+      toast.error(
+        'Failed to open GitHub authentication window. Please check if popups are blocked.',
+      );
       return;
     }
 
     // Listen for messages from popup
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-      
+
       if (event.data.type === 'GITHUB_AUTH_SUCCESS') {
         popup.close();
         setIsConnecting(false);
@@ -186,7 +190,7 @@ export function CreateRepositoryDialog({
           {trigger || (
             <Button variant="outline" size="sm">
               <Github className="h-4 w-4 mr-2" />
-              Create Repository
+              Create Repository3
             </Button>
           )}
         </DialogTrigger>
@@ -203,11 +207,7 @@ export function CreateRepositoryDialog({
               Connect your GitHub account to create a repository for this project and sync your code
               automatically.
             </p>
-            <Button 
-              onClick={handleGitHubConnect} 
-              disabled={isConnecting}
-              className="w-full"
-            >
+            <Button onClick={handleGitHubConnect} disabled={isConnecting} className="w-full">
               {isConnecting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -288,7 +288,7 @@ export function CreateRepositoryDialog({
         {trigger || (
           <Button variant="outline" size="sm">
             <Github className="h-4 w-4 mr-2" />
-            Create Repository
+            Create Repository2
           </Button>
         )}
       </DialogTrigger>
@@ -436,7 +436,7 @@ export function CreateRepositoryDialog({
                     {createRepositoryMutation.isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Create Repository
+                    Create Repository1
                   </Button>
                 </div>
               </form>

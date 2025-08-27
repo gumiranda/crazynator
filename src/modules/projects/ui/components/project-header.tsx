@@ -14,7 +14,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon, DownloadIcon, LoaderIcon, FileArchiveIcon, CodeIcon } from 'lucide-react';
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  SunMoonIcon,
+  DownloadIcon,
+  LoaderIcon,
+  FileArchiveIcon,
+  CodeIcon,
+  Github,
+  Upload,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -45,7 +55,9 @@ export const ProjectHeader = ({ projectId }: Props) => {
       onSuccess: (data) => {
         // Create blob from base64 data and trigger download
         triggerDownload(data);
-        toast.success(`Source Code Downloaded: ${data.fileCount} files (${Math.round(data.size / 1024)}KB)`);
+        toast.success(
+          `Source Code Downloaded: ${data.fileCount} files (${Math.round(data.size / 1024)}KB)`,
+        );
       },
       onError: (error) => {
         toast.error(error.message || 'Failed to download source code');
@@ -61,18 +73,38 @@ export const ProjectHeader = ({ projectId }: Props) => {
         triggerDownload(data);
         const sizeKB = Math.round(data.size / 1024);
         const sizeText = sizeKB > 1024 ? `${Math.round(sizeKB / 1024)}MB` : `${sizeKB}KB`;
-        
+
         // Show different message based on whether it was a fallback
         if (data.isFallback) {
-          toast.success(`Project Downloaded (Database Files): ${data.fileCount} files (${sizeText})`, {
-            description: 'Sandbox expired - downloaded saved files instead. For latest changes, regenerate the project.'
-          });
+          toast.success(
+            `Project Downloaded (Database Files): ${data.fileCount} files (${sizeText})`,
+            {
+              description:
+                'Sandbox expired - downloaded saved files instead. For latest changes, regenerate the project.',
+            },
+          );
         } else {
-          toast.success(`Full Project Downloaded: ${data.fileCount} files (${sizeText})${data.skippedFiles ? ` - ${data.skippedFiles} files skipped` : ''}`);
+          toast.success(
+            `Full Project Downloaded: ${data.fileCount} files (${sizeText})${data.skippedFiles ? ` - ${data.skippedFiles} files skipped` : ''}`,
+          );
         }
       },
       onError: (error) => {
         toast.error(error.message || 'Failed to download full project');
+      },
+    }),
+  );
+
+  // Sync all files to GitHub mutation
+  const syncFullProjectToGitHub = useMutation(
+    trpc.projects.syncFullProjectToGitHub.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`Started sync of ${data.fileCount} files to ${data.repository}`, {
+          description: 'GitHub sync is running in the background. Check status for updates.',
+        });
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to sync full project to GitHub');
       },
     }),
   );
@@ -107,6 +139,10 @@ export const ProjectHeader = ({ projectId }: Props) => {
 
   const handleDownloadFullProject = () => {
     downloadFullProject.mutate({ projectId });
+  };
+
+  const handleSyncFullProjectToGitHub = () => {
+    syncFullProjectToGitHub.mutate({ projectId });
   };
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
@@ -145,8 +181,8 @@ export const ProjectHeader = ({ projectId }: Props) => {
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <DropdownMenuItem 
-                  onClick={handleDownloadSourceCode} 
+                <DropdownMenuItem
+                  onClick={handleDownloadSourceCode}
                   disabled={downloadZip.isPending}
                   className="gap-2"
                 >
@@ -164,11 +200,11 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     </span>
                   </div>
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuSeparator />
-                
-                <DropdownMenuItem 
-                  onClick={handleDownloadFullProject} 
+
+                <DropdownMenuItem
+                  onClick={handleDownloadFullProject}
                   disabled={downloadFullProject.isPending}
                   className="gap-2"
                 >
@@ -183,6 +219,36 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     </span>
                     <span className="text-xs text-muted-foreground">
                       Full project from sandbox (ready to run locally)
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="gap-2">
+              <Github className="size-4" />
+              <span>GitHub Actions</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem
+                  onClick={handleSyncFullProjectToGitHub}
+                  disabled={syncFullProjectToGitHub.isPending}
+                  className="gap-2"
+                >
+                  {syncFullProjectToGitHub.isPending ? (
+                    <LoaderIcon className="size-4 animate-spin" />
+                  ) : (
+                    <Upload className="size-4" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {syncFullProjectToGitHub.isPending ? 'Syncing...' : 'Sync All Files'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Push all sandbox files to existing GitHub repository
                     </span>
                   </div>
                 </DropdownMenuItem>
@@ -218,15 +284,12 @@ export const ProjectHeader = ({ projectId }: Props) => {
         <div className="hidden sm:block">
           <GitHubSyncStatus projectId={projectId} />
         </div>
-        
+
         {/* Create Repository Dialog */}
         <div className="hidden sm:block">
-          <CreateRepositoryDialog 
-            projectId={projectId} 
-            projectName={project.name}
-          />
+          <CreateRepositoryDialog projectId={projectId} projectName={project.name} />
         </div>
-        
+
         <InngestConnectionStatus
           status={
             realtimeConnectionState === InngestSubscriptionState.Connecting ||
