@@ -912,6 +912,10 @@ export const projectsRouter = createTRPCRouter({
 
           console.log(`[GITHUB_SYNC] Found ${validFiles.length} files to sync`);
 
+          // Initialize counters for file processing
+          let processedCount = 0;
+          let errorCount = 0;
+
           // Read all files and build the files object
           for (const filePath of validFiles) {
             try {
@@ -927,7 +931,12 @@ export const projectsRouter = createTRPCRouter({
               try {
                 const content = await sandbox.files.read(filePath);
                 allFiles[filePath] = content;
+                processedCount++;
+                if (processedCount <= 5) {
+                  console.log(`[CREATE_GITHUB_REPO] Successfully read file: ${filePath} (${content.length} chars)`);
+                }
               } catch (readError) {
+                errorCount++;
                 // Check if it's specifically a directory error
                 if (readError instanceof Error) {
                   const errorMsg = readError.message.toLowerCase();
@@ -1022,6 +1031,7 @@ export const projectsRouter = createTRPCRouter({
         }
 
         console.log(`[GITHUB_SYNC] Syncing ${Object.keys(allFiles).length} files to GitHub`);
+        console.log(`[GITHUB_SYNC] File processing summary: ${processedCount} successful, ${errorCount} errors`);
 
         // Update the fragment with all the collected files
         await prisma.fragment.update({
@@ -1068,6 +1078,10 @@ export const projectsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      console.log(`[CREATE_GITHUB_REPO] Starting GitHub repo creation for project: ${input.projectId}`);
+      console.log(`[CREATE_GITHUB_REPO] Repository name: ${input.repositoryName}`);
+      console.log(`[CREATE_GITHUB_REPO] User ID: ${ctx.auth.userId}`);
+      
       // Find the project and verify user ownership
       const project = await prisma.project.findUnique({
         where: {
@@ -1086,8 +1100,16 @@ export const projectsRouter = createTRPCRouter({
           githubRepository: true,
         },
       });
+      
+      console.log(`[CREATE_GITHUB_REPO] Project found:`, {
+        id: project?.id,
+        name: project?.name,
+        messagesCount: project?.messages?.length,
+        hasGithubRepo: !!project?.githubRepository
+      });
 
       if (!project) {
+        console.error(`[CREATE_GITHUB_REPO] Project not found: ${input.projectId}`);
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Project not found',
@@ -1095,6 +1117,7 @@ export const projectsRouter = createTRPCRouter({
       }
 
       if (project.githubRepository) {
+        console.error(`[CREATE_GITHUB_REPO] Project already has GitHub repository:`, project.githubRepository);
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: 'Project already has a GitHub repository',
@@ -1102,11 +1125,18 @@ export const projectsRouter = createTRPCRouter({
       }
 
       // Check if user has GitHub connection
+      console.log(`[CREATE_GITHUB_REPO] Checking GitHub connection for user: ${ctx.auth.userId}`);
       const githubConnection = await prisma.gitHubConnection.findUnique({
         where: { userId: ctx.auth.userId },
       });
+      
+      console.log(`[CREATE_GITHUB_REPO] GitHub connection found:`, {
+        id: githubConnection?.id,
+        hasAccessToken: !!githubConnection?.accessToken
+      });
 
       if (!githubConnection) {
+        console.error(`[CREATE_GITHUB_REPO] No GitHub connection found for user: ${ctx.auth.userId}`);
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'No GitHub connection found. Please connect your GitHub account first.',
@@ -1114,11 +1144,20 @@ export const projectsRouter = createTRPCRouter({
       }
 
       // Find the latest fragment with sandbox
+      console.log(`[CREATE_GITHUB_REPO] Searching for latest fragment with sandbox in ${project.messages.length} messages`);
       const latestFragmentMessage = project.messages.find(
         (message) => message.fragment && message.fragment.sandboxUrl,
       );
+      
+      console.log(`[CREATE_GITHUB_REPO] Latest fragment message found:`, {
+        messageId: latestFragmentMessage?.id,
+        fragmentId: latestFragmentMessage?.fragment?.id,
+        sandboxUrl: latestFragmentMessage?.fragment?.sandboxUrl,
+        fragmentCreatedAt: latestFragmentMessage?.fragment?.createdAt
+      });
 
       if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        console.error(`[CREATE_GITHUB_REPO] No active sandbox found for project: ${input.projectId}`);
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'No active sandbox found for this project',
@@ -1126,14 +1165,26 @@ export const projectsRouter = createTRPCRouter({
       }
 
       const fragment = latestFragmentMessage.fragment;
+      console.log(`[CREATE_GITHUB_REPO] Using fragment:`, {
+        id: fragment.id,
+        sandboxUrl: fragment.sandboxUrl,
+        filesCount: fragment.files ? Object.keys(fragment.files as Record<string, string>).length : 0
+      });
 
       try {
         // Extract sandboxId from E2B URL and collect all files (same logic as above)
         const url = new URL(fragment.sandboxUrl);
         const hostname = url.hostname;
         const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+        
+        console.log(`[CREATE_GITHUB_REPO] Extracted sandbox details:`, {
+          originalUrl: fragment.sandboxUrl,
+          hostname,
+          extractedSandboxId: sandboxId
+        });
 
         if (!sandboxId || sandboxId === 'www' || sandboxId === 'https') {
+          console.error(`[CREATE_GITHUB_REPO] Invalid sandbox ID: ${sandboxId}`);
           throw new Error('Invalid sandbox ID extracted from URL');
         }
 
@@ -1142,7 +1193,9 @@ export const projectsRouter = createTRPCRouter({
         const allFiles: Record<string, string> = {};
 
         try {
+          console.log(`[CREATE_GITHUB_REPO] Attempting to connect to sandbox: ${sandboxId}`);
           const sandbox = await getSandbox(sandboxId);
+          console.log(`[CREATE_GITHUB_REPO] Successfully connected to sandbox`);
 
           // Same exclusion logic as above
           const excludePatterns = [
@@ -1191,6 +1244,7 @@ export const projectsRouter = createTRPCRouter({
             .join(' ');
 
           const findCommand = `find /home/user -type f ${excludeArgs} -print`;
+          console.log(`[CREATE_GITHUB_REPO] Executing find command: ${findCommand}`);
 
           const listBuffer = { stdout: '', stderr: '' };
           await sandbox.commands.run(findCommand, {
@@ -1200,6 +1254,12 @@ export const projectsRouter = createTRPCRouter({
             onStderr: (data: string) => {
               listBuffer.stderr += data;
             },
+          });
+          
+          console.log(`[CREATE_GITHUB_REPO] Find command completed:`, {
+            stdoutLength: listBuffer.stdout.length,
+            stderrLength: listBuffer.stderr.length,
+            hasStderr: !!listBuffer.stderr.trim()
           });
 
           const rawFiles = listBuffer.stdout
@@ -1251,9 +1311,16 @@ export const projectsRouter = createTRPCRouter({
             });
 
           console.log(`[CREATE_GITHUB_REPO] Found ${validFiles.length} files to include`);
-
+          console.log(`[CREATE_GITHUB_REPO] Sample files to process:`, validFiles.slice(0, 10));
+          
           // Read all files
+          let processedCount = 0;
+          let errorCount = 0;
           for (const filePath of validFiles) {
+            processedCount++;
+            if (processedCount % 10 === 0) {
+              console.log(`[CREATE_GITHUB_REPO] Processing file ${processedCount}/${validFiles.length}: ${filePath}`);
+            }
             try {
               // CRITICAL: Never include node_modules
               if (filePath.includes('node_modules')) {
@@ -1267,7 +1334,11 @@ export const projectsRouter = createTRPCRouter({
               try {
                 const content = await sandbox.files.read(filePath);
                 allFiles[filePath] = content;
+                if (processedCount <= 5) {
+                  console.log(`[CREATE_GITHUB_REPO] Successfully read file: ${filePath} (${content.length} chars)`);
+                }
               } catch (readError) {
+                errorCount++;
                 // Check if it's specifically a directory error
                 if (readError instanceof Error) {
                   const errorMsg = readError.message.toLowerCase();
@@ -1302,10 +1373,18 @@ export const projectsRouter = createTRPCRouter({
                 continue;
               }
             } catch (outerError) {
+              errorCount++;
               console.warn(`[CREATE_GITHUB_REPO] Outer error processing ${filePath}:`, outerError);
               continue;
             }
           }
+          
+          console.log(`[CREATE_GITHUB_REPO] File processing completed:`, {
+            totalFiles: validFiles.length,
+            processedFiles: processedCount,
+            successfullyRead: Object.keys(allFiles).length,
+            errors: errorCount
+          });
         } catch (sandboxError) {
           console.error(
             `[CREATE_GITHUB_REPO] Sandbox connection failed, using database files:`,
@@ -1314,7 +1393,14 @@ export const projectsRouter = createTRPCRouter({
 
           // Fallback to database files
           const files = fragment.files as Record<string, string>;
+          console.log(`[CREATE_GITHUB_REPO] Fallback to database files:`, {
+            hasFiles: !!files,
+            fileCount: files ? Object.keys(files).length : 0,
+            sampleFiles: files ? Object.keys(files).slice(0, 5) : []
+          });
+          
           if (!files || Object.keys(files).length === 0) {
+            console.error(`[CREATE_GITHUB_REPO] No database files found for fragment: ${fragment.id}`);
             throw new TRPCError({
               code: 'NOT_FOUND',
               message: 'No files found to create repository with.',
@@ -1342,6 +1428,8 @@ export const projectsRouter = createTRPCRouter({
             'compile_page.sh',
           ];
 
+          let dbProcessedCount = 0;
+          let dbExcludedCount = 0;
           for (const [filePath, content] of Object.entries(files)) {
             const shouldExclude = sourceExcludePatterns.some(
               (pattern) => filePath.includes(pattern) || filePath.startsWith(pattern + '/'),
@@ -1349,38 +1437,78 @@ export const projectsRouter = createTRPCRouter({
 
             if (!shouldExclude && !filePath.includes('node_modules')) {
               allFiles[filePath] = content;
+              dbProcessedCount++;
+              if (dbProcessedCount <= 5) {
+                console.log(`[CREATE_GITHUB_REPO] Added DB file: ${filePath} (${content.length} chars)`);
+              }
+            } else {
+              dbExcludedCount++;
+              if (dbExcludedCount <= 5) {
+                console.log(`[CREATE_GITHUB_REPO] Excluded DB file: ${filePath}`);
+              }
             }
           }
+          
+          console.log(`[CREATE_GITHUB_REPO] Database files processing:`, {
+            totalDbFiles: Object.keys(files).length,
+            includedFiles: dbProcessedCount,
+            excludedFiles: dbExcludedCount
+          });
         }
 
         if (Object.keys(allFiles).length === 0) {
+          console.error(`[CREATE_GITHUB_REPO] No files collected for repository creation`);
           throw new Error('No files found to create repository with');
         }
 
         console.log(
           `[CREATE_GITHUB_REPO] Creating repository with ${Object.keys(allFiles).length} files`,
         );
+        console.log(`[CREATE_GITHUB_REPO] Files to be included:`, Object.keys(allFiles).slice(0, 20));
 
         // Update fragment with collected files
-        await prisma.fragment.update({
+        console.log(`[CREATE_GITHUB_REPO] Updating fragment ${fragment.id} with ${Object.keys(allFiles).length} files`);
+        const updatedFragment = await prisma.fragment.update({
           where: { id: fragment.id },
           data: {
             files: allFiles,
           },
         });
+        console.log(`[CREATE_GITHUB_REPO] Fragment updated successfully:`, {
+          fragmentId: updatedFragment.id,
+          updatedAt: updatedFragment.updatedAt
+        });
 
         // Create GitHub repository using the existing GitHub library
+        console.log(`[CREATE_GITHUB_REPO] Importing GitHub library and decrypting token`);
         const { decryptToken, createRepository } = await import('@/lib/github');
         const accessToken = decryptToken(githubConnection.accessToken);
+        console.log(`[CREATE_GITHUB_REPO] Token decrypted successfully`);
 
+        console.log(`[CREATE_GITHUB_REPO] Creating GitHub repository:`, {
+          name: input.repositoryName,
+          description: input.description || `Generated project: ${project.name}`,
+          private: input.isPrivate,
+          auto_init: true
+        });
+        
         const githubRepo = await createRepository(accessToken, {
           name: input.repositoryName,
           description: input.description || `Generated project: ${project.name}`,
           private: input.isPrivate,
           auto_init: true,
         });
+        
+        console.log(`[CREATE_GITHUB_REPO] GitHub repository created:`, {
+          id: githubRepo.id,
+          name: githubRepo.name,
+          fullName: githubRepo.full_name,
+          htmlUrl: githubRepo.html_url,
+          defaultBranch: githubRepo.default_branch
+        });
 
         // Create GitHub repository record in database
+        console.log(`[CREATE_GITHUB_REPO] Creating database record for GitHub repository`);
         const createdRepository = await prisma.gitHubRepository.create({
           data: {
             githubRepoId: githubRepo.id,
@@ -1396,16 +1524,28 @@ export const projectsRouter = createTRPCRouter({
             syncStatus: 'PENDING',
           },
         });
+        
+        console.log(`[CREATE_GITHUB_REPO] Database record created:`, {
+          id: createdRepository.id,
+          fullName: createdRepository.fullName,
+          syncStatus: createdRepository.syncStatus
+        });
 
         // Trigger initial sync to push all files
-        await inngest.send({
+        console.log(`[CREATE_GITHUB_REPO] Triggering initial sync for repository: ${createdRepository.id}`);
+        const inngestEvent = await inngest.send({
           name: 'github/initial-sync',
           data: {
             repositoryId: createdRepository.id,
           },
         });
+        
+        console.log(`[CREATE_GITHUB_REPO] Initial sync event sent:`, {
+          eventId: inngestEvent.ids?.[0],
+          repositoryId: createdRepository.id
+        });
 
-        return {
+        const result = {
           success: true,
           message: `Created GitHub repository and started sync of ${Object.keys(allFiles).length} files`,
           repository: {
@@ -1416,8 +1556,16 @@ export const projectsRouter = createTRPCRouter({
             fileCount: Object.keys(allFiles).length,
           },
         };
+        
+        console.log(`[CREATE_GITHUB_REPO] Operation completed successfully:`, result);
+        return result;
       } catch (error) {
-        console.error('Failed to create GitHub repository with full project:', error);
+        console.error(`[CREATE_GITHUB_REPO] Failed to create GitHub repository with full project:`, {
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+          projectId: input.projectId,
+          repositoryName: input.repositoryName
+        });
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
