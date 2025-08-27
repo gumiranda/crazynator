@@ -44,6 +44,32 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
     }),
   );
 
+  // Pull changes from GitHub mutation
+  const pullFromGitHub = useMutation(
+    trpc.projects.pullFromGitHub.mutationOptions({
+      onSuccess: (data) => {
+        const { stats } = data;
+        if (stats.newFiles > 0 || stats.updatedFiles > 0) {
+          toast.success(
+            `Pulled ${stats.processedFiles} files from GitHub`,
+            {
+              description: `${stats.newFiles} new files, ${stats.updatedFiles} updated files${stats.sandboxUpdated ? ' (sandbox updated)' : ' (fragment updated)'}`,
+            }
+          );
+        } else {
+          toast.success('Repository is up to date', {
+            description: 'No changes found in GitHub repository',
+          });
+        }
+        // Refresh repository status
+        refetch();
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to pull changes from GitHub');
+      },
+    }),
+  );
+
   if (!repository) {
     return null;
   }
@@ -94,8 +120,8 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
   };
 
   const handleRefresh = () => {
-    refetch();
-    toast.success('Repository status refreshed');
+    // Pull changes from GitHub instead of just refreshing status
+    pullFromGitHub.mutate({ projectId });
   };
 
   const handleSyncFullProject = () => {
@@ -166,11 +192,23 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-6 w-6 p-0">
-                <RefreshCw className="h-3 w-3" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRefresh} 
+                disabled={pullFromGitHub.isPending}
+                className="h-6 w-6 p-0"
+              >
+                {pullFromGitHub.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3" />
+                )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Refresh sync status</TooltipContent>
+            <TooltipContent>
+              Pull changes from GitHub to sandbox and fragment
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 

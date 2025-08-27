@@ -1426,6 +1426,202 @@ export const projectsRouter = createTRPCRouter({
       }
     }),
 
+  pullFromGitHub: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Find the project and verify user ownership
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+        include: {
+          messages: {
+            include: {
+              fragment: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+          githubRepository: {
+            include: {
+              githubConnection: true,
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project not found',
+        });
+      }
+
+      if (!project.githubRepository) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Project does not have a GitHub repository configured',
+        });
+      }
+
+      // Find the latest fragment with sandbox
+      const latestFragmentMessage = project.messages.find(
+        (message) => message.fragment && message.fragment.sandboxUrl,
+      );
+
+      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No active sandbox found for this project',
+        });
+      }
+
+      const fragment = latestFragmentMessage.fragment;
+      const repository = project.githubRepository;
+
+      console.log(`[PULL_FROM_GITHUB] Starting pull from ${repository.fullName}`);
+
+      try {
+        // Import GitHub functions
+        const { decryptToken, createGitHubClient } = await import('@/lib/github');
+        const accessToken = decryptToken(repository.githubConnection.accessToken);
+        const octokit = createGitHubClient(accessToken);
+
+        const [owner, repo] = repository.fullName.split('/');
+
+        // Get all files from GitHub repository
+        console.log(`[PULL_FROM_GITHUB] Fetching files from GitHub repository`);
+        
+        // Get the repository tree (all files)
+        const { data: tree } = await octokit.rest.git.getTree({
+          owner,
+          repo,
+          tree_sha: repository.defaultBranch,
+          recursive: 'true',
+        });
+
+        const githubFiles: Record<string, string> = {};
+        let updatedFiles = 0;
+        let newFiles = 0;
+        let processedFiles = 0;
+
+        // Filter only files (not directories/submodules)
+        const fileEntries = tree.tree.filter(item => item.type === 'blob' && item.path);
+
+        console.log(`[PULL_FROM_GITHUB] Found ${fileEntries.length} files in GitHub repository`);
+
+        // Get content for each file
+        for (const file of fileEntries) {
+          if (!file.path || !file.sha) continue;
+
+          try {
+            // Get file content from GitHub
+            const { data: fileData } = await octokit.rest.git.getBlob({
+              owner,
+              repo,
+              file_sha: file.sha,
+            });
+
+            // Decode base64 content
+            const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+            githubFiles[file.path] = content;
+            processedFiles++;
+
+            // Check if file exists in current fragment and if content is different
+            const currentFiles = fragment.files as Record<string, string> || {};
+            const currentContent = currentFiles[file.path];
+
+            if (!currentContent) {
+              newFiles++;
+              console.log(`[PULL_FROM_GITHUB] New file from GitHub: ${file.path}`);
+            } else if (currentContent !== content) {
+              updatedFiles++;
+              console.log(`[PULL_FROM_GITHUB] Updated file from GitHub: ${file.path}`);
+            }
+
+          } catch (fileError) {
+            console.warn(`[PULL_FROM_GITHUB] Failed to fetch file ${file.path}:`, fileError);
+            continue;
+          }
+        }
+
+        // Update fragment with GitHub files
+        const mergedFiles = {
+          ...(fragment.files as Record<string, string> || {}),
+          ...githubFiles,
+        };
+
+        await prisma.fragment.update({
+          where: { id: fragment.id },
+          data: {
+            files: mergedFiles,
+          },
+        });
+
+        // Try to update sandbox if available
+        let sandboxUpdated = false;
+        try {
+          // Extract sandboxId from E2B URL
+          const url = new URL(fragment.sandboxUrl);
+          const hostname = url.hostname;
+          const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+          if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
+            console.log(`[PULL_FROM_GITHUB] Attempting to update sandbox: ${sandboxId}`);
+            
+            const sandbox = await getSandbox(sandboxId);
+
+            // Update changed/new files in sandbox
+            for (const [filePath, content] of Object.entries(githubFiles)) {
+              const currentFiles = fragment.files as Record<string, string> || {};
+              const currentContent = currentFiles[filePath];
+
+              // Only update if file is new or changed
+              if (!currentContent || currentContent !== content) {
+                try {
+                  await sandbox.files.write(filePath, content);
+                  console.log(`[PULL_FROM_GITHUB] Updated in sandbox: ${filePath}`);
+                } catch (writeError) {
+                  console.warn(`[PULL_FROM_GITHUB] Failed to write to sandbox ${filePath}:`, writeError);
+                }
+              }
+            }
+            sandboxUpdated = true;
+          }
+        } catch (sandboxError) {
+          console.warn(`[PULL_FROM_GITHUB] Sandbox update failed (continuing):`, sandboxError);
+        }
+
+        console.log(`[PULL_FROM_GITHUB] Pull completed: ${processedFiles} processed, ${newFiles} new, ${updatedFiles} updated`);
+
+        return {
+          success: true,
+          message: `Pulled ${processedFiles} files from GitHub`,
+          stats: {
+            processedFiles,
+            newFiles,
+            updatedFiles,
+            sandboxUpdated,
+          },
+          repository: repository.fullName,
+        };
+
+      } catch (error) {
+        console.error('Failed to pull from GitHub:', error);
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to pull changes from GitHub',
+        });
+      }
+    }),
+
   downloadZip: protectedProcedure
     .input(
       z.object({
