@@ -33,13 +33,13 @@ export default function PricingPage() {
   };
 
   const handleSubscribe = async (priceId: string, planType: string) => {
-    // Verificar se o usuário já tem esse plano
+    // Check if the user already has this plan
     if (isCurrentPlan(planType)) {
       toast.info('You already have this plan active!');
       return;
     }
 
-    // Verificar se é um downgrade
+    // Check if it's a downgrade
     if (isDowngrade(planType)) {
       toast.info('To switch to a lower plan, please cancel your current subscription first.');
       return;

@@ -20,6 +20,7 @@ model Project {
   updatedAt DateTime @updatedAt
 
   messages Message[]
+  githubRepository GitHubRepository?
 }
 
 enum MessageRole {
@@ -77,4 +78,57 @@ model Subscription {
   updatedAt             DateTime @updatedAt
 
   @@map("subscriptions")
+}
+
+model GitHubConnection {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  githubUserId      String   @unique
+  githubUsername    String
+  accessToken       String   // Encrypted GitHub access token
+  refreshToken      String?  // GitHub refresh token (if available)
+  tokenExpiresAt    DateTime?
+  scope             String   // OAuth scopes granted
+  avatarUrl         String?
+  profileUrl        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  repositories GitHubRepository[]
+
+  @@map("github_connections")
+}
+
+model GitHubRepository {
+  id                String   @id @default(uuid())
+  projectId         String   @unique
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  githubConnectionId String
+  githubConnection  GitHubConnection @relation(fields: [githubConnectionId], references: [id], onDelete: Cascade)
+  
+  githubRepoId      Int      // GitHub repository ID
+  name              String   // Repository name
+  fullName          String   // owner/repo format
+  description       String?
+  isPrivate         Boolean  @default(false)
+  defaultBranch     String   @default("main")
+  htmlUrl           String   // GitHub repository URL
+  cloneUrl          String   // Git clone URL
+  
+  lastSyncAt        DateTime?
+  syncStatus        GitHubSyncStatus @default(PENDING)
+  syncError         String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([githubConnectionId, githubRepoId])
+  @@map("github_repositories")
+}
+
+enum GitHubSyncStatus {
+  PENDING
+  IN_PROGRESS
+  SUCCESS
+  FAILED
 }

@@ -1,5 +1,102 @@
 # Design Document
 
+Here is Claude's plan: │
+│ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ GitHub Integration Implementation Plan │ │
+│ │ │ │
+│ │ Overview │ │
+│ │ │ │
+│ │ Implement GitHub OAuth integration for CrazyNator to allow users to connect their GitHub accounts, create repositories, and sync project code automatically. │ │
+│ │ │ │
+│ │ Current Architecture Analysis │ │
+│ │ │ │
+│ │ - Framework: Next.js 15 with App Router │ │
+│ │ - Database: PostgreSQL with Prisma ORM │ │
+│ │ - Auth: Clerk authentication system │ │
+│ │ - API: tRPC for type-safe API layer │ │
+│ │ - Background Jobs: Inngest for async processing │ │
+│ │ - Sandbox: E2B for code execution │ │
+│ │ - Current Models: Project, Message, Fragment, Usage, Subscription │ │
+│ │ │ │
+│ │ Implementation Plan │ │
+│ │ │ │
+│ │ Phase 1: Database Schema Extensions │ │
+│ │ │ │
+│ │ 1. Add GitHubConnection model to store OAuth tokens and user GitHub info │ │
+│ │ 2. Add GitHubRepository model to link projects with GitHub repos │ │
+│ │ 3. Extend Project model with GitHub repository association │ │
+│ │ 4. Create migration scripts for schema updates │ │
+│ │ │ │
+│ │ Phase 2: GitHub OAuth Integration │ │
+│ │ │ │
+│ │ 1. Set up GitHub OAuth app configuration │ │
+│ │ 2. Create OAuth flow handlers: │ │
+│ │ - Authorization redirect endpoint │ │
+│ │ - Callback handler with token exchange │ │
+│ │ - Token refresh mechanism │ │
+│ │ 3. Add environment variables for GitHub OAuth credentials │ │
+│ │ 4. Create tRPC procedures for GitHub connection management │ │
+│ │ │ │
+│ │ Phase 3: Repository Management │ │
+│ │ │ │
+│ │ 1. GitHub API client setup with Octokit │ │
+│ │ 2. Repository creation procedures: │ │
+│ │ - Create repository via GitHub API │ │
+│ │ - Link repository to project │ │
+│ │ - Set initial repository content │ │
+│ │ 3. Repository listing and management UI │ │
+│ │ 4. Error handling for API rate limits and failures │ │
+│ │ │ │
+│ │ Phase 4: Code Synchronization │ │
+│ │ │ │
+│ │ 1. Sync mechanism design: │ │
+│ │ - Watch Fragment file changes │ │
+│ │ - Automatic commit creation with descriptive messages │ │
+│ │ - Push to GitHub repository │ │
+│ │ 2. Conflict resolution strategy │ │
+│ │ 3. Background job integration using Inngest │ │
+│ │ 4. Real-time sync status updates │ │
+│ │ │ │
+│ │ Phase 5: User Interface │ │
+│ │ │ │
+│ │ 1. GitHub connection settings page │ │
+│ │ 2. Repository creation dialog in project view │ │
+│ │ 3. Sync status indicators │ │
+│ │ 4. Repository management controls │ │
+│ │ 5. Mobile-responsive design following existing patterns │ │
+│ │ │ │
+│ │ Phase 6: Security & Error Handling │ │
+│ │ │ │
+│ │ 1. Secure token storage and encryption │ │
+│ │ 2. API rate limit handling │ │
+│ │ 3. Comprehensive error messages │ │
+│ │ 4. User permission validation │ │
+│ │ 5. Webhook setup for repository events │ │
+│ │ │ │
+│ │ Key Files to Modify/Create │ │
+│ │ │ │
+│ │ - prisma/schema.prisma - Database schema updates │ │
+│ │ - src/modules/github/ - New module for GitHub integration │ │
+│ │ - src/app/api/auth/github/ - OAuth flow handlers │ │
+│ │ - src/lib/github.ts - GitHub API client │ │
+│ │ - src/components/ui/github-\* - UI components │ │
+│ │ - Environment variables and configuration │ │
+│ │ │ │
+│ │ Technical Considerations │ │
+│ │ │ │
+│ │ - Rate Limiting: GitHub API has rate limits (5000/hour for authenticated requests) │ │
+│ │ - Token Security: Store tokens encrypted, implement refresh mechanism │ │
+│ │ - Error Recovery: Handle network failures, API errors gracefully │ │
+│ │ - Performance: Use background jobs for sync operations │ │
+│ │ - User Experience: Real-time updates using existing Inngest infrastructure │ │
+│ │ │ │
+│ │ This plan implements all three requirements: │ │
+│ │ 1. ✅ GitHub account connection with OAuth │ │
+│ │ 2. ✅ Repository creation from platform │ │
+│ │ 3. ✅ Automatic code synchronization │ │
+│ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│
+
 ## Overview
 
 A integração GitHub permitirá que usuários conectem seus projetos da plataforma diretamente ao GitHub através de OAuth, criem repositórios e sincronizem automaticamente as alterações. O design segue a arquitetura modular existente do projeto, utilizando tRPC para APIs, Prisma para persistência e Clerk para autenticação.
