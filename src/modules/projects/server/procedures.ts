@@ -795,6 +795,10 @@ export const projectsRouter = createTRPCRouter({
         // Try to connect to sandbox
         let sandbox;
         const allFiles: Record<string, string> = {};
+        
+        // Initialize counters for file processing
+        let processedCount = 0;
+        let errorCount = 0;
 
         try {
           sandbox = await getSandbox(sandboxId);
@@ -911,10 +915,6 @@ export const projectsRouter = createTRPCRouter({
             });
 
           console.log(`[GITHUB_SYNC] Found ${validFiles.length} files to sync`);
-
-          // Initialize counters for file processing
-          let processedCount = 0;
-          let errorCount = 0;
 
           // Read all files and build the files object
           for (const filePath of validFiles) {
