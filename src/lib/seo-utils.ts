@@ -28,7 +28,7 @@ export interface TwitterCardData {
   creator?: string;
 }
 
-export type StructuredDataType = 
+export type StructuredDataType =
   | OrganizationSchema
   | WebsiteSchema
   | SoftwareApplicationSchema
@@ -103,7 +103,7 @@ export function generateMetadata({
 }: PageSEO): Metadata {
   const fullTitle = title === seoConfig.site.name ? title : `${title} | ${seoConfig.site.name}`;
   const ogImage = openGraph?.image || `${seoConfig.site.url}/og-default.jpg`;
-  
+
   return {
     title: fullTitle,
     description,
@@ -126,7 +126,7 @@ export function generateMetadata({
       canonical: canonical || seoConfig.site.url,
     },
     openGraph: {
-      type: openGraph?.type === 'product' ? 'website' : (openGraph?.type || 'website'),
+      type: openGraph?.type === 'product' ? 'website' : openGraph?.type || 'website',
       title: openGraph?.title || fullTitle,
       description: openGraph?.description || description,
       url: openGraph?.url || canonical || seoConfig.site.url,
@@ -154,8 +154,6 @@ export function generateMetadata({
     },
     manifest: '/manifest.json',
     other: {
-      'apple-mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-status-bar-style': 'black-translucent',
       'theme-color': '#a48fff',
     },
   };
@@ -167,12 +165,14 @@ export function generateMetadata({
 export const pageSEO = {
   home: (): PageSEO => ({
     title: 'CrazyNator - Build Apps with AI',
-    description: 'Transform your ideas into fully functional web applications using AI. Create apps and websites by chatting with AI - no coding required. Start building today.',
+    description:
+      'Transform your ideas into fully functional web applications using AI. Create apps and websites by chatting with AI - no coding required. Start building today.',
     keywords: [...keywords.primary, ...keywords.longTail],
     canonical: seoConfig.site.url,
     openGraph: {
       title: 'CrazyNator - Build Apps with AI',
-      description: 'Transform your ideas into fully functional web applications using AI. No coding required.',
+      description:
+        'Transform your ideas into fully functional web applications using AI. No coding required.',
       image: `${seoConfig.site.url}/og-home.jpg`,
       imageAlt: 'CrazyNator - AI-powered app development platform',
       type: 'website',
@@ -188,7 +188,8 @@ export const pageSEO = {
 
   pricing: (): PageSEO => ({
     title: 'Pricing Plans - CrazyNator',
-    description: 'Choose the perfect plan for your AI-powered app development needs. Free tier available. Affordable pricing for individuals and teams.',
+    description:
+      'Choose the perfect plan for your AI-powered app development needs. Free tier available. Affordable pricing for individuals and teams.',
     keywords: [
       'crazynator pricing',
       'ai app builder cost',
@@ -209,7 +210,8 @@ export const pageSEO = {
 
   dashboard: (): PageSEO => ({
     title: 'Dashboard - Your Projects',
-    description: 'Manage your AI-generated projects and applications. View, edit, and deploy your apps built with CrazyNator.',
+    description:
+      'Manage your AI-generated projects and applications. View, edit, and deploy your apps built with CrazyNator.',
     canonical: `${seoConfig.site.url}/dashboard`,
     openGraph: {
       title: 'CrazyNator Dashboard',
@@ -223,7 +225,7 @@ export const pageSEO = {
 
   project: (projectName?: string): PageSEO => ({
     title: projectName ? `${projectName} - Project` : 'Project - CrazyNator',
-    description: projectName 
+    description: projectName
       ? `View and edit your ${projectName} project built with CrazyNator's AI-powered development platform.`
       : 'View and edit your AI-generated project with real-time preview and code editing capabilities.',
     canonical: `${seoConfig.site.url}/projects/${projectName || 'project'}`,
@@ -250,7 +252,9 @@ export function createOrganizationSchema(): OrganizationSchema {
     logo: `${seoConfig.site.url}${seoConfig.site.logo}`,
     description: seoConfig.site.description,
     sameAs: [
-      seoConfig.social.twitter ? `https://twitter.com/${seoConfig.social.twitter.replace('@', '')}` : '',
+      seoConfig.social.twitter
+        ? `https://twitter.com/${seoConfig.social.twitter.replace('@', '')}`
+        : '',
       seoConfig.social.facebook || '',
       seoConfig.social.linkedin || '',
     ].filter(Boolean),
@@ -295,10 +299,10 @@ export function createSoftwareApplicationSchema(): SoftwareApplicationSchema {
  */
 export function optimizeDescription(description: string, maxLength = 160): string {
   if (description.length <= maxLength) return description;
-  
+
   const truncated = description.substring(0, maxLength - 3);
   const lastSpace = truncated.lastIndexOf(' ');
-  
+
   return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 

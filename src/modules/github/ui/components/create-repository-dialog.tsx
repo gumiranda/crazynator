@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,11 +59,15 @@ export function CreateRepositoryDialog({
   trigger,
   onSuccess,
 }: CreateRepositoryDialogProps) {
+  // Feature flag to control if GitHub repository creation is enabled
+  const isGitHubRepoEnabled = process.env.NEXT_PUBLIC_ENABLE_GITHUB_REPOSITORY_CREATION === 'true';
+  
   const [open, setOpen] = useState(false);
   const [createdRepository, setCreatedRepository] = useState<any>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const trpc = useTRPC();
-  const { data: connection } = useQuery(trpc.github.getConnection.queryOptions());
+  const { data: connection, refetch: refetchConnection } = useQuery(trpc.github.getConnection.queryOptions());
   console.log({ connection });
   const { data: existingRepo } = useQuery(
     trpc.github.getRepositoryByProject.queryOptions({ projectId }),
@@ -111,11 +115,68 @@ export function CreateRepositoryDialog({
     });
   };
 
+  // Handle GitHub connection via popup
+  const handleGitHubConnect = useCallback(() => {
+    setIsConnecting(true);
+    
+    const authUrl = `/api/auth/github?redirect_url=${encodeURIComponent(window.location.origin + '/auth/github/popup')}`;
+    const popup = window.open(
+      authUrl,
+      'github-auth',
+      'width=600,height=700,scrollbars=yes,resizable=yes'
+    );
+
+    if (!popup) {
+      setIsConnecting(false);
+      toast.error('Failed to open GitHub authentication window. Please check if popups are blocked.');
+      return;
+    }
+
+    // Listen for messages from popup
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      
+      if (event.data.type === 'GITHUB_AUTH_SUCCESS') {
+        popup.close();
+        setIsConnecting(false);
+        toast.success('GitHub account connected successfully!');
+        // Refetch connection data
+        refetchConnection();
+      } else if (event.data.type === 'GITHUB_AUTH_ERROR') {
+        popup.close();
+        setIsConnecting(false);
+        toast.error(event.data.error || 'Failed to connect GitHub account');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Check if popup was closed manually
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleMessage);
+        setIsConnecting(false);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(checkClosed);
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [refetchConnection]);
+
   const handleClose = () => {
     setOpen(false);
     setCreatedRepository(null);
+    setIsConnecting(false);
     form.reset();
   };
+
+  // If GitHub repository creation is disabled by feature flag
+  if (!isGitHubRepoEnabled) {
+    return null;
+  }
 
   // If not connected to GitHub
   if (!connection) {
@@ -142,9 +203,22 @@ export function CreateRepositoryDialog({
               Connect your GitHub account to create a repository for this project and sync your code
               automatically.
             </p>
-            <Button onClick={() => (window.location.href = '/api/auth/github')} className="w-full">
-              <Github className="h-4 w-4 mr-2" />
-              Connect GitHub
+            <Button 
+              onClick={handleGitHubConnect} 
+              disabled={isConnecting}
+              className="w-full"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Github className="h-4 w-4 mr-2" />
+                  Connect GitHub
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>

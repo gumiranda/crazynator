@@ -12,15 +12,21 @@ export async function GET(request: NextRequest) {
   if (error) {
     console.error('GitHub OAuth error:', error);
     const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
+    const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+      ? redirectUrl + '?github_error=' + encodeURIComponent(error)
+      : redirectUrl + '?github_error=' + encodeURIComponent(error);
     return NextResponse.redirect(
-      new URL(redirectUrl + '?github_error=' + encodeURIComponent(error), request.url)
+      new URL(finalRedirectUrl, request.url)
     );
   }
   
   if (!code || !state) {
     const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
+    const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+      ? redirectUrl + '?github_error=missing_parameters'
+      : redirectUrl + '?github_error=missing_parameters';
     return NextResponse.redirect(
-      new URL(redirectUrl + '?github_error=missing_parameters', request.url)
+      new URL(finalRedirectUrl, request.url)
     );
   }
   
@@ -31,15 +37,21 @@ export async function GET(request: NextRequest) {
     const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
     
     if (!storedState || !userId) {
+      const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+        ? redirectUrl + '?github_error=invalid_session'
+        : redirectUrl + '?github_error=invalid_session';
       return NextResponse.redirect(
-        new URL(redirectUrl + '?github_error=invalid_session', request.url)
+        new URL(finalRedirectUrl, request.url)
       );
     }
     
     // Verify state parameter
     if (state !== storedState) {
+      const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+        ? redirectUrl + '?github_error=invalid_state'
+        : redirectUrl + '?github_error=invalid_state';
       return NextResponse.redirect(
-        new URL(redirectUrl + '?github_error=invalid_state', request.url)
+        new URL(finalRedirectUrl, request.url)
       );
     }
     
@@ -76,8 +88,12 @@ export async function GET(request: NextRequest) {
     });
     
     // Clear OAuth cookies
+    const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+      ? redirectUrl + '?github_success=connected'
+      : redirectUrl + '?github_success=connected';
+    
     const response = NextResponse.redirect(
-      new URL(redirectUrl + '?github_success=connected', request.url)
+      new URL(finalRedirectUrl, request.url)
     );
     
     response.cookies.delete('github_oauth_state');
@@ -89,8 +105,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GitHub OAuth callback error:', error);
     const redirectUrl = request.cookies.get('github_oauth_redirect')?.value || '/';
+    const finalRedirectUrl = redirectUrl.includes('/auth/github/popup') 
+      ? redirectUrl + '?github_error=callback_failed'
+      : redirectUrl + '?github_error=callback_failed';
     return NextResponse.redirect(
-      new URL(redirectUrl + '?github_error=callback_failed', request.url)
+      new URL(finalRedirectUrl, request.url)
     );
   }
 }
