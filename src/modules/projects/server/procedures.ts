@@ -434,6 +434,12 @@ export const projectsRouter = createTRPCRouter({
           '*.tsbuildinfo',
           '.swc/',
           'app/favicon.ico',
+          // E2B sandbox specific files - NEVER include these
+          '.bash_logout',
+          '.bashrc',
+          '.e2b',
+          '.profile',
+          'compile_page.sh',
         ];
 
         // Build find command to list ONLY FILES excluding unwanted patterns
@@ -819,6 +825,12 @@ export const projectsRouter = createTRPCRouter({
             '*.tsbuildinfo',
             '.swc/',
             'app/favicon.ico',
+            // E2B sandbox specific files - NEVER include these in GitHub
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
           ];
 
           // Build find command to list ONLY FILES excluding unwanted patterns
@@ -1158,6 +1170,12 @@ export const projectsRouter = createTRPCRouter({
             '*.tsbuildinfo',
             '.swc/',
             'app/favicon.ico',
+            // E2B sandbox specific files - NEVER include these in GitHub
+            '.bash_logout',
+            '.bashrc',
+            '.e2b',
+            '.profile',
+            'compile_page.sh',
           ];
 
           const excludeArgs = excludePatterns
