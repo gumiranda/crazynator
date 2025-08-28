@@ -32,6 +32,7 @@ async function compressFiles(files: Record<string, string>): Promise<string> {
 }
 
 // Helper function to decompress file data from Inngest payload
+// Note: Currently unused but kept for future use
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function decompressFiles(compressedData: string): Promise<Record<string, string>> {
   const compressed = Buffer.from(compressedData, 'base64');
