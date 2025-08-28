@@ -17,7 +17,8 @@ import { projectChannel } from './channels';
 import { 
   githubSyncFunction, 
   githubInitialSyncFunction, 
-  githubBatchSyncFunction 
+  githubBatchSyncFunction,
+  githubBatchFilesSyncFunction 
 } from './github-functions';
 
 interface AgentState {
@@ -308,6 +309,7 @@ export {
   githubSyncFunction, 
   githubInitialSyncFunction, 
   githubBatchSyncFunction,
+  githubBatchFilesSyncFunction,
   sandboxMaintenanceFunction,
   recreateSandboxFunction,
 };

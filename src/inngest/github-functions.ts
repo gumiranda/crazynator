@@ -1,6 +1,6 @@
 import { inngest } from './client';
 import { prisma } from '@/lib/prisma';
-import { decryptToken, createMultipleFiles, createOrUpdateFile } from '@/lib/github';
+import { decryptToken, createMultipleFiles } from '@/lib/github';
 
 /**
  * GitHub sync function that handles automatic code synchronization
@@ -18,7 +18,7 @@ export const githubSyncFunction = inngest.createFunction(
     });
 
     // Get fragment and project with GitHub repository
-    const { fragment, project, repository, connection } = await step.run('get-data', async () => {
+    const { fragment, repository, connection } = await step.run('get-data', async () => {
       const fragment = await prisma.fragment.findUnique({
         where: { id: fragmentId },
         include: {
@@ -50,7 +50,7 @@ export const githubSyncFunction = inngest.createFunction(
         throw new Error('Project does not have a GitHub repository or connection');
       }
 
-      return { fragment, project, repository, connection };
+      return { fragment, repository, connection };
     });
 
     // Update sync status to IN_PROGRESS
@@ -83,7 +83,7 @@ export const githubSyncFunction = inngest.createFunction(
           repo,
           files,
           commitMessage || `Update project files - ${new Date().toISOString()}`,
-          repository.defaultBranch
+          repository.defaultBranch,
         );
       });
 
@@ -104,7 +104,6 @@ export const githubSyncFunction = inngest.createFunction(
         message: 'Files synced successfully to GitHub',
         repository: repository.fullName,
       };
-
     } catch (error) {
       // Update sync status to FAILED
       await step.run('update-sync-status-failed', async () => {
@@ -119,7 +118,7 @@ export const githubSyncFunction = inngest.createFunction(
 
       throw error;
     }
-  }
+  },
 );
 
 /**
@@ -184,9 +183,14 @@ export const githubInitialSyncFunction = inngest.createFunction(
     try {
       // Find the latest fragment with files
       const latestFragment = project.messages
-        .map(m => m.fragment)
-        .filter(f => f !== null)
-        .find(f => f && typeof f.files === 'object' && Object.keys(f.files as Record<string, string>).length > 0);
+        .map((m) => m.fragment)
+        .filter((f) => f !== null)
+        .find(
+          (f) =>
+            f &&
+            typeof f.files === 'object' &&
+            Object.keys(f.files as Record<string, string>).length > 0,
+        );
 
       if (!latestFragment) {
         // No files to sync, mark as success
@@ -215,7 +219,9 @@ export const githubInitialSyncFunction = inngest.createFunction(
         // Create README if it doesn't exist
         const filesWithReadme = {
           ...files,
-          'README.md': files['README.md'] || `# ${repository.name}\n\nProject generated with [CrazyNator](${process.env.NEXT_PUBLIC_APP_URL})\n\n## Description\n\n${repository.description || 'No description provided.'}\n\n## Getting Started\n\nThis project was automatically generated and synced from CrazyNator.\n`,
+          'README.md':
+            files['README.md'] ||
+            `# ${repository.name}\n\nProject generated with [CrazyNator](${process.env.NEXT_PUBLIC_APP_URL})\n\n## Description\n\n${repository.description || 'No description provided.'}\n\n## Getting Started\n\nThis project was automatically generated and synced from CrazyNator.\n`,
         };
 
         await createMultipleFiles(
@@ -224,7 +230,7 @@ export const githubInitialSyncFunction = inngest.createFunction(
           repo,
           filesWithReadme,
           'Initial project setup from CrazyNator',
-          repository.defaultBranch
+          repository.defaultBranch,
         );
       });
 
@@ -245,7 +251,6 @@ export const githubInitialSyncFunction = inngest.createFunction(
         message: 'Initial files synced successfully to GitHub',
         repository: repository.fullName,
       };
-
     } catch (error) {
       // Update sync status to FAILED
       await step.run('update-sync-status-failed', async () => {
@@ -260,7 +265,146 @@ export const githubInitialSyncFunction = inngest.createFunction(
 
       throw error;
     }
-  }
+  },
+);
+
+/**
+ * New batch file sync function for handling compressed file batches
+ * Processes files in batches to avoid payload size limits
+ */
+export const githubBatchFilesSyncFunction = inngest.createFunction(
+  { id: 'github-batch-files-sync' },
+  { event: 'github/batch-sync' },
+  async ({ event, step }) => {
+    const {
+      repositoryId,
+      batchIndex,
+      totalBatches,
+      compressedFiles,
+      isLastBatch,
+      commitMessage,
+      uncompressedSize,
+      compressedSize,
+    } = event.data;
+
+    await step.run('validate-inputs', async () => {
+      if (!repositoryId) {
+        throw new Error('Repository ID is required');
+      }
+      if (batchIndex === undefined || totalBatches === undefined) {
+        throw new Error('Batch index and total batches are required');
+      }
+      if (!compressedFiles) {
+        throw new Error('Compressed files data is required');
+      }
+    });
+
+    // Get repository and connection
+    const { repository, connection } = await step.run('get-repository-data', async () => {
+      const repository = await prisma.gitHubRepository.findUnique({
+        where: { id: repositoryId },
+        include: {
+          githubConnection: true,
+        },
+      });
+
+      if (!repository) {
+        throw new Error('Repository not found');
+      }
+
+      return {
+        repository,
+        connection: repository.githubConnection,
+      };
+    });
+
+    // Update sync status to IN_PROGRESS on first batch
+    if (batchIndex === 0) {
+      await step.run('update-sync-status-progress', async () => {
+        await prisma.gitHubRepository.update({
+          where: { id: repository.id },
+          data: {
+            syncStatus: 'IN_PROGRESS',
+            syncError: null,
+          },
+        });
+      });
+    }
+
+    try {
+      // Decompress and sync files
+      await step.run('sync-batch-files', async () => {
+        const accessToken = decryptToken(connection.accessToken);
+
+        // Decompress files
+        const { gunzip } = await import('zlib');
+        const { promisify } = await import('util');
+        const gunzipAsync = promisify(gunzip);
+
+        const compressed = Buffer.from(compressedFiles, 'base64');
+        const decompressed = await gunzipAsync(compressed);
+        const files = JSON.parse(decompressed.toString('utf8')) as Record<string, string>;
+
+        if (!files || Object.keys(files).length === 0) {
+          console.log(`Batch ${batchIndex + 1}/${totalBatches}: No files to sync`);
+          return;
+        }
+
+        const [owner, repo] = repository.fullName.split('/');
+        const batchCommitMessage = `${commitMessage || 'Update project files'} (batch ${batchIndex + 1}/${totalBatches})`;
+
+        console.log(
+          `Batch ${batchIndex + 1}/${totalBatches}: Syncing ${Object.keys(files).length} files (${uncompressedSize} → ${compressedSize} bytes)`,
+        );
+
+        // Use multiple files commit for efficiency
+        await createMultipleFiles(
+          accessToken,
+          owner,
+          repo,
+          files,
+          batchCommitMessage,
+          repository.defaultBranch,
+        );
+      });
+
+      // Update sync status to SUCCESS on last batch
+      if (isLastBatch) {
+        await step.run('update-sync-status-success', async () => {
+          await prisma.gitHubRepository.update({
+            where: { id: repository.id },
+            data: {
+              syncStatus: 'SUCCESS',
+              lastSyncAt: new Date(),
+              syncError: null,
+            },
+          });
+        });
+      }
+
+      return {
+        success: true,
+        message: `Batch ${batchIndex + 1}/${totalBatches} synced successfully`,
+        repository: repository.fullName,
+        batchIndex,
+        totalBatches,
+        isLastBatch,
+      };
+    } catch (error) {
+      // Update sync status to FAILED
+      await step.run('update-sync-status-failed', async () => {
+        await prisma.gitHubRepository.update({
+          where: { id: repository.id },
+          data: {
+            syncStatus: 'FAILED',
+            syncError: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      });
+
+      throw error;
+    }
+  },
 );
 
 /**
@@ -317,8 +461,8 @@ export const githubBatchSyncFunction = inngest.createFunction(
 
       for (const repository of repositories) {
         const latestFragment = repository.project.messages
-          .map(m => m.fragment)
-          .filter(f => f !== null)[0];
+          .map((m) => m.fragment)
+          .filter((f) => f !== null)[0];
 
         if (latestFragment) {
           try {
@@ -363,5 +507,5 @@ export const githubBatchSyncFunction = inngest.createFunction(
       message: `Batch sync initiated for ${repositories.length} repositories`,
       results: syncResults,
     };
-  }
+  },
 );

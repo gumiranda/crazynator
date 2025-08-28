@@ -4,7 +4,8 @@ import {
   codeAgentFunction, 
   githubSyncFunction, 
   githubInitialSyncFunction, 
-  githubBatchSyncFunction 
+  githubBatchSyncFunction,
+  githubBatchFilesSyncFunction 
 } from '@/inngest/functions';
 
 export const { GET, POST, PUT } = serve({
@@ -14,5 +15,6 @@ export const { GET, POST, PUT } = serve({
     githubSyncFunction,
     githubInitialSyncFunction,
     githubBatchSyncFunction,
+    githubBatchFilesSyncFunction,
   ],
 });
