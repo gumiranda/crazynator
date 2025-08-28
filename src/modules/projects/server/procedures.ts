@@ -118,13 +118,13 @@ export const projectsRouter = createTRPCRouter({
             const BATCH_SIZE = 15;
             const fileEntries = Object.entries(input.files);
             const fileBatches = chunkArray(fileEntries, BATCH_SIZE);
-            
+
             // Send multiple batched sync events with compressed data
             const batchEvents = await Promise.all(
               fileBatches.map(async (batch, index) => {
                 const batchFiles = Object.fromEntries(batch);
                 const compressedFiles = await compressFiles(batchFiles);
-                
+
                 return {
                   name: 'github/batch-sync',
                   data: {
@@ -138,7 +138,7 @@ export const projectsRouter = createTRPCRouter({
                     compressedSize: compressedFiles.length,
                   },
                 };
-              })
+              }),
             );
 
             await inngest.send(batchEvents);
@@ -331,7 +331,6 @@ export const projectsRouter = createTRPCRouter({
         let sandbox;
         try {
           sandbox = await getSandbox(sandboxId);
-
         } catch (sandboxError) {
           // If sandbox doesn't exist or is expired, fallback to database files
           if (
@@ -367,7 +366,6 @@ export const projectsRouter = createTRPCRouter({
               '.DS_Store',
               'Thumbs.db',
             ];
-
 
             // Create ZIP from database files
             const zip = new JSZip();
@@ -461,6 +459,8 @@ export const projectsRouter = createTRPCRouter({
           '.e2b',
           '.profile',
           'compile_page.sh',
+          '.npm',
+          '.nvmrc',
         ];
 
         // Build find command to list ONLY FILES excluding unwanted patterns
@@ -807,10 +807,10 @@ export const projectsRouter = createTRPCRouter({
         // Try to connect to sandbox
         let sandbox;
         const allFiles: Record<string, string> = {};
-        
+
         // Initialize counters for file processing
         let processedCount = 0;
-        let errorCount = 0;
+        const errorCount = 0;
 
         try {
           sandbox = await getSandbox(sandboxId);
@@ -847,6 +847,8 @@ export const projectsRouter = createTRPCRouter({
             '.e2b',
             '.profile',
             'compile_page.sh',
+            '.npm',
+            '.nvmrc',
           ];
 
           // Build find command to list ONLY FILES excluding unwanted patterns
@@ -1003,6 +1005,8 @@ export const projectsRouter = createTRPCRouter({
               '.e2b',
               '.profile',
               'compile_page.sh',
+              '.npm',
+              '.nvmrc',
             ];
 
             for (const [filePath, content] of Object.entries(files)) {
@@ -1023,7 +1027,6 @@ export const projectsRouter = createTRPCRouter({
           throw new Error('No files found to sync');
         }
 
-
         // Update the fragment with all the collected files
         await prisma.fragment.update({
           where: { id: fragment.id },
@@ -1031,19 +1034,18 @@ export const projectsRouter = createTRPCRouter({
             files: allFiles,
           },
         });
-        
 
         // Trigger GitHub sync using batched approach with compression
         const BATCH_SIZE = 15; // Process 15 files per batch to stay under payload limits
         const fileEntries = Object.entries(allFiles);
         const fileBatches = chunkArray(fileEntries, BATCH_SIZE);
-        
+
         // Send multiple batched sync events with compressed data
         const batchEvents = await Promise.all(
           fileBatches.map(async (batch, index) => {
             const batchFiles = Object.fromEntries(batch);
             const compressedFiles = await compressFiles(batchFiles);
-            
+
             return {
               name: 'github/batch-sync',
               data: {
@@ -1052,12 +1054,14 @@ export const projectsRouter = createTRPCRouter({
                 totalBatches: fileBatches.length,
                 compressedFiles,
                 isLastBatch: index === fileBatches.length - 1,
-                commitMessage: input.commitMessage || `Sync all files from sandbox - ${new Date().toISOString()}`,
+                commitMessage:
+                  input.commitMessage ||
+                  `Sync all files from sandbox - ${new Date().toISOString()}`,
                 uncompressedSize: JSON.stringify(batchFiles).length,
                 compressedSize: compressedFiles.length,
               },
             };
-          })
+          }),
         );
 
         await inngest.send(batchEvents);
@@ -1088,7 +1092,6 @@ export const projectsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      
       // Find the project and verify user ownership
       const project = await prisma.project.findUnique({
         where: {
@@ -1107,7 +1110,6 @@ export const projectsRouter = createTRPCRouter({
           githubRepository: true,
         },
       });
-      
 
       if (!project) {
         throw new TRPCError({
@@ -1196,6 +1198,8 @@ export const projectsRouter = createTRPCRouter({
             '.e2b',
             '.profile',
             'compile_page.sh',
+            '.npm',
+            '.nvmrc',
           ];
 
           const excludeArgs = excludePatterns
@@ -1311,7 +1315,7 @@ export const projectsRouter = createTRPCRouter({
         } catch {
           // Fallback to database files
           const files = fragment.files as Record<string, string>;
-          
+
           if (!files || Object.keys(files).length === 0) {
             throw new TRPCError({
               code: 'NOT_FOUND',
@@ -1338,6 +1342,8 @@ export const projectsRouter = createTRPCRouter({
             '.e2b',
             '.profile',
             'compile_page.sh',
+            '.npm',
+            '.nvmrc',
           ];
 
           for (const [filePath, content] of Object.entries(files)) {
@@ -1366,7 +1372,7 @@ export const projectsRouter = createTRPCRouter({
         // Create GitHub repository using the existing GitHub library
         const { decryptToken, createRepository } = await import('@/lib/github');
         const accessToken = decryptToken(githubConnection.accessToken);
-        
+
         const githubRepo = await createRepository(accessToken, {
           name: input.repositoryName,
           description: input.description || `Generated project: ${project.name}`,
@@ -1395,13 +1401,13 @@ export const projectsRouter = createTRPCRouter({
         const BATCH_SIZE = 15; // Process 15 files per batch to stay under payload limits
         const fileEntries = Object.entries(allFiles);
         const fileBatches = chunkArray(fileEntries, BATCH_SIZE);
-        
+
         // Send multiple batched sync events with compressed data
         const batchEvents = await Promise.all(
           fileBatches.map(async (batch, index) => {
             const batchFiles = Object.fromEntries(batch);
             const compressedFiles = await compressFiles(batchFiles);
-            
+
             return {
               name: 'github/batch-sync',
               data: {
@@ -1414,7 +1420,7 @@ export const projectsRouter = createTRPCRouter({
                 compressedSize: compressedFiles.length,
               },
             };
-          })
+          }),
         );
 
         await inngest.send(batchEvents);
@@ -1509,7 +1515,7 @@ export const projectsRouter = createTRPCRouter({
 
         // Get all files from GitHub repository
         console.log(`[PULL_FROM_GITHUB] Fetching files from GitHub repository`);
-        
+
         // Get the repository tree (all files)
         const { data: tree } = await octokit.rest.git.getTree({
           owner,
@@ -1524,7 +1530,7 @@ export const projectsRouter = createTRPCRouter({
         let processedFiles = 0;
 
         // Filter only files (not directories/submodules)
-        const fileEntries = tree.tree.filter(item => item.type === 'blob' && item.path);
+        const fileEntries = tree.tree.filter((item) => item.type === 'blob' && item.path);
 
         console.log(`[PULL_FROM_GITHUB] Found ${fileEntries.length} files in GitHub repository`);
 
@@ -1546,7 +1552,7 @@ export const projectsRouter = createTRPCRouter({
             processedFiles++;
 
             // Check if file exists in current fragment and if content is different
-            const currentFiles = fragment.files as Record<string, string> || {};
+            const currentFiles = (fragment.files as Record<string, string>) || {};
             const currentContent = currentFiles[file.path];
 
             if (!currentContent) {
@@ -1556,7 +1562,6 @@ export const projectsRouter = createTRPCRouter({
               updatedFiles++;
               console.log(`[PULL_FROM_GITHUB] Updated file from GitHub: ${file.path}`);
             }
-
           } catch (fileError) {
             console.warn(`[PULL_FROM_GITHUB] Failed to fetch file ${file.path}:`, fileError);
             continue;
@@ -1565,16 +1570,18 @@ export const projectsRouter = createTRPCRouter({
 
         // Update fragment with GitHub files
         const mergedFiles = {
-          ...(fragment.files as Record<string, string> || {}),
+          ...((fragment.files as Record<string, string>) || {}),
           ...githubFiles,
         };
-        
+
         // Debug: Log fragment info before GitHub pull update
         console.log(`[PULL_FROM_GITHUB] Fragment before update:`, {
           id: fragment.id,
-          currentFilesCount: fragment.files ? Object.keys(fragment.files as Record<string, string>).length : 0,
+          currentFilesCount: fragment.files
+            ? Object.keys(fragment.files as Record<string, string>).length
+            : 0,
           githubFilesCount: Object.keys(githubFiles).length,
-          mergedFilesCount: Object.keys(mergedFiles).length
+          mergedFilesCount: Object.keys(mergedFiles).length,
         });
 
         const updatedFragment = await prisma.fragment.update({
@@ -1583,12 +1590,14 @@ export const projectsRouter = createTRPCRouter({
             files: mergedFiles,
           },
         });
-        
+
         // Debug: Verify the GitHub pull update worked
         console.log(`[PULL_FROM_GITHUB] Fragment after update:`, {
           id: updatedFragment.id,
-          savedFilesCount: updatedFragment.files ? Object.keys(updatedFragment.files as Record<string, string>).length : 0,
-          updateSuccessful: !!updatedFragment.files
+          savedFilesCount: updatedFragment.files
+            ? Object.keys(updatedFragment.files as Record<string, string>).length
+            : 0,
+          updateSuccessful: !!updatedFragment.files,
         });
 
         // Try to update sandbox if available
@@ -1601,12 +1610,12 @@ export const projectsRouter = createTRPCRouter({
 
           if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
             console.log(`[PULL_FROM_GITHUB] Attempting to update sandbox: ${sandboxId}`);
-            
+
             const sandbox = await getSandbox(sandboxId);
 
             // Update changed/new files in sandbox
             for (const [filePath, content] of Object.entries(githubFiles)) {
-              const currentFiles = fragment.files as Record<string, string> || {};
+              const currentFiles = (fragment.files as Record<string, string>) || {};
               const currentContent = currentFiles[filePath];
 
               // Only update if file is new or changed
@@ -1615,7 +1624,10 @@ export const projectsRouter = createTRPCRouter({
                   await sandbox.files.write(filePath, content);
                   console.log(`[PULL_FROM_GITHUB] Updated in sandbox: ${filePath}`);
                 } catch (writeError) {
-                  console.warn(`[PULL_FROM_GITHUB] Failed to write to sandbox ${filePath}:`, writeError);
+                  console.warn(
+                    `[PULL_FROM_GITHUB] Failed to write to sandbox ${filePath}:`,
+                    writeError,
+                  );
                 }
               }
             }
@@ -1625,7 +1637,9 @@ export const projectsRouter = createTRPCRouter({
           console.warn(`[PULL_FROM_GITHUB] Sandbox update failed (continuing):`, sandboxError);
         }
 
-        console.log(`[PULL_FROM_GITHUB] Pull completed: ${processedFiles} processed, ${newFiles} new, ${updatedFiles} updated`);
+        console.log(
+          `[PULL_FROM_GITHUB] Pull completed: ${processedFiles} processed, ${newFiles} new, ${updatedFiles} updated`,
+        );
 
         return {
           success: true,
@@ -1638,7 +1652,6 @@ export const projectsRouter = createTRPCRouter({
           },
           repository: repository.fullName,
         };
-
       } catch (error) {
         console.error('Failed to pull from GitHub:', error);
 
@@ -1718,6 +1731,8 @@ export const projectsRouter = createTRPCRouter({
           '.e2b',
           '.profile',
           'compile_page.sh',
+          '.npm',
+          '.nvmrc',
         ];
 
         console.log(
