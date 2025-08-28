@@ -332,7 +332,7 @@ export const projectsRouter = createTRPCRouter({
         try {
           sandbox = await getSandbox(sandboxId);
 
-        } catch {
+        } catch (sandboxError) {
           // If sandbox doesn't exist or is expired, fallback to database files
           if (
             sandboxError instanceof Error &&
@@ -967,7 +967,7 @@ export const projectsRouter = createTRPCRouter({
               continue;
             }
           }
-        } catch {
+        } catch (sandboxError) {
           // Fallback to database files if sandbox is expired
           if (
             sandboxError instanceof Error &&
@@ -1356,7 +1356,7 @@ export const projectsRouter = createTRPCRouter({
         }
 
         // Update fragment with collected files
-        const updatedFragment = await prisma.fragment.update({
+        await prisma.fragment.update({
           where: { id: fragment.id },
           data: {
             files: allFiles,
@@ -1621,7 +1621,7 @@ export const projectsRouter = createTRPCRouter({
             }
             sandboxUpdated = true;
           }
-        } catch {
+        } catch (sandboxError) {
           console.warn(`[PULL_FROM_GITHUB] Sandbox update failed (continuing):`, sandboxError);
         }
 
