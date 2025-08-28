@@ -1009,7 +1009,6 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
         }
 
         const mergedFiles = {
-          ...cleanedExistingFiles,
           ...cleanedNewFiles,
         };
 
