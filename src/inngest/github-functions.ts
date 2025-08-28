@@ -537,7 +537,7 @@ export const githubBatchSyncFunction = inngest.createFunction(
  * Handles async processing of GitHub pulls with batching and compression
  */
 export const githubPullBatchProcessorFunction = inngest.createFunction(
-  { 
+  {
     id: 'github-pull-batch-processor',
     retries: 3,
   },
@@ -609,123 +609,130 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
     try {
       // Get file tree from GitHub with caching and optimization
-      const { fileEntries, totalFiles, treeCache } = await step.run('fetch-github-tree', async () => {
-        const { repository } = job;
+      const { fileEntries, totalFiles, treeCache } = await step.run(
+        'fetch-github-tree',
+        async () => {
+          const { repository } = job;
 
-        if (!repository) {
-          throw new Error('Repository not found');
-        }
+          if (!repository) {
+            throw new Error('Repository not found');
+          }
 
-        const accessToken = decryptToken(repository.githubConnection.accessToken);
-        const octokit = createGitHubClient(accessToken);
-        const [owner, repo] = repository.fullName.split('/');
+          const accessToken = decryptToken(repository.githubConnection.accessToken);
+          const octokit = createGitHubClient(accessToken);
+          const [owner, repo] = repository.fullName.split('/');
 
-        console.log(`[PULL_BATCH] Fetching tree from ${repository.fullName}`);
+          console.log(`[PULL_BATCH] Fetching tree from ${repository.fullName}`);
 
-        // Get the latest commit SHA for caching
-        const { data: commit } = await octokit.rest.repos.getCommit({
-          owner,
-          repo,
-          ref: repository.defaultBranch,
-        });
-
-        const latestCommitSha = commit.sha;
-        const treeSha = commit.commit.tree.sha;
-
-        // Check if we have cached tree data in job metadata
-        const cachedMetadata = job.metadata as any;
-        const shouldUseCachedTree = 
-          cachedMetadata?.lastCommitSha === latestCommitSha &&
-          cachedMetadata?.treeSha === treeSha &&
-          cachedMetadata?.fileEntries;
-
-        let fileEntries: any[];
-        let treeCache: any = null;
-
-        if (shouldUseCachedTree) {
-          console.log(`[PULL_BATCH] Using cached tree data (${cachedMetadata.fileEntries.length} files)`);
-          fileEntries = cachedMetadata.fileEntries;
-          treeCache = { fromCache: true, commitSha: latestCommitSha, treeSha };
-        } else {
-          console.log(`[PULL_BATCH] Fetching fresh tree data from GitHub`);
-
-          // Get the repository tree (all files)
-          const { data: tree } = await octokit.rest.git.getTree({
+          // Get the latest commit SHA for caching
+          const { data: commit } = await octokit.rest.repos.getCommit({
             owner,
             repo,
-            tree_sha: treeSha,
-            recursive: 'true',
+            ref: repository.defaultBranch,
           });
 
-          // Filter only files (not directories/submodules) and exclude unnecessary files
-          const excludePatterns = [
-            'node_modules/',
-            '.git/',
-            '.next/',
-            'dist/',
-            'build/',
-            '.cache/',
-            '.turbo/',
-            '.vercel/',
-            'out/',
-            '.env',
-            '.DS_Store',
-            'Thumbs.db',
-            '*.log',
-            '*.tsbuildinfo',
-            '.swc/',
-          ];
+          const latestCommitSha = commit.sha;
+          const treeSha = commit.commit.tree.sha;
 
-          fileEntries = tree.tree
-            .filter((item) => item.type === 'blob' && item.path)
-            .filter((item) => {
-              // Apply exclusion filters to reduce unnecessary file processing
-              return !excludePatterns.some(pattern => {
-                if (pattern.endsWith('/')) {
-                  return item.path?.includes(pattern);
-                } else if (pattern.includes('*')) {
-                  const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-                  return regex.test(item.path || '');
-                } else {
-                  return item.path === pattern || item.path?.includes(pattern);
-                }
-              });
+          // Check if we have cached tree data in job metadata
+          const cachedMetadata = job.metadata as any;
+          const shouldUseCachedTree =
+            cachedMetadata?.lastCommitSha === latestCommitSha &&
+            cachedMetadata?.treeSha === treeSha &&
+            cachedMetadata?.fileEntries;
+
+          let fileEntries: any[];
+          let treeCache: any = null;
+
+          if (shouldUseCachedTree) {
+            console.log(
+              `[PULL_BATCH] Using cached tree data (${cachedMetadata.fileEntries.length} files)`,
+            );
+            fileEntries = cachedMetadata.fileEntries;
+            treeCache = { fromCache: true, commitSha: latestCommitSha, treeSha };
+          } else {
+            console.log(`[PULL_BATCH] Fetching fresh tree data from GitHub`);
+
+            // Get the repository tree (all files)
+            const { data: tree } = await octokit.rest.git.getTree({
+              owner,
+              repo,
+              tree_sha: treeSha,
+              recursive: 'true',
             });
 
-          console.log(`[PULL_BATCH] Found ${fileEntries.length} files (after filtering) in GitHub repository`);
+            // Filter only files (not directories/submodules) and exclude unnecessary files
+            const excludePatterns = [
+              'node_modules/',
+              '.git/',
+              '.next/',
+              'dist/',
+              'build/',
+              '.cache/',
+              '.turbo/',
+              '.vercel/',
+              'out/',
+              '.env',
+              '.DS_Store',
+              'Thumbs.db',
+              '*.log',
+              '*.tsbuildinfo',
+              '.swc/',
+            ];
 
-          // Cache the tree data in job metadata for future use
-          treeCache = { 
-            fromCache: false, 
-            commitSha: latestCommitSha, 
-            treeSha,
-            totalFiles: fileEntries.length,
-          };
+            fileEntries = tree.tree
+              .filter((item) => item.type === 'blob' && item.path)
+              .filter((item) => {
+                // Apply exclusion filters to reduce unnecessary file processing
+                return !excludePatterns.some((pattern) => {
+                  if (pattern.endsWith('/')) {
+                    return item.path?.includes(pattern);
+                  } else if (pattern.includes('*')) {
+                    const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+                    return regex.test(item.path || '');
+                  } else {
+                    return item.path === pattern || item.path?.includes(pattern);
+                  }
+                });
+              });
 
+            console.log(
+              `[PULL_BATCH] Found ${fileEntries.length} files (after filtering) in GitHub repository`,
+            );
+
+            // Cache the tree data in job metadata for future use
+            treeCache = {
+              fromCache: false,
+              commitSha: latestCommitSha,
+              treeSha,
+              totalFiles: fileEntries.length,
+            };
+
+            await prisma.gitHubSyncJob.update({
+              where: { id: jobId },
+              data: {
+                metadata: {
+                  ...cachedMetadata,
+                  lastCommitSha: latestCommitSha,
+                  treeSha: treeSha,
+                  fileEntries: fileEntries,
+                  cacheTimestamp: new Date().toISOString(),
+                },
+              },
+            });
+          }
+
+          // Update job with total file count
           await prisma.gitHubSyncJob.update({
             where: { id: jobId },
             data: {
-              metadata: {
-                ...cachedMetadata,
-                lastCommitSha: latestCommitSha,
-                treeSha: treeSha,
-                fileEntries: fileEntries,
-                cacheTimestamp: new Date().toISOString(),
-              },
+              totalFiles: fileEntries.length,
             },
           });
-        }
 
-        // Update job with total file count
-        await prisma.gitHubSyncJob.update({
-          where: { id: jobId },
-          data: {
-            totalFiles: fileEntries.length,
-          },
-        });
-
-        return { fileEntries, totalFiles: fileEntries.length, treeCache };
-      });
+          return { fileEntries, totalFiles: fileEntries.length, treeCache };
+        },
+      );
 
       // Process files in batches
       const BATCH_SIZE = 75; // Process 75 files per batch to avoid timeouts
@@ -742,7 +749,7 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
             totalBatches: batches.length,
           },
         });
-        
+
         console.log(`[PULL_BATCH] Job ${jobId} updated with ${batches.length} batches`);
       });
 
@@ -755,12 +762,14 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        
+
         try {
           console.log(`[PULL_BATCH] Starting batch ${batchIndex + 1}/${batches.length}`);
-          
+
           const batchResult = await step.run(`process-batch-${batchIndex}`, async () => {
-            console.log(`[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`);
+            console.log(
+              `[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`,
+            );
 
             if (!job.repository) {
               console.error(`[PULL_BATCH] Repository not found in job for batch ${batchIndex + 1}`);
@@ -770,7 +779,9 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
             const repository = job.repository;
 
             if (!repository.githubConnection?.accessToken) {
-              console.error(`[PULL_BATCH] No GitHub access token found for repository ${repository.fullName}`);
+              console.error(
+                `[PULL_BATCH] No GitHub access token found for repository ${repository.fullName}`,
+              );
               throw new Error('GitHub access token not found');
             }
 
@@ -783,15 +794,19 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
               throw new Error(`Invalid repository fullName: ${repository.fullName}`);
             }
 
-            console.log(`[PULL_BATCH] Using GitHub API for ${owner}/${repo} (batch ${batchIndex + 1}/${batches.length})`);
+            console.log(
+              `[PULL_BATCH] Using GitHub API for ${owner}/${repo} (batch ${batchIndex + 1}/${batches.length})`,
+            );
 
             const batchFiles: Record<string, string> = {};
             let batchProcessed = 0;
             let batchFailed = 0;
 
             // Process files in this batch
-            console.log(`[PULL_BATCH] Starting to process ${batch.length} files in batch ${batchIndex + 1}`);
-            
+            console.log(
+              `[PULL_BATCH] Starting to process ${batch.length} files in batch ${batchIndex + 1}`,
+            );
+
             for (const file of batch) {
               if (!file.path || !file.sha) {
                 console.warn(`[PULL_BATCH] Skipping invalid file entry:`, JSON.stringify(file));
@@ -801,11 +816,11 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
               try {
                 console.log(`[PULL_BATCH] Fetching file: ${file.path} (sha: ${file.sha})`);
-                
+
                 // Get file content from GitHub with retries
                 let retries = 3;
                 let fileData;
-                
+
                 while (retries > 0) {
                   try {
                     const response = await octokit.rest.git.getBlob({
@@ -817,12 +832,15 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
                     break;
                   } catch (error) {
                     retries--;
-                    console.warn(`[PULL_BATCH] Retry ${4-retries}/3 failed for ${file.path}:`, error);
-                    
+                    console.warn(
+                      `[PULL_BATCH] Retry ${4 - retries}/3 failed for ${file.path}:`,
+                      error,
+                    );
+
                     if (retries === 0) throw error;
-                    
+
                     // Wait before retry with exponential backoff
-                    await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
+                    await new Promise((resolve) => setTimeout(resolve, (4 - retries) * 1000));
                   }
                 }
 
@@ -838,9 +856,10 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
                 const content = cleanFileContent(rawContent);
                 batchFiles[file.path] = content;
                 batchProcessed++;
-                
-                console.log(`[PULL_BATCH] Successfully processed ${file.path} (${content.length} chars)`);
 
+                console.log(
+                  `[PULL_BATCH] Successfully processed ${file.path} (${content.length} chars)`,
+                );
               } catch (fileError) {
                 console.error(`[PULL_BATCH] Failed to fetch file ${file.path}:`, fileError);
                 batchFailed++;
@@ -848,20 +867,22 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
               }
             }
 
-            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed: ${batchProcessed} processed, ${batchFailed} failed (${Object.keys(batchFiles).length} files in result)`);
-            
+            console.log(
+              `[PULL_BATCH] Batch ${batchIndex + 1} completed: ${batchProcessed} processed, ${batchFailed} failed (${Object.keys(batchFiles).length} files in result)`,
+            );
+
             const batchResult = {
               batchFiles,
               batchProcessed,
               batchFailed,
             };
-            
+
             console.log(`[PULL_BATCH] Returning batch result:`, {
               fileCount: Object.keys(batchFiles).length,
               processed: batchProcessed,
               failed: batchFailed,
             });
-            
+
             return batchResult;
           });
 
@@ -869,7 +890,9 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
           if (batchResult && typeof batchResult === 'object') {
             if (batchResult.batchFiles && typeof batchResult.batchFiles === 'object') {
               allFiles = { ...allFiles, ...batchResult.batchFiles };
-              console.log(`[PULL_BATCH] Added ${Object.keys(batchResult.batchFiles).length} files from batch ${batchIndex + 1}`);
+              console.log(
+                `[PULL_BATCH] Added ${Object.keys(batchResult.batchFiles).length} files from batch ${batchIndex + 1}`,
+              );
             }
             if (typeof batchResult.batchProcessed === 'number') {
               processedFiles += batchResult.batchProcessed;
@@ -877,9 +900,14 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
             if (typeof batchResult.batchFailed === 'number') {
               failedFiles += batchResult.batchFailed;
             }
-            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} totals: processed=${batchResult.batchProcessed || 0}, failed=${batchResult.batchFailed || 0}`);
+            console.log(
+              `[PULL_BATCH] Batch ${batchIndex + 1} totals: processed=${batchResult.batchProcessed || 0}, failed=${batchResult.batchFailed || 0}`,
+            );
           } else {
-            console.error(`[PULL_BATCH] Batch ${batchIndex + 1} returned invalid result:`, batchResult);
+            console.error(
+              `[PULL_BATCH] Batch ${batchIndex + 1} returned invalid result:`,
+              batchResult,
+            );
             failedFiles += batch.length; // Count all files in this batch as failed
           }
 
@@ -922,13 +950,12 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
           });
 
           console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed successfully`);
-
         } catch (batchError) {
           console.error(`[PULL_BATCH] Batch ${batchIndex + 1} failed completely:`, batchError);
-          
+
           // Update failed files count for the entire batch
           failedFiles += batch.length;
-          
+
           // Update job with failed batch
           await step.run(`handle-batch-error-${batchIndex}`, async () => {
             await prisma.gitHubSyncJob.update({
@@ -948,7 +975,9 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
         }
       }
 
-      console.log(`[PULL_BATCH] All batches completed. Final results: ${processedFiles} processed, ${failedFiles} failed`);
+      console.log(
+        `[PULL_BATCH] All batches completed. Final results: ${processedFiles} processed, ${failedFiles} failed`,
+      );
 
       // Update fragment with all GitHub files (with compression if needed)
       await step.run('update-fragment-with-files', async () => {
@@ -962,44 +991,51 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
         }
 
         const fragment = latestFragmentMessage.fragment;
-        
+
         // Merge with existing files - clean all content to ensure PostgreSQL compatibility
         const existingFiles = (fragment.files as Record<string, string>) || {};
         const cleanedExistingFiles: Record<string, string> = {};
         const cleanedNewFiles: Record<string, string> = {};
-        
+
         // Clean existing files
         for (const [path, content] of Object.entries(existingFiles)) {
-          cleanedExistingFiles[path] = typeof content === 'string' ? cleanFileContent(content) : content;
+          cleanedExistingFiles[path] =
+            typeof content === 'string' ? cleanFileContent(content) : content;
         }
-        
+
         // Clean new files (already cleaned during processing, but ensure consistency)
         for (const [path, content] of Object.entries(allFiles)) {
           cleanedNewFiles[path] = typeof content === 'string' ? cleanFileContent(content) : content;
         }
-        
+
         const mergedFiles = {
           ...cleanedExistingFiles,
           ...cleanedNewFiles,
         };
 
         const totalFilesSize = JSON.stringify(mergedFiles).length;
-        const fileMB = Math.round(totalFilesSize / (1024 * 1024) * 100) / 100;
-        
-        console.log(`[PULL_BATCH] Updating fragment with ${Object.keys(mergedFiles).length} total files (${fileMB}MB uncompressed)`);
+        const fileMB = Math.round((totalFilesSize / (1024 * 1024)) * 100) / 100;
+
+        console.log(
+          `[PULL_BATCH] Updating fragment with ${Object.keys(mergedFiles).length} total files (${fileMB}MB uncompressed)`,
+        );
 
         // If files are very large, consider compression (PostgreSQL has limits)
         let filesToStore = mergedFiles;
         let compressionUsed = false;
 
-        if (totalFilesSize > 50 * 1024 * 1024) { // If larger than 50MB
-          console.log(`[PULL_BATCH] Files are large (${fileMB}MB), applying compression optimization`);
-          
+        if (totalFilesSize > 50 * 1024 * 1024) {
+          // If larger than 50MB
+          console.log(
+            `[PULL_BATCH] Files are large (${fileMB}MB), applying compression optimization`,
+          );
+
           // Compress large text files to save database space
           const compressedFiles: Record<string, any> = {};
-          
+
           for (const [filePath, content] of Object.entries(mergedFiles)) {
-            if (typeof content === 'string' && content.length > 10000) { // Compress files larger than 10KB
+            if (typeof content === 'string' && content.length > 10000) {
+              // Compress files larger than 10KB
               try {
                 // Ensure content is clean before compression
                 const cleanContent = cleanFileContent(content);
@@ -1011,20 +1047,24 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
                 };
                 compressionUsed = true;
               } catch {
-                compressedFiles[filePath] = typeof content === 'string' ? cleanFileContent(content) : content; // Fallback to cleaned original
+                compressedFiles[filePath] =
+                  typeof content === 'string' ? cleanFileContent(content) : content; // Fallback to cleaned original
               }
             } else {
-              compressedFiles[filePath] = typeof content === 'string' ? cleanFileContent(content) : content;
+              compressedFiles[filePath] =
+                typeof content === 'string' ? cleanFileContent(content) : content;
             }
           }
-          
+
           filesToStore = compressedFiles;
-          
+
           if (compressionUsed) {
             const compressedSize = JSON.stringify(filesToStore).length;
-            const compressedMB = Math.round(compressedSize / (1024 * 1024) * 100) / 100;
+            const compressedMB = Math.round((compressedSize / (1024 * 1024)) * 100) / 100;
             const savings = Math.round(((totalFilesSize - compressedSize) / totalFilesSize) * 100);
-            console.log(`[PULL_BATCH] Compression applied: ${fileMB}MB → ${compressedMB}MB (${savings}% savings)`);
+            console.log(
+              `[PULL_BATCH] Compression applied: ${fileMB}MB → ${compressedMB}MB (${savings}% savings)`,
+            );
           }
         }
 
@@ -1052,7 +1092,8 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
             for (const [filePath, content] of Object.entries(allFiles)) {
               const currentContent = currentFiles[filePath];
-              const cleanContent = typeof content === 'string' ? cleanFileContent(content) : content;
+              const cleanContent =
+                typeof content === 'string' ? cleanFileContent(content) : content;
 
               // Only update if file is new or changed
               if (!currentContent || currentContent !== cleanContent) {
@@ -1110,7 +1151,9 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
         });
       });
 
-      console.log(`[PULL_BATCH] Job ${jobId} completed: ${processedFiles} processed, ${failedFiles} failed`);
+      console.log(
+        `[PULL_BATCH] Job ${jobId} completed: ${processedFiles} processed, ${failedFiles} failed`,
+      );
 
       return {
         success: true,
@@ -1122,7 +1165,6 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
           totalBatches: batches.length,
         },
       };
-
     } catch (error) {
       // Update job status to FAILED
       await step.run('update-job-status-failed', async () => {
@@ -1168,10 +1210,10 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
  * Processes sync progress events and can forward to WebSocket/SSE
  */
 export const realtimeSyncProgressFunction = inngest.createFunction(
-  { 
+  {
     id: 'realtime-sync-progress',
     concurrency: {
-      limit: 100, // Allow many concurrent progress events
+      limit: 25, // Allow many concurrent progress events
     },
   },
   { event: 'realtime/sync-progress' },
@@ -1194,10 +1236,10 @@ export const realtimeSyncProgressFunction = inngest.createFunction(
     // 2. Send push notifications
     // 3. Update real-time dashboard
     // 4. Store progress metrics
-    
+
     // For now, we'll just ensure the progress is logged and available
     // The frontend can poll getGitHubSyncJobStatus for real-time updates
-    
+
     return {
       jobId,
       projectId,
