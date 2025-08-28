@@ -745,10 +745,16 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
           const batchResult = await step.run(`process-batch-${batchIndex}`, async () => {
             console.log(`[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`);
 
-            const repository = job.repository!;
-            
-            if (!repository) {
+            if (!job.repository) {
+              console.error(`[PULL_BATCH] Repository not found in job for batch ${batchIndex + 1}`);
               throw new Error('Repository not found in job');
+            }
+
+            const repository = job.repository;
+
+            if (!repository.githubConnection?.accessToken) {
+              console.error(`[PULL_BATCH] No GitHub access token found for repository ${repository.fullName}`);
+              throw new Error('GitHub access token not found');
             }
 
             const accessToken = decryptToken(repository.githubConnection.accessToken);
@@ -756,24 +762,28 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
             const [owner, repo] = repository.fullName.split('/');
 
             if (!owner || !repo) {
+              console.error(`[PULL_BATCH] Invalid repository fullName: ${repository.fullName}`);
               throw new Error(`Invalid repository fullName: ${repository.fullName}`);
             }
 
-            console.log(`[PULL_BATCH] Using GitHub API for ${owner}/${repo}`);
+            console.log(`[PULL_BATCH] Using GitHub API for ${owner}/${repo} (batch ${batchIndex + 1}/${batches.length})`);
 
             const batchFiles: Record<string, string> = {};
             let batchProcessed = 0;
             let batchFailed = 0;
 
             // Process files in this batch
+            console.log(`[PULL_BATCH] Starting to process ${batch.length} files in batch ${batchIndex + 1}`);
+            
             for (const file of batch) {
               if (!file.path || !file.sha) {
-                console.warn(`[PULL_BATCH] Skipping invalid file entry:`, file);
+                console.warn(`[PULL_BATCH] Skipping invalid file entry:`, JSON.stringify(file));
+                batchFailed++;
                 continue;
               }
 
               try {
-                console.log(`[PULL_BATCH] Fetching file: ${file.path}`);
+                console.log(`[PULL_BATCH] Fetching file: ${file.path} (sha: ${file.sha})`);
                 
                 // Get file content from GitHub with retries
                 let retries = 3;
@@ -819,19 +829,40 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
               }
             }
 
-            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} results: ${batchProcessed} processed, ${batchFailed} failed`);
+            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed: ${batchProcessed} processed, ${batchFailed} failed (${Object.keys(batchFiles).length} files in result)`);
             
-            return {
+            const batchResult = {
               batchFiles,
               batchProcessed,
               batchFailed,
             };
+            
+            console.log(`[PULL_BATCH] Returning batch result:`, {
+              fileCount: Object.keys(batchFiles).length,
+              processed: batchProcessed,
+              failed: batchFailed,
+            });
+            
+            return batchResult;
           });
 
-          // Update counters with batch results
-          allFiles = { ...allFiles, ...batchResult.batchFiles };
-          processedFiles += batchResult.batchProcessed;
-          failedFiles += batchResult.batchFailed;
+          // Update counters with batch results - with safety checks
+          if (batchResult && typeof batchResult === 'object') {
+            if (batchResult.batchFiles && typeof batchResult.batchFiles === 'object') {
+              allFiles = { ...allFiles, ...batchResult.batchFiles };
+              console.log(`[PULL_BATCH] Added ${Object.keys(batchResult.batchFiles).length} files from batch ${batchIndex + 1}`);
+            }
+            if (typeof batchResult.batchProcessed === 'number') {
+              processedFiles += batchResult.batchProcessed;
+            }
+            if (typeof batchResult.batchFailed === 'number') {
+              failedFiles += batchResult.batchFailed;
+            }
+            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} totals: processed=${batchResult.batchProcessed || 0}, failed=${batchResult.batchFailed || 0}`);
+          } else {
+            console.error(`[PULL_BATCH] Batch ${batchIndex + 1} returned invalid result:`, batchResult);
+            failedFiles += batch.length; // Count all files in this batch as failed
+          }
 
           // Update job progress and send real-time update
           await step.run(`update-progress-${batchIndex}`, async () => {
