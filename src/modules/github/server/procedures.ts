@@ -2,11 +2,6 @@ import { protectedProcedure, createTRPCRouter } from '@/trpc/init';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { TRPCError } from '@trpc/server';
-import { inngest } from '@/inngest/client';
-import { 
-  decryptToken, 
-  createRepository as createGitHubRepo
-} from '@/lib/github';
 
 export const githubRouter = createTRPCRouter({
   // Get user's GitHub connection status

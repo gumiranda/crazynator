@@ -21,6 +21,7 @@ model Project {
 
   messages Message[]
   githubRepository GitHubRepository?
+  githubSyncJobs GitHubSyncJob[]
 }
 
 enum MessageRole {
@@ -122,6 +123,8 @@ model GitHubRepository {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  githubSyncJobs GitHubSyncJob[]
+
   @@unique([githubConnectionId, githubRepoId])
   @@map("github_repositories")
 }
@@ -131,4 +134,47 @@ enum GitHubSyncStatus {
   IN_PROGRESS
   SUCCESS
   FAILED
+}
+
+enum GitHubSyncJobType {
+  PULL_FROM_GITHUB
+  PUSH_TO_GITHUB
+}
+
+enum GitHubSyncJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model GitHubSyncJob {
+  id           String                @id @default(uuid())
+  projectId    String
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  repositoryId String?
+  repository   GitHubRepository?    @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  
+  type         GitHubSyncJobType
+  status       GitHubSyncJobStatus  @default(PENDING)
+  
+  // Progress tracking
+  totalFiles   Int                  @default(0)
+  processedFiles Int                @default(0)
+  failedFiles  Int                  @default(0)
+  
+  // Batch processing
+  totalBatches Int                  @default(0)
+  processedBatches Int              @default(0)
+  
+  // Metadata
+  metadata     Json?                // Store additional job-specific data
+  error        String?              // Error message if failed
+  
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@map("github_sync_jobs")
 }

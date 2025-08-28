@@ -1,6 +1,11 @@
 import { inngest } from './client';
 import { prisma } from '@/lib/prisma';
-import { decryptToken, createMultipleFiles } from '@/lib/github';
+import { decryptToken, createMultipleFiles, createGitHubClient } from '@/lib/github';
+import { getSandbox } from '@/lib/sandbox';
+import { gzip } from 'zlib';
+import { promisify } from 'util';
+
+const gzipAsync = promisify(gzip);
 
 /**
  * GitHub sync function that handles automatic code synchronization
@@ -507,5 +512,514 @@ export const githubBatchSyncFunction = inngest.createFunction(
       message: `Batch sync initiated for ${repositories.length} repositories`,
       results: syncResults,
     };
+  },
+);
+
+/**
+ * GitHub pull batch processor function
+ * Handles async processing of GitHub pulls with batching and compression
+ */
+export const githubPullBatchProcessorFunction = inngest.createFunction(
+  { 
+    id: 'github-pull-batch-processor',
+    retries: 3,
+  },
+  { event: 'github/pull-batch-processor' },
+  async ({ event, step }) => {
+    const { jobId, projectId, repositoryId } = event.data;
+
+    await step.run('validate-inputs', async () => {
+      if (!jobId || !projectId || !repositoryId) {
+        throw new Error('Job ID, Project ID, and Repository ID are required');
+      }
+    });
+
+    // Update job status to PROCESSING
+    const job = await step.run('update-job-status-processing', async () => {
+      const job = await prisma.gitHubSyncJob.update({
+        where: { id: jobId },
+        data: {
+          status: 'PROCESSING',
+          startedAt: new Date(),
+        },
+        include: {
+          project: {
+            include: {
+              messages: {
+                include: {
+                  fragment: true,
+                },
+                orderBy: {
+                  createdAt: 'desc',
+                },
+              },
+            },
+          },
+          repository: {
+            include: {
+              githubConnection: true,
+            },
+          },
+        },
+      });
+
+      if (!job) {
+        throw new Error('Sync job not found');
+      }
+
+      // Send real-time update that job started
+      await inngest.send({
+        name: 'realtime/sync-progress',
+        data: {
+          jobId,
+          projectId,
+          type: 'PULL_FROM_GITHUB',
+          status: 'PROCESSING',
+          progress: {
+            processedFiles: 0,
+            totalFiles: 0,
+            failedFiles: 0,
+            processedBatches: 0,
+            totalBatches: 0,
+            percentage: 0,
+          },
+          message: `Started pulling files from ${job.repository?.fullName || 'GitHub repository'}`,
+        },
+      });
+
+      return job;
+    });
+
+    try {
+      // Get file tree from GitHub with caching and optimization
+      const { fileEntries, totalFiles, treeCache } = await step.run('fetch-github-tree', async () => {
+        const { repository } = job;
+
+        if (!repository) {
+          throw new Error('Repository not found');
+        }
+
+        const accessToken = decryptToken(repository.githubConnection.accessToken);
+        const octokit = createGitHubClient(accessToken);
+        const [owner, repo] = repository.fullName.split('/');
+
+        console.log(`[PULL_BATCH] Fetching tree from ${repository.fullName}`);
+
+        // Get the latest commit SHA for caching
+        const { data: commit } = await octokit.rest.repos.getCommit({
+          owner,
+          repo,
+          ref: repository.defaultBranch,
+        });
+
+        const latestCommitSha = commit.sha;
+        const treeSha = commit.commit.tree.sha;
+
+        // Check if we have cached tree data in job metadata
+        const cachedMetadata = job.metadata as any;
+        const shouldUseCachedTree = 
+          cachedMetadata?.lastCommitSha === latestCommitSha &&
+          cachedMetadata?.treeSha === treeSha &&
+          cachedMetadata?.fileEntries;
+
+        let fileEntries: any[];
+        let treeCache: any = null;
+
+        if (shouldUseCachedTree) {
+          console.log(`[PULL_BATCH] Using cached tree data (${cachedMetadata.fileEntries.length} files)`);
+          fileEntries = cachedMetadata.fileEntries;
+          treeCache = { fromCache: true, commitSha: latestCommitSha, treeSha };
+        } else {
+          console.log(`[PULL_BATCH] Fetching fresh tree data from GitHub`);
+
+          // Get the repository tree (all files)
+          const { data: tree } = await octokit.rest.git.getTree({
+            owner,
+            repo,
+            tree_sha: treeSha,
+            recursive: 'true',
+          });
+
+          // Filter only files (not directories/submodules) and exclude unnecessary files
+          const excludePatterns = [
+            'node_modules/',
+            '.git/',
+            '.next/',
+            'dist/',
+            'build/',
+            '.cache/',
+            '.turbo/',
+            '.vercel/',
+            'out/',
+            '.env',
+            '.DS_Store',
+            'Thumbs.db',
+            '*.log',
+            '*.tsbuildinfo',
+            '.swc/',
+          ];
+
+          fileEntries = tree.tree
+            .filter((item) => item.type === 'blob' && item.path)
+            .filter((item) => {
+              // Apply exclusion filters to reduce unnecessary file processing
+              return !excludePatterns.some(pattern => {
+                if (pattern.endsWith('/')) {
+                  return item.path?.includes(pattern);
+                } else if (pattern.includes('*')) {
+                  const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+                  return regex.test(item.path || '');
+                } else {
+                  return item.path === pattern || item.path?.includes(pattern);
+                }
+              });
+            });
+
+          console.log(`[PULL_BATCH] Found ${fileEntries.length} files (after filtering) in GitHub repository`);
+
+          // Cache the tree data in job metadata for future use
+          treeCache = { 
+            fromCache: false, 
+            commitSha: latestCommitSha, 
+            treeSha,
+            totalFiles: fileEntries.length,
+          };
+
+          await prisma.gitHubSyncJob.update({
+            where: { id: jobId },
+            data: {
+              metadata: {
+                ...cachedMetadata,
+                lastCommitSha: latestCommitSha,
+                treeSha: treeSha,
+                fileEntries: fileEntries,
+                cacheTimestamp: new Date().toISOString(),
+              },
+            },
+          });
+        }
+
+        // Update job with total file count
+        await prisma.gitHubSyncJob.update({
+          where: { id: jobId },
+          data: {
+            totalFiles: fileEntries.length,
+          },
+        });
+
+        return { fileEntries, totalFiles: fileEntries.length, treeCache };
+      });
+
+      // Process files in batches
+      const BATCH_SIZE = 75; // Process 75 files per batch to avoid timeouts
+      const batches = [];
+      for (let i = 0; i < fileEntries.length; i += BATCH_SIZE) {
+        batches.push(fileEntries.slice(i, i + BATCH_SIZE));
+      }
+
+      // Update job with batch count
+      await step.run('update-job-batch-count', async () => {
+        await prisma.gitHubSyncJob.update({
+          where: { id: jobId },
+          data: {
+            totalBatches: batches.length,
+          },
+        });
+      });
+
+      console.log(`[PULL_BATCH] Processing ${totalFiles} files in ${batches.length} batches`);
+
+      // Process each batch
+      const allFiles: Record<string, string> = {};
+      let processedFiles = 0;
+      let failedFiles = 0;
+
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        
+        await step.run(`process-batch-${batchIndex}`, async () => {
+          console.log(`[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`);
+
+          const repository = job.repository!;
+          const accessToken = decryptToken(repository.githubConnection.accessToken);
+          const octokit = createGitHubClient(accessToken);
+          const [owner, repo] = repository.fullName.split('/');
+
+          const batchFiles: Record<string, string> = {};
+
+          // Process files in this batch
+          for (const file of batch) {
+            if (!file.path || !file.sha) continue;
+
+            try {
+              // Get file content from GitHub with retries
+              let retries = 3;
+              let fileData;
+              
+              while (retries > 0) {
+                try {
+                  const response = await octokit.rest.git.getBlob({
+                    owner,
+                    repo,
+                    file_sha: file.sha,
+                  });
+                  fileData = response.data;
+                  break;
+                } catch (error) {
+                  retries--;
+                  if (retries === 0) throw error;
+                  
+                  // Wait before retry with exponential backoff
+                  await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
+                }
+              }
+
+              if (!fileData) continue;
+
+              // Decode base64 content
+              const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+              batchFiles[file.path] = content;
+              allFiles[file.path] = content;
+              processedFiles++;
+
+            } catch (fileError) {
+              console.warn(`[PULL_BATCH] Failed to fetch file ${file.path}:`, fileError);
+              failedFiles++;
+              continue;
+            }
+          }
+
+          // Update job progress and send real-time update
+          await prisma.gitHubSyncJob.update({
+            where: { id: jobId },
+            data: {
+              processedFiles,
+              failedFiles,
+              processedBatches: batchIndex + 1,
+            },
+          });
+
+          // Send real-time progress update
+          await inngest.send({
+            name: 'realtime/sync-progress',
+            data: {
+              jobId,
+              projectId,
+              type: 'PULL_FROM_GITHUB',
+              status: 'PROCESSING',
+              progress: {
+                processedFiles,
+                totalFiles,
+                failedFiles,
+                processedBatches: batchIndex + 1,
+                totalBatches: batches.length,
+                percentage: Math.round((processedFiles / totalFiles) * 100),
+              },
+              message: `Processing batch ${batchIndex + 1}/${batches.length} - ${processedFiles}/${totalFiles} files`,
+            },
+          });
+
+          console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed: ${Object.keys(batchFiles).length} files processed`);
+        });
+
+        // Add a small delay between batches to avoid rate limiting
+        if (batchIndex < batches.length - 1) {
+          await step.sleep('batch-delay', '2s');
+        }
+      }
+
+      // Update fragment with all GitHub files (with compression if needed)
+      await step.run('update-fragment-with-files', async () => {
+        // Find the latest fragment with sandbox
+        const latestFragmentMessage = job.project.messages.find(
+          (message) => message.fragment && message.fragment.sandboxUrl,
+        );
+
+        if (!latestFragmentMessage?.fragment) {
+          throw new Error('No active fragment found for this project');
+        }
+
+        const fragment = latestFragmentMessage.fragment;
+        
+        // Merge with existing files
+        const mergedFiles = {
+          ...((fragment.files as Record<string, string>) || {}),
+          ...allFiles,
+        };
+
+        const totalFilesSize = JSON.stringify(mergedFiles).length;
+        const fileMB = Math.round(totalFilesSize / (1024 * 1024) * 100) / 100;
+        
+        console.log(`[PULL_BATCH] Updating fragment with ${Object.keys(mergedFiles).length} total files (${fileMB}MB uncompressed)`);
+
+        // If files are very large, consider compression (PostgreSQL has limits)
+        let filesToStore = mergedFiles;
+        let compressionUsed = false;
+
+        if (totalFilesSize > 50 * 1024 * 1024) { // If larger than 50MB
+          console.log(`[PULL_BATCH] Files are large (${fileMB}MB), applying compression optimization`);
+          
+          // Compress large text files to save database space
+          const compressedFiles: Record<string, any> = {};
+          
+          for (const [filePath, content] of Object.entries(mergedFiles)) {
+            if (content.length > 10000) { // Compress files larger than 10KB
+              try {
+                const compressed = await gzipAsync(Buffer.from(content, 'utf8'));
+                compressedFiles[filePath] = {
+                  _compressed: true,
+                  data: compressed.toString('base64'),
+                  originalSize: content.length,
+                };
+                compressionUsed = true;
+              } catch {
+                compressedFiles[filePath] = content; // Fallback to original
+              }
+            } else {
+              compressedFiles[filePath] = content;
+            }
+          }
+          
+          filesToStore = compressedFiles;
+          
+          if (compressionUsed) {
+            const compressedSize = JSON.stringify(filesToStore).length;
+            const compressedMB = Math.round(compressedSize / (1024 * 1024) * 100) / 100;
+            const savings = Math.round(((totalFilesSize - compressedSize) / totalFilesSize) * 100);
+            console.log(`[PULL_BATCH] Compression applied: ${fileMB}MB → ${compressedMB}MB (${savings}% savings)`);
+          }
+        }
+
+        await prisma.fragment.update({
+          where: { id: fragment.id },
+          data: {
+            files: filesToStore,
+          },
+        });
+
+        // Try to update sandbox if available
+        try {
+          const url = new URL(fragment.sandboxUrl);
+          const hostname = url.hostname;
+          const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+
+          if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
+            console.log(`[PULL_BATCH] Attempting to update sandbox: ${sandboxId}`);
+
+            const sandbox = await getSandbox(sandboxId);
+
+            // Update only new/changed files in sandbox (using original uncompressed content)
+            const currentFiles = (fragment.files as Record<string, string>) || {};
+            let sandboxUpdates = 0;
+
+            for (const [filePath, content] of Object.entries(allFiles)) {
+              const currentContent = currentFiles[filePath];
+
+              // Only update if file is new or changed
+              if (!currentContent || currentContent !== content) {
+                try {
+                  await sandbox.files.write(filePath, content);
+                  sandboxUpdates++;
+                } catch (writeError) {
+                  console.warn(`[PULL_BATCH] Failed to write to sandbox ${filePath}:`, writeError);
+                }
+              }
+            }
+
+            console.log(`[PULL_BATCH] Updated ${sandboxUpdates} files in sandbox`);
+          }
+        } catch (sandboxError) {
+          console.warn(`[PULL_BATCH] Sandbox update failed (continuing):`, sandboxError);
+        }
+      });
+
+      // Update job status to COMPLETED
+      await step.run('update-job-status-completed', async () => {
+        await prisma.gitHubSyncJob.update({
+          where: { id: jobId },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+          },
+        });
+
+        // Send real-time completion update
+        await inngest.send({
+          name: 'realtime/sync-progress',
+          data: {
+            jobId,
+            projectId,
+            type: 'PULL_FROM_GITHUB',
+            status: 'COMPLETED',
+            progress: {
+              processedFiles,
+              totalFiles,
+              failedFiles,
+              processedBatches: batches.length,
+              totalBatches: batches.length,
+              percentage: 100,
+            },
+            message: `Successfully pulled ${processedFiles} files from GitHub${failedFiles > 0 ? ` (${failedFiles} failed)` : ''}`,
+            stats: {
+              totalFiles,
+              processedFiles,
+              failedFiles,
+              totalBatches: batches.length,
+              treeCache,
+            },
+          },
+        });
+      });
+
+      console.log(`[PULL_BATCH] Job ${jobId} completed: ${processedFiles} processed, ${failedFiles} failed`);
+
+      return {
+        success: true,
+        message: `Successfully pulled ${processedFiles} files from GitHub`,
+        stats: {
+          totalFiles,
+          processedFiles,
+          failedFiles,
+          totalBatches: batches.length,
+        },
+      };
+
+    } catch (error) {
+      // Update job status to FAILED
+      await step.run('update-job-status-failed', async () => {
+        await prisma.gitHubSyncJob.update({
+          where: { id: jobId },
+          data: {
+            status: 'FAILED',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            completedAt: new Date(),
+          },
+        });
+
+        // Send real-time failure update
+        await inngest.send({
+          name: 'realtime/sync-progress',
+          data: {
+            jobId,
+            projectId,
+            type: 'PULL_FROM_GITHUB',
+            status: 'FAILED',
+            progress: {
+              processedFiles: 0,
+              totalFiles: 0,
+              failedFiles: 0,
+              processedBatches: 0,
+              totalBatches: 0,
+              percentage: 0,
+            },
+            message: `Failed to pull files from GitHub: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      });
+
+      console.error(`[PULL_BATCH] Job ${jobId} failed:`, error);
+      throw error;
+    }
   },
 );

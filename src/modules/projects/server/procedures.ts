@@ -32,6 +32,7 @@ async function compressFiles(files: Record<string, string>): Promise<string> {
 }
 
 // Helper function to decompress file data from Inngest payload
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function decompressFiles(compressedData: string): Promise<Record<string, string>> {
   const compressed = Buffer.from(compressedData, 'base64');
   const decompressed = await gunzipAsync(compressed);
@@ -143,7 +144,7 @@ export const projectsRouter = createTRPCRouter({
 
             await inngest.send(batchEvents);
           }
-        } catch (syncError) {
+        } catch {
           // Don't fail the main operation if GitHub sync fails
         }
 
@@ -809,8 +810,6 @@ export const projectsRouter = createTRPCRouter({
         const allFiles: Record<string, string> = {};
 
         // Initialize counters for file processing
-        let processedCount = 0;
-        const errorCount = 0;
 
         try {
           sandbox = await getSandbox(sandboxId);
@@ -938,7 +937,6 @@ export const projectsRouter = createTRPCRouter({
               try {
                 const content = await sandbox.files.read(filePath);
                 allFiles[filePath] = content;
-                processedCount++;
               } catch (readError) {
                 // Check if it's specifically a directory error
                 if (readError instanceof Error) {
@@ -965,7 +963,7 @@ export const projectsRouter = createTRPCRouter({
                 // For unexpected errors, continue
                 continue;
               }
-            } catch (outerError) {
+            } catch {
               continue;
             }
           }
@@ -1458,14 +1456,6 @@ export const projectsRouter = createTRPCRouter({
           userId: ctx.auth.userId,
         },
         include: {
-          messages: {
-            include: {
-              fragment: true,
-            },
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
           githubRepository: {
             include: {
               githubConnection: true,
@@ -1488,178 +1478,124 @@ export const projectsRouter = createTRPCRouter({
         });
       }
 
-      // Find the latest fragment with sandbox
-      const latestFragmentMessage = project.messages.find(
-        (message) => message.fragment && message.fragment.sandboxUrl,
-      );
+      // Check if there's already a pending or processing pull job
+      const existingJob = await prisma.gitHubSyncJob.findFirst({
+        where: {
+          projectId: input.projectId,
+          type: 'PULL_FROM_GITHUB',
+          status: {
+            in: ['PENDING', 'PROCESSING'],
+          },
+        },
+      });
 
-      if (!latestFragmentMessage?.fragment?.sandboxUrl) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'No active sandbox found for this project',
-        });
+      if (existingJob) {
+        return {
+          jobId: existingJob.id,
+          message: 'GitHub pull job is already in progress',
+          status: existingJob.status,
+        };
       }
-
-      const fragment = latestFragmentMessage.fragment;
-      const repository = project.githubRepository;
-
-      console.log(`[PULL_FROM_GITHUB] Starting pull from ${repository.fullName}`);
 
       try {
-        // Import GitHub functions
-        const { decryptToken, createGitHubClient } = await import('@/lib/github');
-        const accessToken = decryptToken(repository.githubConnection.accessToken);
-        const octokit = createGitHubClient(accessToken);
-
-        const [owner, repo] = repository.fullName.split('/');
-
-        // Get all files from GitHub repository
-        console.log(`[PULL_FROM_GITHUB] Fetching files from GitHub repository`);
-
-        // Get the repository tree (all files)
-        const { data: tree } = await octokit.rest.git.getTree({
-          owner,
-          repo,
-          tree_sha: repository.defaultBranch,
-          recursive: 'true',
-        });
-
-        const githubFiles: Record<string, string> = {};
-        let updatedFiles = 0;
-        let newFiles = 0;
-        let processedFiles = 0;
-
-        // Filter only files (not directories/submodules)
-        const fileEntries = tree.tree.filter((item) => item.type === 'blob' && item.path);
-
-        console.log(`[PULL_FROM_GITHUB] Found ${fileEntries.length} files in GitHub repository`);
-
-        // Get content for each file
-        for (const file of fileEntries) {
-          if (!file.path || !file.sha) continue;
-
-          try {
-            // Get file content from GitHub
-            const { data: fileData } = await octokit.rest.git.getBlob({
-              owner,
-              repo,
-              file_sha: file.sha,
-            });
-
-            // Decode base64 content
-            const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
-            githubFiles[file.path] = content;
-            processedFiles++;
-
-            // Check if file exists in current fragment and if content is different
-            const currentFiles = (fragment.files as Record<string, string>) || {};
-            const currentContent = currentFiles[file.path];
-
-            if (!currentContent) {
-              newFiles++;
-              console.log(`[PULL_FROM_GITHUB] New file from GitHub: ${file.path}`);
-            } else if (currentContent !== content) {
-              updatedFiles++;
-              console.log(`[PULL_FROM_GITHUB] Updated file from GitHub: ${file.path}`);
-            }
-          } catch (fileError) {
-            console.warn(`[PULL_FROM_GITHUB] Failed to fetch file ${file.path}:`, fileError);
-            continue;
-          }
-        }
-
-        // Update fragment with GitHub files
-        const mergedFiles = {
-          ...((fragment.files as Record<string, string>) || {}),
-          ...githubFiles,
-        };
-
-        // Debug: Log fragment info before GitHub pull update
-        console.log(`[PULL_FROM_GITHUB] Fragment before update:`, {
-          id: fragment.id,
-          currentFilesCount: fragment.files
-            ? Object.keys(fragment.files as Record<string, string>).length
-            : 0,
-          githubFilesCount: Object.keys(githubFiles).length,
-          mergedFilesCount: Object.keys(mergedFiles).length,
-        });
-
-        const updatedFragment = await prisma.fragment.update({
-          where: { id: fragment.id },
+        // Create a new sync job
+        const syncJob = await prisma.gitHubSyncJob.create({
           data: {
-            files: mergedFiles,
+            projectId: input.projectId,
+            repositoryId: project.githubRepository.id,
+            type: 'PULL_FROM_GITHUB',
+            status: 'PENDING',
+            metadata: {
+              repositoryFullName: project.githubRepository.fullName,
+              defaultBranch: project.githubRepository.defaultBranch,
+            },
           },
         });
 
-        // Debug: Verify the GitHub pull update worked
-        console.log(`[PULL_FROM_GITHUB] Fragment after update:`, {
-          id: updatedFragment.id,
-          savedFilesCount: updatedFragment.files
-            ? Object.keys(updatedFragment.files as Record<string, string>).length
-            : 0,
-          updateSuccessful: !!updatedFragment.files,
+        console.log(`[PULL_FROM_GITHUB] Created sync job ${syncJob.id} for project ${input.projectId}`);
+
+        // Trigger the async processing via Inngest
+        await inngest.send({
+          name: 'github/pull-batch-processor',
+          data: {
+            jobId: syncJob.id,
+            projectId: input.projectId,
+            repositoryId: project.githubRepository.id,
+          },
         });
-
-        // Try to update sandbox if available
-        let sandboxUpdated = false;
-        try {
-          // Extract sandboxId from E2B URL
-          const url = new URL(fragment.sandboxUrl);
-          const hostname = url.hostname;
-          const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
-
-          if (sandboxId && sandboxId !== 'www' && sandboxId !== 'https') {
-            console.log(`[PULL_FROM_GITHUB] Attempting to update sandbox: ${sandboxId}`);
-
-            const sandbox = await getSandbox(sandboxId);
-
-            // Update changed/new files in sandbox
-            for (const [filePath, content] of Object.entries(githubFiles)) {
-              const currentFiles = (fragment.files as Record<string, string>) || {};
-              const currentContent = currentFiles[filePath];
-
-              // Only update if file is new or changed
-              if (!currentContent || currentContent !== content) {
-                try {
-                  await sandbox.files.write(filePath, content);
-                  console.log(`[PULL_FROM_GITHUB] Updated in sandbox: ${filePath}`);
-                } catch (writeError) {
-                  console.warn(
-                    `[PULL_FROM_GITHUB] Failed to write to sandbox ${filePath}:`,
-                    writeError,
-                  );
-                }
-              }
-            }
-            sandboxUpdated = true;
-          }
-        } catch (sandboxError) {
-          console.warn(`[PULL_FROM_GITHUB] Sandbox update failed (continuing):`, sandboxError);
-        }
-
-        console.log(
-          `[PULL_FROM_GITHUB] Pull completed: ${processedFiles} processed, ${newFiles} new, ${updatedFiles} updated`,
-        );
 
         return {
-          success: true,
-          message: `Pulled ${processedFiles} files from GitHub`,
-          stats: {
-            processedFiles,
-            newFiles,
-            updatedFiles,
-            sandboxUpdated,
-          },
-          repository: repository.fullName,
+          jobId: syncJob.id,
+          message: 'GitHub pull job started successfully',
+          status: 'PENDING',
+          repository: project.githubRepository.fullName,
         };
       } catch (error) {
-        console.error('Failed to pull from GitHub:', error);
-
+        console.error('Failed to create GitHub pull job:', error);
+        
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to pull changes from GitHub',
+          message: 'Failed to start GitHub pull job',
         });
       }
+    }),
+
+  // Get sync job status
+  getGitHubSyncJobStatus: protectedProcedure
+    .input(
+      z.object({
+        jobId: z.string().min(1, 'Job ID is required'),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const job = await prisma.gitHubSyncJob.findFirst({
+        where: {
+          id: input.jobId,
+          project: {
+            userId: ctx.auth.userId,
+          },
+        },
+        include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          repository: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+      });
+
+      if (!job) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Sync job not found',
+        });
+      }
+
+      return {
+        id: job.id,
+        type: job.type,
+        status: job.status,
+        totalFiles: job.totalFiles,
+        processedFiles: job.processedFiles,
+        failedFiles: job.failedFiles,
+        totalBatches: job.totalBatches,
+        processedBatches: job.processedBatches,
+        progress: job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0,
+        error: job.error,
+        startedAt: job.startedAt,
+        completedAt: job.completedAt,
+        createdAt: job.createdAt,
+        project: job.project,
+        repository: job.repository,
+        metadata: job.metadata,
+      };
     }),
 
   downloadZip: protectedProcedure

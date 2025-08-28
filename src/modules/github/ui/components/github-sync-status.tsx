@@ -48,24 +48,14 @@ export function GitHubSyncStatus({ projectId }: GitHubSyncStatusProps) {
   const pullFromGitHub = useMutation(
     trpc.projects.pullFromGitHub.mutationOptions({
       onSuccess: (data) => {
-        const { stats } = data;
-        if (stats.newFiles > 0 || stats.updatedFiles > 0) {
-          toast.success(
-            `Pulled ${stats.processedFiles} files from GitHub`,
-            {
-              description: `${stats.newFiles} new files, ${stats.updatedFiles} updated files${stats.sandboxUpdated ? ' (sandbox updated)' : ' (fragment updated)'}`,
-            }
-          );
-        } else {
-          toast.success('Repository is up to date', {
-            description: 'No changes found in GitHub repository',
-          });
-        }
-        // Refresh repository status
-        refetch();
+        toast.success(data.message, {
+          description: `GitHub pull job started. Job ID: ${data.jobId}`,
+        });
+        // Refresh repository status after a short delay
+        setTimeout(() => refetch(), 1000);
       },
       onError: (error) => {
-        toast.error(error.message || 'Failed to pull changes from GitHub');
+        toast.error(error.message || 'Failed to start GitHub pull job');
       },
     }),
   );
