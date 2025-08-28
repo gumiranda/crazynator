@@ -992,16 +992,7 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
         const fragment = latestFragmentMessage.fragment;
 
-        // Merge with existing files - clean all content to ensure PostgreSQL compatibility
-        const existingFiles = (fragment.files as Record<string, string>) || {};
-        const cleanedExistingFiles: Record<string, string> = {};
         const cleanedNewFiles: Record<string, string> = {};
-
-        // Clean existing files
-        for (const [path, content] of Object.entries(existingFiles)) {
-          cleanedExistingFiles[path] =
-            typeof content === 'string' ? cleanFileContent(content) : content;
-        }
 
         // Clean new files (already cleaned during processing, but ensure consistency)
         for (const [path, content] of Object.entries(allFiles)) {
