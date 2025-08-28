@@ -19,7 +19,8 @@ import {
   githubInitialSyncFunction, 
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
-  githubPullBatchProcessorFunction
+  githubPullBatchProcessorFunction,
+  realtimeSyncProgressFunction
 } from './github-functions';
 
 interface AgentState {
@@ -312,6 +313,7 @@ export {
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
   githubPullBatchProcessorFunction,
+  realtimeSyncProgressFunction,
   sandboxMaintenanceFunction,
   recreateSandboxFunction,
 };

@@ -6,7 +6,10 @@ import {
   githubInitialSyncFunction, 
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
-  githubPullBatchProcessorFunction
+  githubPullBatchProcessorFunction,
+  realtimeSyncProgressFunction,
+  sandboxMaintenanceFunction,
+  recreateSandboxFunction
 } from '@/inngest/functions';
 
 export const { GET, POST, PUT } = serve({
@@ -18,5 +21,8 @@ export const { GET, POST, PUT } = serve({
     githubBatchSyncFunction,
     githubBatchFilesSyncFunction,
     githubPullBatchProcessorFunction,
+    realtimeSyncProgressFunction,
+    sandboxMaintenanceFunction,
+    recreateSandboxFunction,
   ],
 });

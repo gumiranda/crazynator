@@ -725,108 +725,180 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
             totalBatches: batches.length,
           },
         });
+        
+        console.log(`[PULL_BATCH] Job ${jobId} updated with ${batches.length} batches`);
       });
 
       console.log(`[PULL_BATCH] Processing ${totalFiles} files in ${batches.length} batches`);
 
       // Process each batch
-      const allFiles: Record<string, string> = {};
+      let allFiles: Record<string, string> = {};
       let processedFiles = 0;
       let failedFiles = 0;
 
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
         
-        await step.run(`process-batch-${batchIndex}`, async () => {
-          console.log(`[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`);
+        try {
+          console.log(`[PULL_BATCH] Starting batch ${batchIndex + 1}/${batches.length}`);
+          
+          const batchResult = await step.run(`process-batch-${batchIndex}`, async () => {
+            console.log(`[PULL_BATCH] Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} files)`);
 
-          const repository = job.repository!;
-          const accessToken = decryptToken(repository.githubConnection.accessToken);
-          const octokit = createGitHubClient(accessToken);
-          const [owner, repo] = repository.fullName.split('/');
+            const repository = job.repository!;
+            
+            if (!repository) {
+              throw new Error('Repository not found in job');
+            }
 
-          const batchFiles: Record<string, string> = {};
+            const accessToken = decryptToken(repository.githubConnection.accessToken);
+            const octokit = createGitHubClient(accessToken);
+            const [owner, repo] = repository.fullName.split('/');
 
-          // Process files in this batch
-          for (const file of batch) {
-            if (!file.path || !file.sha) continue;
+            if (!owner || !repo) {
+              throw new Error(`Invalid repository fullName: ${repository.fullName}`);
+            }
 
-            try {
-              // Get file content from GitHub with retries
-              let retries = 3;
-              let fileData;
-              
-              while (retries > 0) {
-                try {
-                  const response = await octokit.rest.git.getBlob({
-                    owner,
-                    repo,
-                    file_sha: file.sha,
-                  });
-                  fileData = response.data;
-                  break;
-                } catch (error) {
-                  retries--;
-                  if (retries === 0) throw error;
-                  
-                  // Wait before retry with exponential backoff
-                  await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
-                }
+            console.log(`[PULL_BATCH] Using GitHub API for ${owner}/${repo}`);
+
+            const batchFiles: Record<string, string> = {};
+            let batchProcessed = 0;
+            let batchFailed = 0;
+
+            // Process files in this batch
+            for (const file of batch) {
+              if (!file.path || !file.sha) {
+                console.warn(`[PULL_BATCH] Skipping invalid file entry:`, file);
+                continue;
               }
 
-              if (!fileData) continue;
+              try {
+                console.log(`[PULL_BATCH] Fetching file: ${file.path}`);
+                
+                // Get file content from GitHub with retries
+                let retries = 3;
+                let fileData;
+                
+                while (retries > 0) {
+                  try {
+                    const response = await octokit.rest.git.getBlob({
+                      owner,
+                      repo,
+                      file_sha: file.sha,
+                    });
+                    fileData = response.data;
+                    break;
+                  } catch (error) {
+                    retries--;
+                    console.warn(`[PULL_BATCH] Retry ${4-retries}/3 failed for ${file.path}:`, error);
+                    
+                    if (retries === 0) throw error;
+                    
+                    // Wait before retry with exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
+                  }
+                }
 
-              // Decode base64 content
-              const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
-              batchFiles[file.path] = content;
-              allFiles[file.path] = content;
-              processedFiles++;
+                if (!fileData) {
+                  console.warn(`[PULL_BATCH] No file data received for ${file.path}`);
+                  batchFailed++;
+                  continue;
+                }
 
-            } catch (fileError) {
-              console.warn(`[PULL_BATCH] Failed to fetch file ${file.path}:`, fileError);
-              failedFiles++;
-              continue;
+                // Decode base64 content
+                const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+                batchFiles[file.path] = content;
+                batchProcessed++;
+                
+                console.log(`[PULL_BATCH] Successfully processed ${file.path} (${content.length} chars)`);
+
+              } catch (fileError) {
+                console.error(`[PULL_BATCH] Failed to fetch file ${file.path}:`, fileError);
+                batchFailed++;
+                continue;
+              }
             }
-          }
+
+            console.log(`[PULL_BATCH] Batch ${batchIndex + 1} results: ${batchProcessed} processed, ${batchFailed} failed`);
+            
+            return {
+              batchFiles,
+              batchProcessed,
+              batchFailed,
+            };
+          });
+
+          // Update counters with batch results
+          allFiles = { ...allFiles, ...batchResult.batchFiles };
+          processedFiles += batchResult.batchProcessed;
+          failedFiles += batchResult.batchFailed;
 
           // Update job progress and send real-time update
-          await prisma.gitHubSyncJob.update({
-            where: { id: jobId },
-            data: {
-              processedFiles,
-              failedFiles,
-              processedBatches: batchIndex + 1,
-            },
-          });
-
-          // Send real-time progress update
-          await inngest.send({
-            name: 'realtime/sync-progress',
-            data: {
-              jobId,
-              projectId,
-              type: 'PULL_FROM_GITHUB',
-              status: 'PROCESSING',
-              progress: {
+          await step.run(`update-progress-${batchIndex}`, async () => {
+            await prisma.gitHubSyncJob.update({
+              where: { id: jobId },
+              data: {
                 processedFiles,
-                totalFiles,
                 failedFiles,
                 processedBatches: batchIndex + 1,
-                totalBatches: batches.length,
-                percentage: Math.round((processedFiles / totalFiles) * 100),
               },
-              message: `Processing batch ${batchIndex + 1}/${batches.length} - ${processedFiles}/${totalFiles} files`,
-            },
+            });
+
+            console.log(`[PULL_BATCH] Updated job progress: ${processedFiles}/${totalFiles} files`);
+
+            // Send real-time progress update
+            try {
+              await inngest.send({
+                name: 'realtime/sync-progress',
+                data: {
+                  jobId,
+                  projectId,
+                  type: 'PULL_FROM_GITHUB',
+                  status: 'PROCESSING',
+                  progress: {
+                    processedFiles,
+                    totalFiles,
+                    failedFiles,
+                    processedBatches: batchIndex + 1,
+                    totalBatches: batches.length,
+                    percentage: Math.round((processedFiles / totalFiles) * 100),
+                  },
+                  message: `Processing batch ${batchIndex + 1}/${batches.length} - ${processedFiles}/${totalFiles} files`,
+                },
+              });
+            } catch (eventError) {
+              console.warn(`[PULL_BATCH] Failed to send progress event:`, eventError);
+            }
           });
 
-          console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed: ${Object.keys(batchFiles).length} files processed`);
-        });
+          console.log(`[PULL_BATCH] Batch ${batchIndex + 1} completed successfully`);
+
+        } catch (batchError) {
+          console.error(`[PULL_BATCH] Batch ${batchIndex + 1} failed completely:`, batchError);
+          
+          // Update failed files count for the entire batch
+          failedFiles += batch.length;
+          
+          // Update job with failed batch
+          await step.run(`handle-batch-error-${batchIndex}`, async () => {
+            await prisma.gitHubSyncJob.update({
+              where: { id: jobId },
+              data: {
+                failedFiles,
+                processedBatches: batchIndex + 1,
+              },
+            });
+          });
+        }
 
         // Add a small delay between batches to avoid rate limiting
         if (batchIndex < batches.length - 1) {
+          console.log(`[PULL_BATCH] Waiting 2s before next batch...`);
           await step.sleep('batch-delay', '2s');
         }
       }
+
+      console.log(`[PULL_BATCH] All batches completed. Final results: ${processedFiles} processed, ${failedFiles} failed`);
 
       // Update fragment with all GitHub files (with compression if needed)
       await step.run('update-fragment-with-files', async () => {
@@ -1021,5 +1093,51 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
       console.error(`[PULL_BATCH] Job ${jobId} failed:`, error);
       throw error;
     }
+  },
+);
+
+/**
+ * Real-time sync progress handler function
+ * Processes sync progress events and can forward to WebSocket/SSE
+ */
+export const realtimeSyncProgressFunction = inngest.createFunction(
+  { 
+    id: 'realtime-sync-progress',
+    concurrency: {
+      limit: 100, // Allow many concurrent progress events
+    },
+  },
+  { event: 'realtime/sync-progress' },
+  async ({ event, step }) => {
+    const { jobId, projectId, type, status, progress, message } = event.data;
+
+    // Log progress for debugging
+    await step.run('log-progress', async () => {
+      console.log(`[REALTIME_PROGRESS] Job ${jobId}: ${status} - ${message}`, {
+        projectId,
+        type,
+        progress: progress?.percentage || 0,
+        processedFiles: progress?.processedFiles || 0,
+        totalFiles: progress?.totalFiles || 0,
+      });
+    });
+
+    // Here you could add additional processing like:
+    // 1. Send to WebSocket connections
+    // 2. Send push notifications
+    // 3. Update real-time dashboard
+    // 4. Store progress metrics
+    
+    // For now, we'll just ensure the progress is logged and available
+    // The frontend can poll getGitHubSyncJobStatus for real-time updates
+    
+    return {
+      jobId,
+      projectId,
+      status,
+      progress: progress?.percentage || 0,
+      message,
+      processed: true,
+    };
   },
 );
