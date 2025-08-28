@@ -8,6 +8,17 @@ import { promisify } from 'util';
 const gzipAsync = promisify(gzip);
 
 /**
+ * Clean invalid Unicode characters that PostgreSQL cannot handle
+ */
+function cleanFileContent(content: string): string {
+  // Remove null bytes and other problematic characters
+  return content
+    .replace(/\u0000/g, '') // Remove null bytes
+    .replace(/[\uFFFE\uFFFF]/g, '') // Remove invalid Unicode characters
+    .replace(/[\u0001-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ''); // Remove other control characters except \t, \n, \r
+}
+
+/**
  * GitHub sync function that handles automatic code synchronization
  */
 export const githubSyncFunction = inngest.createFunction(
@@ -73,10 +84,16 @@ export const githubSyncFunction = inngest.createFunction(
       // Sync files to GitHub
       await step.run('sync-files', async () => {
         const accessToken = decryptToken(connection.accessToken);
-        const files = fragment.files as Record<string, string>;
+        const rawFiles = fragment.files as Record<string, string>;
 
-        if (!files || Object.keys(files).length === 0) {
+        if (!rawFiles || Object.keys(rawFiles).length === 0) {
           throw new Error('No files to sync');
+        }
+
+        // Clean all files to ensure PostgreSQL/GitHub compatibility
+        const files: Record<string, string> = {};
+        for (const [path, content] of Object.entries(rawFiles)) {
+          files[path] = typeof content === 'string' ? cleanFileContent(content) : content;
         }
 
         const [owner, repo] = repository.fullName.split('/');
@@ -816,7 +833,9 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
                 }
 
                 // Decode base64 content
-                const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+                const rawContent = Buffer.from(fileData.content, 'base64').toString('utf-8');
+                // Clean invalid Unicode characters that PostgreSQL cannot handle
+                const content = cleanFileContent(rawContent);
                 batchFiles[file.path] = content;
                 batchProcessed++;
                 
@@ -944,10 +963,24 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
         const fragment = latestFragmentMessage.fragment;
         
-        // Merge with existing files
+        // Merge with existing files - clean all content to ensure PostgreSQL compatibility
+        const existingFiles = (fragment.files as Record<string, string>) || {};
+        const cleanedExistingFiles: Record<string, string> = {};
+        const cleanedNewFiles: Record<string, string> = {};
+        
+        // Clean existing files
+        for (const [path, content] of Object.entries(existingFiles)) {
+          cleanedExistingFiles[path] = typeof content === 'string' ? cleanFileContent(content) : content;
+        }
+        
+        // Clean new files (already cleaned during processing, but ensure consistency)
+        for (const [path, content] of Object.entries(allFiles)) {
+          cleanedNewFiles[path] = typeof content === 'string' ? cleanFileContent(content) : content;
+        }
+        
         const mergedFiles = {
-          ...((fragment.files as Record<string, string>) || {}),
-          ...allFiles,
+          ...cleanedExistingFiles,
+          ...cleanedNewFiles,
         };
 
         const totalFilesSize = JSON.stringify(mergedFiles).length;
@@ -966,20 +999,22 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
           const compressedFiles: Record<string, any> = {};
           
           for (const [filePath, content] of Object.entries(mergedFiles)) {
-            if (content.length > 10000) { // Compress files larger than 10KB
+            if (typeof content === 'string' && content.length > 10000) { // Compress files larger than 10KB
               try {
-                const compressed = await gzipAsync(Buffer.from(content, 'utf8'));
+                // Ensure content is clean before compression
+                const cleanContent = cleanFileContent(content);
+                const compressed = await gzipAsync(Buffer.from(cleanContent, 'utf8'));
                 compressedFiles[filePath] = {
                   _compressed: true,
                   data: compressed.toString('base64'),
-                  originalSize: content.length,
+                  originalSize: cleanContent.length,
                 };
                 compressionUsed = true;
               } catch {
-                compressedFiles[filePath] = content; // Fallback to original
+                compressedFiles[filePath] = typeof content === 'string' ? cleanFileContent(content) : content; // Fallback to cleaned original
               }
             } else {
-              compressedFiles[filePath] = content;
+              compressedFiles[filePath] = typeof content === 'string' ? cleanFileContent(content) : content;
             }
           }
           
@@ -1011,17 +1046,18 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 
             const sandbox = await getSandbox(sandboxId);
 
-            // Update only new/changed files in sandbox (using original uncompressed content)
+            // Update only new/changed files in sandbox (using cleaned content)
             const currentFiles = (fragment.files as Record<string, string>) || {};
             let sandboxUpdates = 0;
 
             for (const [filePath, content] of Object.entries(allFiles)) {
               const currentContent = currentFiles[filePath];
+              const cleanContent = typeof content === 'string' ? cleanFileContent(content) : content;
 
               // Only update if file is new or changed
-              if (!currentContent || currentContent !== content) {
+              if (!currentContent || currentContent !== cleanContent) {
                 try {
-                  await sandbox.files.write(filePath, content);
+                  await sandbox.files.write(filePath, cleanContent);
                   sandboxUpdates++;
                 } catch (writeError) {
                   console.warn(`[PULL_BATCH] Failed to write to sandbox ${filePath}:`, writeError);
