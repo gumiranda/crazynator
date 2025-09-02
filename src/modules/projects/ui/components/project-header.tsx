@@ -24,6 +24,7 @@ import {
   CodeIcon,
   Github,
   Upload,
+  RefreshCw,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,8 +36,9 @@ import {
   InngestConnectionStatusIndicator,
 } from '@/components/inngest-connection-status';
 import { useInngest } from '@/components/ui/inngest-provider';
-import { GitHubSyncStatus } from '@/modules/github/ui/components/github-sync-status';
+import { GitHubSyncStatus, CompactGitHubSyncStatus } from '@/modules/github/ui/components/github-sync-status';
 import { CreateRepositoryDialog } from '@/modules/github/ui/components/create-repository-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 interface Props {
   projectId: string;
@@ -44,6 +46,7 @@ interface Props {
 
 export const ProjectHeader = ({ projectId }: Props) => {
   const { setTheme, theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
@@ -109,6 +112,20 @@ export const ProjectHeader = ({ projectId }: Props) => {
     }),
   );
 
+  // Pull changes from GitHub mutation
+  const pullFromGitHub = useMutation(
+    trpc.projects.pullFromGitHub.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(data.message, {
+          description: `GitHub pull job started. Job ID: ${data.jobId}`,
+        });
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to start GitHub pull job');
+      },
+    }),
+  );
+
   // Helper function to trigger download
   const triggerDownload = (data: { data: string; filename: string }) => {
     const binaryString = atob(data.data);
@@ -143,6 +160,10 @@ export const ProjectHeader = ({ projectId }: Props) => {
 
   const handleSyncFullProjectToGitHub = () => {
     syncFullProjectToGitHub.mutate({ projectId });
+  };
+
+  const handlePullFromGitHub = () => {
+    pullFromGitHub.mutate({ projectId });
   };
   return (
     <header className="p-2 flex justify-between items-center border-b bg-background z-10">
@@ -252,6 +273,26 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     </span>
                   </div>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={handlePullFromGitHub}
+                  disabled={pullFromGitHub.isPending}
+                  className="gap-2"
+                >
+                  {pullFromGitHub.isPending ? (
+                    <LoaderIcon className="size-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-4" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {pullFromGitHub.isPending ? 'Pulling...' : 'Pull Changes'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Pull changes from GitHub to sandbox and fragments
+                    </span>
+                  </div>
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
@@ -279,16 +320,28 @@ export const ProjectHeader = ({ projectId }: Props) => {
           </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="flex items-center gap-2 px-2 sm:px-3 pl-1 sm:pl-2">
-        {/* GitHub Sync Status */}
-        <div className="hidden sm:block">
+      <div className={`flex items-center gap-2 px-2 sm:px-3 pl-1 sm:pl-2 ${isMobile ? 'gap-1' : 'gap-2'}`}>
+        {/* GitHub Sync Status - Responsive */}
+        {isMobile ? (
+          <CompactGitHubSyncStatus projectId={projectId} />
+        ) : (
           <GitHubSyncStatus projectId={projectId} />
-        </div>
+        )}
 
-        {/* Create Repository Dialog */}
-        <div className="hidden sm:block">
+        {/* Create Repository Dialog - Responsive */}
+        {isMobile ? (
+          <CreateRepositoryDialog 
+            projectId={projectId} 
+            projectName={project.name}
+            trigger={
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 min-w-[32px] min-h-[32px] hover:bg-accent">
+                <Github className="h-4 w-4" />
+              </Button>
+            }
+          />
+        ) : (
           <CreateRepositoryDialog projectId={projectId} projectName={project.name} />
-        </div>
+        )}
 
         <InngestConnectionStatus
           status={
