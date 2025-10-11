@@ -73,9 +73,10 @@ export async function POST(request: NextRequest) {
         const updatedSubscription = event.data.object as Stripe.Subscription;
         console.log('STATUS:', updatedSubscription.status);
         console.log('Subscription updated:', updatedSubscription);
+        const canceled = updatedSubscription?.canceled_at ?? updatedSubscription?.cancel_at;
         const subscriptionUpdated = {
           ...updatedSubscription,
-          status: updatedSubscription?.canceled_at ? 'canceled' : updatedSubscription.status,
+          status: canceled ? 'canceled' : updatedSubscription.status,
         };
         try {
           await createOrUpdateSubscriptionFromStripe(subscriptionUpdated);
