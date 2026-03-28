@@ -14,13 +14,14 @@ import { prisma } from '@/lib/prisma';
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
 import { projectChannel } from './channels';
-import { 
-  githubSyncFunction, 
-  githubInitialSyncFunction, 
+import {
+  githubSyncFunction,
+  githubInitialSyncFunction,
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
   githubPullBatchProcessorFunction,
-  realtimeSyncProgressFunction
+  realtimeSyncProgressFunction,
+  githubPullFromRepoFunction,
 } from './github-functions';
 
 interface AgentState {
@@ -306,14 +307,15 @@ import {
 } from './sandbox-functions';
 
 // Export all functions
-export { 
-  codeAgentFunction, 
-  githubSyncFunction, 
-  githubInitialSyncFunction, 
+export {
+  codeAgentFunction,
+  githubSyncFunction,
+  githubInitialSyncFunction,
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
   githubPullBatchProcessorFunction,
   realtimeSyncProgressFunction,
+  githubPullFromRepoFunction,
   sandboxMaintenanceFunction,
   recreateSandboxFunction,
 };

@@ -1196,6 +1196,167 @@ export const githubPullBatchProcessorFunction = inngest.createFunction(
 );
 
 /**
+ * Full duplex GitHub sync - Pull files from a GitHub repository into the project.
+ * Triggered by the pullFromGitHub tRPC procedure.
+ */
+export const githubPullFromRepoFunction = inngest.createFunction(
+  { id: 'github-pull-from-repo', retries: 2 },
+  { event: 'github/pull-from-repo' },
+  async ({ event, step }) => {
+    const { projectId, repositoryId, syncJobId, repoFullName, defaultBranch, connectionId } =
+      event.data;
+
+    // Update job to processing
+    await step.run('mark-processing', async () => {
+      await prisma.gitHubSyncJob.update({
+        where: { id: syncJobId },
+        data: { status: 'PROCESSING', startedAt: new Date() },
+      });
+    });
+
+    try {
+      // Fetch repo tree from GitHub
+      const files = await step.run('fetch-repo-files', async () => {
+        const connection = await prisma.gitHubConnection.findUnique({
+          where: { id: connectionId },
+        });
+        if (!connection) throw new Error('GitHub connection not found');
+
+        const accessToken = decryptToken(connection.accessToken);
+        const octokit = createGitHubClient(accessToken);
+        const [owner, repo] = repoFullName.split('/');
+
+        // Get the tree
+        const { data: ref } = await octokit.rest.git.getRef({
+          owner,
+          repo,
+          ref: `heads/${defaultBranch}`,
+        });
+
+        const { data: commit } = await octokit.rest.git.getCommit({
+          owner,
+          repo,
+          commit_sha: ref.object.sha,
+        });
+
+        const { data: tree } = await octokit.rest.git.getTree({
+          owner,
+          repo,
+          tree_sha: commit.tree.sha,
+          recursive: 'true',
+        });
+
+        const excludePatterns = [
+          'node_modules/',
+          '.git/',
+          '.next/',
+          'dist/',
+          'build/',
+          '.env',
+          '.DS_Store',
+          'package-lock.json',
+          'bun.lockb',
+        ];
+
+        const fileEntries = tree.tree.filter(
+          (item) =>
+            item.type === 'blob' &&
+            item.path &&
+            !excludePatterns.some((p) =>
+              p.endsWith('/') ? item.path!.includes(p) : item.path === p,
+            ),
+        );
+
+        // Fetch file contents
+        const result: Record<string, string> = {};
+        for (const entry of fileEntries) {
+          if (!entry.sha || !entry.path) continue;
+          try {
+            const { data: blob } = await octokit.rest.git.getBlob({
+              owner,
+              repo,
+              file_sha: entry.sha,
+            });
+            const content = Buffer.from(blob.content, 'base64').toString('utf-8');
+            result[entry.path] = cleanFileContent(content);
+          } catch {
+            console.warn(`[PULL] Failed to fetch ${entry.path}`);
+          }
+        }
+
+        return result;
+      });
+
+      // Update the latest fragment with pulled files
+      await step.run('update-fragment', async () => {
+        const latestFragment = await prisma.fragment.findFirst({
+          where: { message: { projectId } },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (latestFragment) {
+          // Merge: GitHub files take priority
+          const existingFiles = (latestFragment.files as Record<string, string>) || {};
+          const merged = { ...existingFiles, ...files };
+
+          await prisma.fragment.update({
+            where: { id: latestFragment.id },
+            data: { files: merged },
+          });
+
+          // Try to write to sandbox
+          try {
+            const url = new URL(latestFragment.sandboxUrl);
+            const hostname = url.hostname;
+            const sandboxId = hostname.replace(/^\d+-/, '').replace(/\.e2b\.app$/, '');
+            if (sandboxId && sandboxId !== 'www') {
+              const sandbox = await getSandbox(sandboxId);
+              for (const [path, content] of Object.entries(files)) {
+                await sandbox.files.write(path, content);
+              }
+            }
+          } catch {
+            console.warn('[PULL] Could not write to sandbox (may have expired)');
+          }
+        }
+      });
+
+      // Mark complete
+      await step.run('mark-completed', async () => {
+        await prisma.gitHubSyncJob.update({
+          where: { id: syncJobId },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+            processedFiles: Object.keys(files).length,
+            totalFiles: Object.keys(files).length,
+          },
+        });
+
+        await prisma.gitHubRepository.update({
+          where: { id: repositoryId },
+          data: { syncStatus: 'SUCCESS', lastSyncAt: new Date() },
+        });
+      });
+
+      return { success: true, filesCount: Object.keys(files).length };
+    } catch (error) {
+      await step.run('mark-failed', async () => {
+        await prisma.gitHubSyncJob.update({
+          where: { id: syncJobId },
+          data: {
+            status: 'FAILED',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            completedAt: new Date(),
+          },
+        });
+      });
+      throw error;
+    }
+  },
+);
+
+/**
  * Real-time sync progress handler function
  * Processes sync progress events and can forward to WebSocket/SSE
  */

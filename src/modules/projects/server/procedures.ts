@@ -210,6 +210,16 @@ export const projectsRouter = createTRPCRouter({
         value: z.string().min(1, { message: 'Prompt is required' }).max(10000, {
           message: 'Prompt is too long',
         }),
+        uiLibraries: z.array(z.string()).optional(),
+        envVariables: z.record(z.string()).optional(),
+        sandboxConfig: z
+          .object({
+            timeout: z.number().optional(),
+            autoInstallDeps: z.boolean().optional(),
+            nodeVersion: z.string().optional(),
+            port: z.number().optional(),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -251,6 +261,9 @@ export const projectsRouter = createTRPCRouter({
         data: {
           name: generateSlug(2, { format: 'kebab' }),
           userId: ctx.auth.userId,
+          uiLibraries: input.uiLibraries || [],
+          envVariables: input.envVariables || {},
+          sandboxConfig: input.sandboxConfig || {},
           messages: {
             create: {
               content: input.value,
@@ -268,6 +281,42 @@ export const projectsRouter = createTRPCRouter({
         },
       });
       return createdProject;
+    }),
+
+  // Update project UI libraries and settings
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1),
+        uiLibraries: z.array(z.string()).optional(),
+        envVariables: z.record(z.string()).optional(),
+        sandboxConfig: z
+          .object({
+            timeout: z.number().optional(),
+            autoInstallDeps: z.boolean().optional(),
+            nodeVersion: z.string().optional(),
+            port: z.number().optional(),
+          })
+          .optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const project = await prisma.project.findFirst({
+        where: { id: input.projectId, userId: ctx.auth.userId },
+      });
+      if (!project) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found' });
+      }
+
+      const updateData: Record<string, unknown> = {};
+      if (input.uiLibraries !== undefined) updateData.uiLibraries = input.uiLibraries;
+      if (input.envVariables !== undefined) updateData.envVariables = input.envVariables;
+      if (input.sandboxConfig !== undefined) updateData.sandboxConfig = input.sandboxConfig;
+
+      return await prisma.project.update({
+        where: { id: input.projectId },
+        data: updateData,
+      });
     }),
 
   downloadFullProject: protectedProcedure

@@ -5,7 +5,14 @@ import { Suspense, useState, useEffect } from 'react';
 import { Fragment } from '@prisma/client';
 import { ProjectHeader } from '../components/project-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CrownIcon, EyeIcon, CodeIcon } from 'lucide-react';
+import {
+  CrownIcon,
+  EyeIcon,
+  CodeIcon,
+  TerminalIcon,
+  KeyIcon,
+  GitBranchIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import FragmentPreview from '../components/fragment-preview';
@@ -15,6 +22,11 @@ import UserControl from '@/components/user-control';
 import { ErrorBoundary } from 'react-error-boundary';
 import { InngestProvider } from '@/components/ui/inngest-provider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { SandboxTerminal } from '../components/sandbox-terminal';
+import { EnvEditor } from '../components/env-editor';
+import { GitHubSyncPanel } from '../components/github-sync-panel';
+
+type ActiveTab = 'preview' | 'code' | 'terminal' | 'env' | 'github';
 
 interface Props {
   projectId: string;
@@ -23,7 +35,7 @@ interface Props {
 export const ProjectView = ({ projectId }: Props) => {
   const hasProAccess = false;
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
-  const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('preview');
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -97,7 +109,7 @@ export const ProjectView = ({ projectId }: Props) => {
                   <div className="flex items-center gap-2 mt-2">
                     <Tabs
                       value={activeTab}
-                      onValueChange={(value) => setActiveTab(value as 'preview' | 'code')}
+                      onValueChange={(value) => setActiveTab(value as ActiveTab)}
                       className="w-full"
                     >
                       <div className="flex items-center justify-between">
@@ -109,6 +121,10 @@ export const ProjectView = ({ projectId }: Props) => {
                           <TabsTrigger value="code" className="rounded-md text-xs px-3">
                             <CodeIcon className="h-3 w-3 mr-1" />
                             <span>Code</span>
+                          </TabsTrigger>
+                          <TabsTrigger value="terminal" className="rounded-md text-xs px-3">
+                            <TerminalIcon className="h-3 w-3 mr-1" />
+                            <span>Term</span>
                           </TabsTrigger>
                         </TabsList>
                         <div className="flex items-center gap-2">
@@ -139,6 +155,9 @@ export const ProjectView = ({ projectId }: Props) => {
                           fragmentId={activeFragment.id}
                           readOnly={false}
                         />
+                      </TabsContent>
+                      <TabsContent value="terminal" className="h-full m-0">
+                        <SandboxTerminal fragmentId={activeFragment.id} />
                       </TabsContent>
                     </Tabs>
                   )}
@@ -176,7 +195,7 @@ export const ProjectView = ({ projectId }: Props) => {
               defaultValue="preview"
               className="h-full gap-y-0"
               value={activeTab}
-              onValueChange={(value) => setActiveTab(value as 'preview' | 'code')}
+              onValueChange={(value) => setActiveTab(value as ActiveTab)}
             >
               <div className="flex w-full items-center gap-x-2 border-b p-2">
                 <TabsList className="h-8 rounded-md border p-0">
@@ -187,6 +206,18 @@ export const ProjectView = ({ projectId }: Props) => {
                   <TabsTrigger value="code" className="rounded-md">
                     <CodeIcon className="h-4 w-4" />
                     <span>Code</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="terminal" className="rounded-md">
+                    <TerminalIcon className="h-4 w-4" />
+                    <span>Terminal</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="env" className="rounded-md">
+                    <KeyIcon className="h-4 w-4" />
+                    <span>Env</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="github" className="rounded-md">
+                    <GitBranchIcon className="h-4 w-4" />
+                    <span>GitHub</span>
                   </TabsTrigger>
                 </TabsList>
                 <div className="ml-auto flex items-center gap-x-2">
@@ -212,6 +243,15 @@ export const ProjectView = ({ projectId }: Props) => {
                     readOnly={false}
                   />
                 )}
+              </TabsContent>
+              <TabsContent value="terminal" className="h-[calc(100%-48px)]">
+                <SandboxTerminal fragmentId={activeFragment?.id ?? null} />
+              </TabsContent>
+              <TabsContent value="env" className="h-[calc(100%-48px)]">
+                <EnvEditor projectId={projectId} fragmentId={activeFragment?.id ?? null} />
+              </TabsContent>
+              <TabsContent value="github" className="h-[calc(100%-48px)]">
+                <GitHubSyncPanel projectId={projectId} />
               </TabsContent>
             </Tabs>
           </ResizablePanel>

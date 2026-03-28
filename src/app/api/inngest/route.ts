@@ -1,15 +1,16 @@
 import { serve } from 'inngest/next';
 import { inngest } from '@/inngest/client';
-import { 
-  codeAgentFunction, 
-  githubSyncFunction, 
-  githubInitialSyncFunction, 
+import {
+  codeAgentFunction,
+  githubSyncFunction,
+  githubInitialSyncFunction,
   githubBatchSyncFunction,
   githubBatchFilesSyncFunction,
   githubPullBatchProcessorFunction,
   realtimeSyncProgressFunction,
+  githubPullFromRepoFunction,
   sandboxMaintenanceFunction,
-  recreateSandboxFunction
+  recreateSandboxFunction,
 } from '@/inngest/functions';
 
 export const { GET, POST, PUT } = serve({
@@ -22,6 +23,7 @@ export const { GET, POST, PUT } = serve({
     githubBatchFilesSyncFunction,
     githubPullBatchProcessorFunction,
     realtimeSyncProgressFunction,
+    githubPullFromRepoFunction,
     sandboxMaintenanceFunction,
     recreateSandboxFunction,
   ],

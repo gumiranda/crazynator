@@ -11,9 +11,15 @@ import {
 } from '@inngest/agent-kit';
 import { getSandbox, lastAssistantTextMessageContent } from './utils';
 import { z } from 'zod';
-import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
+import { buildPrompt, FRAGMENT_TITLE_PROMPT, RESPONSE_PROMPT } from '@/constants/prompt';
 import { createSandbox } from '@/lib/sandbox';
 import { prisma } from '@/lib/prisma';
+import { generateUILibraryPromptContext, getInstallCommand } from '@/constants/ui-libraries';
+import {
+  findTemplate,
+  generateFromTemplate,
+  generateTemplatePromptContext,
+} from '@/lib/plop-templates';
 interface AgentState {
   summary: string;
   files: { [path: string]: string };
@@ -55,6 +61,26 @@ export const codeAgentFunction = inngest.createFunction(
       }
       return formattedMessages.reverse();
     });
+    // Fetch project configuration for dynamic prompt building
+    const projectConfig = await step.run('get-project-config', async () => {
+      const project = await prisma.project.findUnique({
+        where: { id: event.data.projectId },
+        select: { uiLibraries: true, envVariables: true, sandboxConfig: true },
+      });
+      return {
+        uiLibraries: (project?.uiLibraries as string[]) || [],
+        envVariables: (project?.envVariables as Record<string, string>) || {},
+        sandboxConfig: project?.sandboxConfig as Record<string, unknown> | null,
+      };
+    });
+
+    // Build dynamic prompt with only relevant context (saves tokens!)
+    const dynamicPrompt = buildPrompt({
+      uiLibraryContext: generateUILibraryPromptContext(projectConfig.uiLibraries),
+      templateContext: generateTemplatePromptContext(projectConfig.uiLibraries),
+      envVariables: projectConfig.envVariables,
+    });
+
     const state = createState<AgentState>(
       {
         summary: '',
@@ -64,10 +90,33 @@ export const codeAgentFunction = inngest.createFunction(
         messages: previousMessages,
       },
     );
+
+    // Install UI library dependencies in sandbox if configured
+    if (projectConfig.uiLibraries.length > 0) {
+      await step.run('install-ui-libs', async () => {
+        const installCmd = getInstallCommand(projectConfig.uiLibraries);
+        if (installCmd) {
+          const sandbox = await getSandbox(sandboxId);
+          await sandbox.commands.run(installCmd);
+        }
+      });
+    }
+
+    // Write env variables to sandbox if configured
+    if (Object.keys(projectConfig.envVariables).length > 0) {
+      await step.run('write-env-vars', async () => {
+        const sandbox = await getSandbox(sandboxId);
+        const envContent = Object.entries(projectConfig.envVariables)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('\n');
+        await sandbox.files.write('.env.local', envContent);
+      });
+    }
+
     const codeAgent = createAgent<AgentState>({
       name: 'code-agent',
       description: 'You are an expert code agent.',
-      system: PROMPT,
+      system: dynamicPrompt,
       model: anthropic({
         model: 'claude-opus-4-20250514',
         defaultParameters: { temperature: 0.1, max_tokens: 8000 },
@@ -151,6 +200,44 @@ export const codeAgentFunction = inngest.createFunction(
                 return `Error reading files: ${e}`;
               }
             });
+          },
+        }),
+        // TOKEN-SAVING: Template tool generates files from pre-built templates
+        createTool({
+          name: 'useTemplate',
+          description:
+            'Generate files from a pre-built template. ALWAYS prefer this over writing boilerplate from scratch to save tokens. Available templates: dashboard-layout, landing-page, auth-page, crud-table, settings-page',
+          parameters: z.object({
+            templateName: z.string().describe('Name of the template to use'),
+            variables: z
+              .record(z.union([z.string(), z.boolean(), z.array(z.string())]))
+              .describe('Template variables to fill in'),
+          }),
+          handler: async (
+            { templateName, variables },
+            { step, network }: Tool.Options<AgentState>,
+          ) => {
+            const newFiles = await step?.run('useTemplate', async () => {
+              const template = findTemplate(templateName);
+              if (!template) {
+                return `Template "${templateName}" not found. Available: dashboard-layout, landing-page, auth-page, crud-table, settings-page`;
+              }
+
+              const generatedFiles = generateFromTemplate(template, variables);
+              const updatedFiles = network.state.data.files || {};
+              const sandbox = await getSandbox(sandboxId);
+
+              for (const file of generatedFiles) {
+                await sandbox.files.write(file.path, file.content);
+                updatedFiles[file.path] = file.content;
+              }
+
+              return updatedFiles;
+            });
+            if (typeof newFiles === 'object') {
+              network.state.data.files = newFiles as { [path: string]: string };
+            }
+            return `Template "${templateName}" applied successfully. Generated ${Object.keys(newFiles || {}).length} files.`;
           },
         }),
       ],

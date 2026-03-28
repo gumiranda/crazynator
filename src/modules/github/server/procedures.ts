@@ -2,6 +2,7 @@ import { protectedProcedure, createTRPCRouter } from '@/trpc/init';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { TRPCError } from '@trpc/server';
+import { inngest } from '@/inngest/client';
 
 export const githubRouter = createTRPCRouter({
   // Get user's GitHub connection status
@@ -174,7 +175,110 @@ export const githubRouter = createTRPCRouter({
           },
         },
       });
-      
+
       return repository;
+    }),
+
+  // Pull from GitHub - sync repository files into the project sandbox
+  pullFromGitHub: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Verify ownership and get repo info
+      const repository = await prisma.gitHubRepository.findFirst({
+        where: {
+          projectId: input.projectId,
+          githubConnection: { userId: ctx.auth.userId },
+        },
+        include: {
+          githubConnection: true,
+        },
+      });
+
+      if (!repository) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No GitHub repository linked to this project',
+        });
+      }
+
+      // Create a sync job for tracking
+      const syncJob = await prisma.gitHubSyncJob.create({
+        data: {
+          projectId: input.projectId,
+          repositoryId: repository.id,
+          type: 'PULL_FROM_GITHUB',
+          status: 'PENDING',
+        },
+      });
+
+      // Trigger the pull sync via Inngest
+      await inngest.send({
+        name: 'github/pull-from-repo',
+        data: {
+          projectId: input.projectId,
+          repositoryId: repository.id,
+          syncJobId: syncJob.id,
+          repoFullName: repository.fullName,
+          defaultBranch: repository.defaultBranch,
+          connectionId: repository.githubConnectionId,
+        },
+      });
+
+      return {
+        success: true,
+        syncJobId: syncJob.id,
+        message: 'Pull sync started',
+      };
+    }),
+
+  // Push to GitHub - sync sandbox files to GitHub repository
+  pushToGitHub: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, 'Project ID is required'),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Import the projects router to use syncFullProjectToGitHub
+      const { projectsRouter } = await import('@/modules/projects/server/procedures');
+
+      try {
+        const result = await projectsRouter.createCaller(ctx).syncFullProjectToGitHub({
+          projectId: input.projectId,
+        });
+        return result;
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to push to GitHub',
+        });
+      }
+    }),
+
+  // Get sync job status
+  getSyncStatus: protectedProcedure
+    .input(
+      z.object({
+        syncJobId: z.string().min(1),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const job = await prisma.gitHubSyncJob.findFirst({
+        where: {
+          id: input.syncJobId,
+          project: { userId: ctx.auth.userId },
+        },
+      });
+
+      if (!job) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Sync job not found' });
+      }
+
+      return job;
     }),
 });

@@ -19,6 +19,13 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // UI library preferences chosen by user
+  uiLibraries   Json?   // Array of selected UI library IDs e.g. ["aceternity", "kibo"]
+  // Sandbox configuration
+  sandboxConfig Json?   // { timeout, autoInstallDeps, nodeVersion, etc. }
+  // Environment variables for the sandbox
+  envVariables  Json?   // { KEY: "value", ... } - encrypted at rest
+
   messages Message[]
   githubRepository GitHubRepository?
   githubSyncJobs GitHubSyncJob[]
@@ -61,6 +68,22 @@ model Fragment {
 }
 
 
+
+// Plop template registry - reusable code templates to save tokens
+model PlopTemplate {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "dashboard-layout", "auth-page"
+  description String?
+  category    String   // e.g. "layout", "page", "component", "feature"
+  uiLibrary   String?  // Which UI library this template is for
+  files       Json     // Template files with handlebars placeholders
+  prompts     Json?    // PlopJS prompt configuration
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name, uiLibrary])
+  @@map("plop_templates")
+}
 
 model Usage {
   key    String    @id
